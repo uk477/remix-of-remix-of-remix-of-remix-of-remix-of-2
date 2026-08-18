@@ -23,7 +23,7 @@ import {
   RotateCw,
   Share,
   ShieldCheck,
-  TriangleAlert,
+  
   X,
 } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
@@ -296,109 +296,133 @@ export function BoostOrderScreen({ order }: { order: Order }) {
         initial={{ opacity: 0, y: 14 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.12, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-        className="mt-3 border-y border-border bg-card px-5 py-5 sm:mx-4 sm:rounded-[26px] sm:border"
+        className="mt-3 border-y border-border bg-card sm:mx-4 sm:rounded-[26px] sm:border"
       >
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-[11px] font-bold uppercase tracking-[0.24em] text-muted-foreground/85">
-            {ru ? 'Статус заказа' : 'Order status'}
-          </h2>
-          {service ? (
-            <span className="inline-flex items-center gap-1 rounded-full border border-border/70 bg-background/50 px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">
-              <Gauge className="size-3" />
-              {service.speed[lang]}
-            </span>
-          ) : null}
+        <div className="px-5 pb-5 pt-5">
+          <div className="flex items-center justify-between">
+            <h2 className="text-[10.5px] font-semibold uppercase tracking-[0.26em] text-muted-foreground/70">
+              {ru ? 'Статус заказа' : 'Order status'}
+            </h2>
+            {service ? (
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-border/60 px-2.5 py-1 text-[10px] font-medium text-muted-foreground/90">
+                <Gauge className="size-3 opacity-70" />
+                {service.speed[lang]}
+              </span>
+            ) : null}
+          </div>
+
+          <ol className="relative mt-5 pl-8">
+            <span
+              aria-hidden
+              className="absolute left-[7px] top-3 bottom-3 w-px bg-linear-to-b from-border via-border to-transparent"
+            />
+            <TimelineRow
+              tone="done"
+              label={ru ? 'Заказ оформлен' : 'Order placed'}
+              value={fullDate(order.date, lang)}
+            />
+            <TimelineRow
+              tone={done ? 'done' : 'live'}
+              label={ru ? 'Выполнение' : 'Delivery'}
+              value={
+                done
+                  ? ru
+                    ? 'Все единицы доставлены'
+                    : 'All units delivered'
+                  : ru
+                    ? `Идёт накрутка · ${nf(volume)}`
+                    : `In progress · ${nf(volume)}`
+              }
+            />
+            <TimelineRow
+              tone={done ? 'done' : 'idle'}
+              last
+              label={ru ? 'Заказ выполнен' : 'Completed'}
+              value={
+                done
+                  ? order.completedAt
+                    ? fullDate(order.completedAt, lang)
+                    : ru
+                      ? 'Готово'
+                      : 'Done'
+                  : ru
+                    ? 'Ожидается'
+                    : 'Pending'
+              }
+            />
+          </ol>
         </div>
 
-        <ol className="relative space-y-4 pl-7">
-          <span
-            aria-hidden
-            className="absolute left-[9px] top-2 h-[calc(100%-1.25rem)] w-px bg-linear-to-b from-primary/60 via-border to-border"
-          />
-          <TimelineRow
-            tone="done"
-            label={ru ? 'Заказ оформлен' : 'Order placed'}
-            value={fullDate(order.date, lang)}
-          />
-          <TimelineRow
-            tone={done ? 'done' : 'live'}
-            label={ru ? 'Выполнение' : 'Delivery'}
-            value={
-              done
-                ? ru
-                  ? 'Все единицы доставлены'
-                  : 'All units delivered'
-                : ru
-                  ? `Идёт накрутка · ${nf(volume)}`
-                  : `In progress · ${nf(volume)}`
-            }
-          />
-          <TimelineRow
-            tone={done ? 'done' : 'idle'}
-            label={ru ? 'Заказ выполнен' : 'Completed'}
-            value={
-              done
-                ? order.completedAt
-                  ? fullDate(order.completedAt, lang)
-                  : ru
-                    ? 'Готово'
-                    : 'Done'
-                : ru
-                  ? 'Ожидается'
-                  : 'Pending'
-            }
-          />
-        </ol>
-
-        <div className="mt-5 rounded-2xl border border-border/70 bg-background/45 p-3.5">
-          <div className="flex items-center justify-between gap-2">
-            <span className="inline-flex items-center gap-1.5 text-[11.5px] font-bold">
-              <ShieldCheck className="size-3.5 text-success" />
+        {/* Гарантия рефилла — отдельная «квитанция» */}
+        <div className="border-t border-dashed border-border/70 px-5 pb-5 pt-4">
+          <div className="flex items-baseline justify-between gap-3">
+            <span className="inline-flex items-center gap-2 text-[12px] font-semibold tracking-tight">
+              <ShieldCheck className="size-4 text-success/90" strokeWidth={2.2} />
               {ru ? 'Гарантия рефилла' : 'Refill guarantee'}
             </span>
-            <span className="tnum text-[11px] font-semibold text-muted-foreground">
-              {used}/{REFILL_LIMIT}
+            <span className="tnum text-[11px] font-medium text-muted-foreground/80">
+              {used} <span className="opacity-40">/</span> {REFILL_LIMIT}
             </span>
           </div>
-          <div className="mt-2 flex gap-1">
+
+          <div className="mt-2.5 flex gap-1.5">
             {Array.from({ length: REFILL_LIMIT }).map((_, i) => (
               <span
                 key={i}
-                className={`h-1 flex-1 rounded-full ${i < used ? 'bg-primary' : 'bg-border'}`}
-              />
+                className="relative h-[3px] flex-1 overflow-hidden rounded-full bg-border/70"
+              >
+                <motion.span
+                  initial={{ scaleX: 0 }}
+                  animate={{ scaleX: i < used ? 1 : 0 }}
+                  transition={{ duration: 0.5, delay: i * 0.06, ease: [0.22, 1, 0.36, 1] }}
+                  style={{ transformOrigin: 'left' }}
+                  className="absolute inset-0 rounded-full bg-primary/85"
+                />
+              </span>
             ))}
           </div>
-          <p className="mt-2.5 text-[11px] leading-relaxed text-muted-foreground">
-            {ru
-              ? `Доступно 4 рефилла в течение 48 часов после покупки (до ${fullDate(windowEnd, lang)}).`
-              : `4 refills are available within 48 hours of purchase (until ${fullDate(windowEnd, lang)}).`}
+
+          <p className="mt-3 text-[11.5px] leading-[1.55] text-muted-foreground/85">
+            {ru ? (
+              <>
+                Доступно {REFILL_LIMIT} рефилла в течение 48 часов после покупки — до{' '}
+                <span className="tnum font-medium text-foreground/80">
+                  {fullDate(windowEnd, lang)}
+                </span>
+                .
+              </>
+            ) : (
+              <>
+                {REFILL_LIMIT} refills within 48 hours of purchase — until{' '}
+                <span className="tnum font-medium text-foreground/80">
+                  {fullDate(windowEnd, lang)}
+                </span>
+                .
+              </>
+            )}
           </p>
 
           <motion.button
             type="button"
             onClick={() => canRefill && setAskRefill(true)}
             aria-disabled={!canRefill}
-            whileTap={canRefill ? { scale: 0.98 } : {}}
-            className={`relative mt-3 flex h-12 w-full items-center justify-center gap-2 overflow-hidden rounded-2xl text-[13px] font-black uppercase tracking-[0.12em] transition-colors ${
+            whileTap={canRefill ? { scale: 0.985 } : {}}
+            transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+            className={`group relative mt-4 flex h-[52px] w-full items-center justify-center gap-2.5 overflow-hidden rounded-[16px] text-[13.5px] font-semibold tracking-tight transition-colors duration-300 ${
               canRefill
-                ? 'bg-gold-gradient text-[#111] shadow-[0_10px_26px_-14px_color-mix(in_oklab,var(--primary)_90%,transparent)]'
-                : 'border border-border bg-secondary/45 text-muted-foreground'
+                ? 'bg-primary text-primary-foreground shadow-[inset_0_1px_0_color-mix(in_oklab,white_28%,transparent),0_1px_0_color-mix(in_oklab,black_35%,transparent),0_16px_34px_-24px_color-mix(in_oklab,var(--primary)_80%,transparent)]'
+                : 'border border-border/80 bg-transparent text-muted-foreground/70'
             }`}
           >
-            {canRefill ? (
-              <motion.span
-                aria-hidden
-                animate={{ x: ['-140%', '240%'] }}
-                transition={{ duration: 2.6, repeat: Infinity, repeatDelay: 1.6 }}
-                className="absolute inset-y-0 w-1/4 bg-linear-to-r from-transparent via-white/45 to-transparent"
-              />
-            ) : null}
-            <RotateCw className="relative z-10 size-4" strokeWidth={2.6} />
-            <span className="relative z-10">{ru ? 'Рефилл' : 'Refill'}</span>
+            <RotateCw
+              className={`size-[15px] transition-transform duration-500 ${canRefill ? 'group-active:-rotate-180' : ''}`}
+              strokeWidth={2.4}
+            />
+            <span>{ru ? 'Запросить рефилл' : 'Request refill'}</span>
           </motion.button>
 
           {!canRefill ? (
-            <p className="mt-2 text-center text-[10.5px] font-semibold text-muted-foreground/80">
+            <p className="mt-2.5 text-center text-[10.5px] text-muted-foreground/60">
               {!order.refillable
                 ? ru
                   ? 'Для этой услуги рефилл не предусмотрен'
@@ -414,6 +438,7 @@ export function BoostOrderScreen({ order }: { order: Order }) {
           ) : null}
         </div>
       </motion.section>
+
 
       <AnimatePresence>
         {askRefill ? (
@@ -434,39 +459,48 @@ function TimelineRow({
   tone,
   label,
   value,
+  last,
 }: {
   tone: 'done' | 'live' | 'idle'
   label: string
   value: string
+  last?: boolean
 }) {
   return (
-    <li className="relative">
-      <span
-        className={`absolute -left-7 top-0.5 flex size-[19px] items-center justify-center rounded-full border ${
-          tone === 'done'
-            ? 'border-success/40 bg-success/15 text-success'
-            : tone === 'live'
-              ? 'border-primary/45 bg-primary/15 text-primary'
-              : 'border-border bg-background text-muted-foreground/50'
+    <li className={`relative ${last ? '' : 'pb-5'}`}>
+      <span className="absolute -left-8 top-[3px] flex size-[15px] items-center justify-center">
+        {tone === 'live' ? (
+          <motion.span
+            aria-hidden
+            animate={{ scale: [1, 2.1], opacity: [0.4, 0] }}
+            transition={{ duration: 2.2, repeat: Infinity, ease: 'easeOut' }}
+            className="absolute size-[13px] rounded-full bg-primary/40"
+          />
+        ) : null}
+        <span
+          className={`relative size-[13px] rounded-full ring-4 ring-card ${
+            tone === 'done'
+              ? 'flex items-center justify-center bg-success/20 text-success'
+              : tone === 'live'
+                ? 'bg-primary'
+                : 'border border-border bg-card'
+          }`}
+        >
+          {tone === 'done' ? <Check className="size-2.5" strokeWidth={3.4} /> : null}
+        </span>
+      </span>
+      <p
+        className={`text-[13px] font-semibold leading-none tracking-tight ${
+          tone === 'idle' ? 'text-muted-foreground' : ''
         }`}
       >
-        {tone === 'done' ? (
-          <Check className="size-3" strokeWidth={3.2} />
-        ) : tone === 'live' ? (
-          <motion.span
-            animate={{ scale: [1, 1.55, 1], opacity: [1, 0.35, 1] }}
-            transition={{ duration: 1.7, repeat: Infinity }}
-            className="size-1.5 rounded-full bg-primary"
-          />
-        ) : (
-          <span className="size-1.5 rounded-full bg-current" />
-        )}
-      </span>
-      <p className="text-[12.5px] font-bold leading-none">{label}</p>
-      <p className="mt-1 text-[11.5px] text-muted-foreground">{value}</p>
+        {label}
+      </p>
+      <p className="tnum mt-1.5 text-[11.5px] leading-none text-muted-foreground/70">{value}</p>
     </li>
   )
 }
+
 
 /* ── Followers target: X profile card with growth arrow ───────────────── */
 function FollowersTarget({
@@ -789,65 +823,73 @@ function RefillSheet({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
+      transition={{ duration: 0.22 }}
       onClick={onClose}
-      className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-end justify-center bg-black/65 backdrop-blur-[6px]"
     >
       <motion.div
-        initial={{ y: '100%' }}
-        animate={{ y: 0 }}
-        exit={{ y: '100%' }}
-        transition={{ type: 'spring', stiffness: 320, damping: 32 }}
+        initial={{ y: 40, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        exit={{ y: 40, opacity: 0 }}
+        transition={{ type: 'spring', stiffness: 420, damping: 38 }}
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-[520px] rounded-t-[28px] border-t border-border bg-card px-5 pb-8 pt-3"
+        className="w-full max-w-[520px] rounded-t-[28px] border-t border-border bg-card px-5 pb-[max(2rem,env(safe-area-inset-bottom))] pt-3"
       >
-        <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-border" />
-        <div className="flex items-start gap-3">
-          <div className="flex size-11 shrink-0 items-center justify-center rounded-2xl border border-primary/30 bg-primary/10">
-            <RotateCw className="size-5 text-primary" strokeWidth={2.5} />
-          </div>
+        <div className="mx-auto mb-5 h-1 w-9 rounded-full bg-border" />
+
+        <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <h3 className="text-[15.5px] font-black leading-tight">
-              {ru ? 'Запустить рефилл?' : 'Start a refill?'}
+            <h3 className="text-[17px] font-semibold leading-tight tracking-tight">
+              {ru ? 'Запросить рефилл' : 'Request a refill'}
             </h3>
-            <p className="mt-1 text-[12px] leading-relaxed text-muted-foreground">
+            <p className="mt-1.5 text-[12.5px] leading-[1.55] text-muted-foreground">
               {ru
-                ? 'Мы дозакажем недостающие единицы по этому заказу и вернём его в работу.'
-                : 'We will top up the missing units and put the order back in progress.'}
+                ? 'Дозакажем недостающие единицы и вернём заказ в работу.'
+                : 'We top up the missing units and put the order back in progress.'}
             </p>
           </div>
           <button
             onClick={onClose}
             aria-label="Close"
-            className="ml-auto flex size-8 shrink-0 items-center justify-center rounded-full border border-border text-muted-foreground active:scale-95"
+            className="-mr-1 flex size-8 shrink-0 items-center justify-center rounded-full text-muted-foreground/70 transition-colors active:text-foreground"
           >
-            <X className="size-4" />
+            <X className="size-[18px]" />
           </button>
         </div>
 
-        <div className="mt-4 flex gap-2.5 rounded-2xl border border-primary/20 bg-primary/[0.06] p-3">
-          <TriangleAlert className="mt-0.5 size-4 shrink-0 text-primary" />
-          <p className="text-[11.5px] leading-relaxed text-foreground/85">
-            {ru
-              ? `Рефилл доступен только в течение 48 часов после покупки и не более 4 раз суммарно. Использовано: ${used} из ${REFILL_LIMIT}.`
-              : `Refills are available for 48 hours after purchase, up to 4 times in total. Used: ${used} of ${REFILL_LIMIT}.`}
-          </p>
-        </div>
+        <dl className="mt-5 space-y-2.5 border-t border-border/70 pt-4 text-[12.5px]">
+          <div className="flex items-center justify-between gap-3">
+            <dt className="text-muted-foreground">{ru ? 'Использовано' : 'Used'}</dt>
+            <dd className="tnum font-medium">
+              {used} <span className="text-muted-foreground/50">/ {REFILL_LIMIT}</span>
+            </dd>
+          </div>
+          <div className="flex items-center justify-between gap-3">
+            <dt className="text-muted-foreground">{ru ? 'Окно гарантии' : 'Guarantee window'}</dt>
+            <dd className="font-medium">{ru ? '48 часов' : '48 hours'}</dd>
+          </div>
+          <div className="flex items-center justify-between gap-3">
+            <dt className="text-muted-foreground">{ru ? 'Стоимость' : 'Price'}</dt>
+            <dd className="font-medium text-success">{ru ? 'Бесплатно' : 'Free'}</dd>
+          </div>
+        </dl>
 
-        <div className="mt-4 flex gap-2">
+        <div className="mt-5 grid grid-cols-[1fr_1.4fr] gap-2.5">
           <button
             onClick={onClose}
-            className="h-12 flex-1 rounded-2xl border border-border bg-secondary/50 text-[13px] font-bold text-foreground active:scale-[0.98]"
+            className="h-[52px] rounded-[16px] border border-border/80 text-[13.5px] font-medium text-muted-foreground transition-colors active:bg-secondary/40"
           >
             {ru ? 'Отмена' : 'Cancel'}
           </button>
           <button
             onClick={onConfirm}
-            className="h-12 flex-1 rounded-2xl bg-gold-gradient text-[13px] font-black uppercase tracking-[0.1em] text-[#111] shadow-[0_10px_26px_-14px_color-mix(in_oklab,var(--primary)_90%,transparent)] active:scale-[0.98]"
+            className="h-[52px] rounded-[16px] bg-primary text-[13.5px] font-semibold tracking-tight text-primary-foreground shadow-[inset_0_1px_0_color-mix(in_oklab,white_28%,transparent),0_16px_34px_-24px_color-mix(in_oklab,var(--primary)_80%,transparent)] transition-transform active:scale-[0.985]"
           >
-            {ru ? 'Подтвердить' : 'Confirm'}
+            {ru ? 'Подтвердить рефилл' : 'Confirm refill'}
           </button>
         </div>
       </motion.div>
+
     </motion.div>
   )
 }
