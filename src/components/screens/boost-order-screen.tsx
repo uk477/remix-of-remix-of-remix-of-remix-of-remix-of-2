@@ -318,7 +318,7 @@ export function BoostOrderScreen({ order }: { order: Order }) {
             ) : null}
           </div>
 
-          <ol className="relative mt-6 flex flex-col gap-y-7">
+          <ol className="relative mt-7 flex flex-col gap-y-10">
             <span
               aria-hidden
               className="pointer-events-none absolute bottom-4 left-[15px] top-4 w-[2px] overflow-hidden rounded-full bg-foreground/[0.06]"
