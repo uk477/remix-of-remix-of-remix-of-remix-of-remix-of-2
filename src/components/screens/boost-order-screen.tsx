@@ -561,10 +561,11 @@ function TimelineRow({
           {tone === 'live' ? (
             <motion.span
               aria-hidden
-              animate={{ scale: [1, 2.2], opacity: [0.7, 0] }}
+              animate={{ scale: [1, 1.9], opacity: [0.55, 0] }}
               transition={{ duration: 1.8, repeat: Infinity, ease: 'easeOut' }}
-              className="size-1.5 rounded-full bg-primary"
+              className="size-1 rounded-full bg-primary"
             />
+
           ) : null}
         </div>
 
