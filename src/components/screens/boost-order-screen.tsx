@@ -459,39 +459,48 @@ function TimelineRow({
   tone,
   label,
   value,
+  last,
 }: {
   tone: 'done' | 'live' | 'idle'
   label: string
   value: string
+  last?: boolean
 }) {
   return (
-    <li className="relative">
-      <span
-        className={`absolute -left-7 top-0.5 flex size-[19px] items-center justify-center rounded-full border ${
-          tone === 'done'
-            ? 'border-success/40 bg-success/15 text-success'
-            : tone === 'live'
-              ? 'border-primary/45 bg-primary/15 text-primary'
-              : 'border-border bg-background text-muted-foreground/50'
+    <li className={`relative ${last ? '' : 'pb-5'}`}>
+      <span className="absolute -left-8 top-[3px] flex size-[15px] items-center justify-center">
+        {tone === 'live' ? (
+          <motion.span
+            aria-hidden
+            animate={{ scale: [1, 2.1], opacity: [0.4, 0] }}
+            transition={{ duration: 2.2, repeat: Infinity, ease: 'easeOut' }}
+            className="absolute size-[13px] rounded-full bg-primary/40"
+          />
+        ) : null}
+        <span
+          className={`relative size-[13px] rounded-full ring-4 ring-card ${
+            tone === 'done'
+              ? 'flex items-center justify-center bg-success/20 text-success'
+              : tone === 'live'
+                ? 'bg-primary'
+                : 'border border-border bg-card'
+          }`}
+        >
+          {tone === 'done' ? <Check className="size-2.5" strokeWidth={3.4} /> : null}
+        </span>
+      </span>
+      <p
+        className={`text-[13px] font-semibold leading-none tracking-tight ${
+          tone === 'idle' ? 'text-muted-foreground' : ''
         }`}
       >
-        {tone === 'done' ? (
-          <Check className="size-3" strokeWidth={3.2} />
-        ) : tone === 'live' ? (
-          <motion.span
-            animate={{ scale: [1, 1.55, 1], opacity: [1, 0.35, 1] }}
-            transition={{ duration: 1.7, repeat: Infinity }}
-            className="size-1.5 rounded-full bg-primary"
-          />
-        ) : (
-          <span className="size-1.5 rounded-full bg-current" />
-        )}
-      </span>
-      <p className="text-[12.5px] font-bold leading-none">{label}</p>
-      <p className="mt-1 text-[11.5px] text-muted-foreground">{value}</p>
+        {label}
+      </p>
+      <p className="tnum mt-1.5 text-[11.5px] leading-none text-muted-foreground/70">{value}</p>
     </li>
   )
 }
+
 
 /* ── Followers target: X profile card with growth arrow ───────────────── */
 function FollowersTarget({
