@@ -305,7 +305,7 @@ export function BoostOrderScreen({ order }: { order: Order }) {
         transition={{ delay: 0.12, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
         className="mt-3 border-y border-border bg-card sm:mx-4 sm:rounded-[26px] sm:border"
       >
-        <div className="px-5 pb-5 pt-5">
+        <div className="px-6 pb-7 pt-6">
           <div className="flex items-center justify-between">
             <h2 className="text-[10.5px] font-semibold uppercase tracking-[0.26em] text-muted-foreground/70">
               {ru ? 'Статус заказа' : 'Order status'}
@@ -318,10 +318,10 @@ export function BoostOrderScreen({ order }: { order: Order }) {
             ) : null}
           </div>
 
-          <ol className="relative mt-6 flex flex-col gap-y-7">
+          <ol className="relative mt-7 flex flex-col gap-y-10">
             <span
               aria-hidden
-              className="pointer-events-none absolute bottom-4 left-[15px] top-4 w-[2px] overflow-hidden rounded-full bg-foreground/[0.06]"
+              className="pointer-events-none absolute inset-y-[38px] left-[15px] w-[2px] overflow-hidden rounded-full bg-foreground/[0.06]"
             >
               <motion.span
                 initial={{ scaleY: 0 }}
@@ -374,7 +374,7 @@ export function BoostOrderScreen({ order }: { order: Order }) {
         </div>
 
         {/* Гарантия рефилла — отдельная «квитанция» */}
-        <div className="border-t border-dashed border-border/70 px-5 pb-6 pt-5">
+        <div className="border-t border-dashed border-border/70 px-6 pb-7 pt-6">
           <div className="flex items-baseline justify-between gap-3">
             <span className="inline-flex items-center gap-2 text-[12px] font-semibold tracking-tight">
               <ShieldCheck className="size-4 text-success/90" strokeWidth={2.2} />
@@ -526,9 +526,12 @@ function TimelineRow({
     <li className="relative flex items-start gap-4">
       <span className="relative z-10 flex size-8 shrink-0 items-center justify-center">
         {tone === 'done' ? (
-          <span className="flex size-8 items-center justify-center rounded-full border border-success/25 bg-success/10 shadow-[0_0_18px_-6px_color-mix(in_oklab,var(--success)_70%,transparent)]">
-            <Check className="size-4 text-success" strokeWidth={3} />
+          <span className="flex size-8 items-center justify-center rounded-full border border-success/25 bg-card shadow-[0_0_18px_-6px_color-mix(in_oklab,var(--success)_70%,transparent)]">
+            <span className="flex size-full items-center justify-center rounded-full bg-success/10">
+              <Check className="size-4 shrink-0 text-success" strokeWidth={2.6} />
+            </span>
           </span>
+
         ) : tone === 'live' ? (
           <>
             <motion.span
@@ -558,10 +561,11 @@ function TimelineRow({
           {tone === 'live' ? (
             <motion.span
               aria-hidden
-              animate={{ scale: [1, 2.2], opacity: [0.7, 0] }}
+              animate={{ scale: [1, 1.9], opacity: [0.55, 0] }}
               transition={{ duration: 1.8, repeat: Infinity, ease: 'easeOut' }}
-              className="size-1.5 rounded-full bg-primary"
+              className="size-1 rounded-full bg-primary"
             />
+
           ) : null}
         </div>
 
