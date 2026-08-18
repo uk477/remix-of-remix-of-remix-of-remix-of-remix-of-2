@@ -374,7 +374,7 @@ export function BoostOrderScreen({ order }: { order: Order }) {
         </div>
 
         {/* Гарантия рефилла — отдельная «квитанция» */}
-        <div className="border-t border-dashed border-border/70 px-5 pb-6 pt-5">
+        <div className="border-t border-dashed border-border/70 px-6 pb-7 pt-6">
           <div className="flex items-baseline justify-between gap-3">
             <span className="inline-flex items-center gap-2 text-[12px] font-semibold tracking-tight">
               <ShieldCheck className="size-4 text-success/90" strokeWidth={2.2} />
