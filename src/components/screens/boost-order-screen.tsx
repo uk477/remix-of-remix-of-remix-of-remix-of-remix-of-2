@@ -321,7 +321,7 @@ export function BoostOrderScreen({ order }: { order: Order }) {
           <ol className="relative mt-7 flex flex-col gap-y-10">
             <span
               aria-hidden
-              className="pointer-events-none absolute bottom-4 left-[15px] top-4 w-[2px] overflow-hidden rounded-full bg-foreground/[0.06]"
+              className="pointer-events-none absolute bottom-9 left-[15px] top-9 w-[2px] overflow-hidden rounded-full bg-foreground/[0.06]"
             >
               <motion.span
                 initial={{ scaleY: 0 }}
