@@ -318,11 +318,19 @@ export function BoostOrderScreen({ order }: { order: Order }) {
             ) : null}
           </div>
 
-          <ol className="relative mt-5 pl-9">
+          <ol className="relative mt-6 flex flex-col gap-y-7">
             <span
               aria-hidden
-              className="pointer-events-none absolute left-[6.5px] top-2 bottom-2 w-px bg-linear-to-b from-border via-border to-transparent"
-            />
+              className="pointer-events-none absolute bottom-4 left-[15px] top-4 w-[2px] overflow-hidden rounded-full bg-foreground/[0.06]"
+            >
+              <motion.span
+                initial={{ scaleY: 0 }}
+                animate={{ scaleY: done ? 1 : 0.5 }}
+                transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
+                style={{ transformOrigin: 'top' }}
+                className="absolute inset-x-0 top-0 h-full rounded-full bg-linear-to-b from-success via-primary to-transparent"
+              />
+            </span>
             <TimelineRow
               tone="done"
               label={ru ? 'Заказ оформлен' : 'Order placed'}
@@ -336,11 +344,13 @@ export function BoostOrderScreen({ order }: { order: Order }) {
                   ? ru
                     ? 'Все единицы доставлены'
                     : 'All units delivered'
-                  : ru
-                    ? `Идёт накрутка · ${nf(volume)}`
-                    : `In progress · ${nf(volume)}`
+                  : undefined
               }
-              progress={!done}
+              chip={
+                done
+                  ? undefined
+                  : { label: ru ? 'Идёт накрутка' : 'In progress', value: nf(volume) }
+              }
             />
             <TimelineRow
               tone={done ? 'done' : 'idle'}
@@ -360,6 +370,7 @@ export function BoostOrderScreen({ order }: { order: Order }) {
             />
           </ol>
 
+
         </div>
 
         {/* Гарантия рефилла — отдельная «квитанция» */}
@@ -374,22 +385,7 @@ export function BoostOrderScreen({ order }: { order: Order }) {
             </span>
           </div>
 
-          <div className="mt-3 flex gap-2 px-0.5">
-            {Array.from({ length: REFILL_LIMIT }).map((_, i) => (
-              <motion.span
-                key={i}
-                initial={{ opacity: 0, scaleX: 0.6 }}
-                animate={{ opacity: i < REFILL_LIMIT - used ? 1 : 0.2, scaleX: 1 }}
-                transition={{ duration: 0.45, delay: i * 0.06, ease: [0.22, 1, 0.36, 1] }}
-                style={{ transformOrigin: 'left' }}
-                className={`h-[3px] flex-1 rounded-full transition-all duration-300 ease-in-out ${
-                  i < REFILL_LIMIT - used ? 'bg-primary/70' : 'bg-muted-foreground'
-                }`}
-              />
-            ))}
-          </div>
-
-          <p className="mt-3.5 text-[11.5px] leading-[1.55] text-muted-foreground/85">
+          <p className="mt-2.5 text-[11.5px] leading-[1.55] text-muted-foreground/85">
             {ru ? (
               <>
                 Доступно {REFILL_LIMIT} рефилла в течение 48 часов после покупки — до{' '}
@@ -413,48 +409,89 @@ export function BoostOrderScreen({ order }: { order: Order }) {
             type="button"
             onClick={() => canRefill && !refilling && setAskRefill(true)}
             aria-disabled={!canRefill || refilling}
-            whileTap={canRefill ? { scale: 0.985 } : {}}
+            whileTap={canRefill ? { scale: 0.98 } : {}}
             transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-            className={`group mt-4 flex w-full items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-[13px] font-semibold tracking-tight transition-all duration-300 ease-in-out ${
+            className={`group relative mt-4 flex w-full items-center justify-between gap-3 overflow-hidden rounded-2xl border p-3.5 transition-all duration-300 ease-in-out ${
               canRefill
-                ? 'bg-primary text-primary-foreground shadow-[inset_0_1px_0_color-mix(in_oklab,white_26%,transparent),0_10px_26px_-20px_color-mix(in_oklab,var(--primary)_80%,transparent)] hover:brightness-[1.04]'
-                : 'border border-border/80 bg-transparent text-muted-foreground/70'
+                ? 'border-foreground/[0.09] bg-linear-to-br from-foreground/[0.08] to-foreground/[0.02] hover:border-primary/25'
+                : 'border-border/70 bg-transparent opacity-60'
             }`}
           >
-            <RotateCw
-              className={`size-4 transition-transform duration-300 ease-in-out ${
-                refilling ? 'animate-spin' : canRefill ? 'group-hover:-translate-y-px' : ''
-              }`}
-              strokeWidth={2.2}
-            />
-            <span>
-              {refilling
-                ? ru
-                  ? 'Отправляем…'
-                  : 'Submitting…'
-                : ru
-                  ? 'Запросить рефилл'
-                  : 'Request refill'}
+            {canRefill ? (
+              <span
+                aria-hidden
+                className="pointer-events-none absolute inset-0 -translate-x-full bg-linear-to-r from-transparent via-foreground/[0.06] to-transparent transition-transform duration-1000 group-hover:translate-x-full"
+              />
+            ) : null}
+
+            <span className="relative z-10 flex min-w-0 items-center gap-3">
+              <span
+                className={`flex size-9 shrink-0 items-center justify-center rounded-xl border transition-colors duration-300 ${
+                  canRefill
+                    ? 'border-primary/25 bg-primary/10'
+                    : 'border-border/70 bg-transparent'
+                }`}
+              >
+                <RotateCw
+                  className={`size-[18px] transition-transform duration-300 ease-in-out ${
+                    canRefill ? 'text-primary' : 'text-muted-foreground/70'
+                  } ${refilling ? 'animate-spin' : canRefill ? 'group-hover:-translate-y-px' : ''}`}
+                  strokeWidth={2}
+                />
+              </span>
+              <span className="min-w-0 text-left">
+                <span className="block text-[14px] font-bold tracking-tight text-foreground">
+                  {refilling
+                    ? ru
+                      ? 'Отправляем…'
+                      : 'Submitting…'
+                    : ru
+                      ? 'Запросить рефилл'
+                      : 'Request refill'}
+                </span>
+                <span className="mt-0.5 block truncate text-[10.5px] font-medium uppercase tracking-[0.18em] text-muted-foreground/60">
+                  {canRefill
+                    ? ru
+                      ? 'Доступно сейчас'
+                      : 'Available now'
+                    : !order.refillable
+                      ? ru
+                        ? 'Не предусмотрен'
+                        : 'Not available'
+                      : used >= REFILL_LIMIT
+                        ? ru
+                          ? 'Лимит исчерпан'
+                          : 'Limit reached'
+                        : ru
+                          ? 'Окно закрыто'
+                          : 'Window closed'}
+                </span>
+              </span>
+            </span>
+
+            <span className="relative z-10 flex shrink-0 items-center gap-1">
+              {Array.from({ length: REFILL_LIMIT }).map((_, i) => {
+                const on = i < REFILL_LIMIT - used
+                return (
+                  <motion.span
+                    key={i}
+                    initial={{ scaleY: 0.4, opacity: 0 }}
+                    animate={{ scaleY: 1, opacity: 1 }}
+                    transition={{ duration: 0.4, delay: i * 0.06, ease: [0.22, 1, 0.36, 1] }}
+                    className={`h-5 w-1 rounded-full transition-all duration-300 ease-in-out ${
+                      on && canRefill
+                        ? 'bg-primary shadow-[0_0_8px_-1px_color-mix(in_oklab,var(--primary)_60%,transparent)]'
+                        : on
+                          ? 'bg-foreground/25'
+                          : 'bg-foreground/10'
+                    }`}
+                  />
+                )
+              })}
             </span>
           </motion.button>
-
-
-          {!canRefill ? (
-            <p className="mt-2.5 text-center text-[10.5px] text-muted-foreground/60">
-              {!order.refillable
-                ? ru
-                  ? 'Для этой услуги рефилл не предусмотрен'
-                  : 'Refill is not available for this service'
-                : used >= REFILL_LIMIT
-                  ? ru
-                    ? 'Лимит рефиллов исчерпан'
-                    : 'Refill limit reached'
-                  : ru
-                    ? 'Окно 48 часов закрыто'
-                    : 'The 48-hour window has closed'}
-            </p>
-          ) : null}
         </div>
+
       </motion.section>
 
 
@@ -477,61 +514,71 @@ function TimelineRow({
   tone,
   label,
   value,
-  last,
-  progress,
+  chip,
 }: {
   tone: 'done' | 'live' | 'idle'
   label: string
-  value: string
+  value?: string
   last?: boolean
-  progress?: boolean
+  chip?: { label: string; value: string }
 }) {
   return (
-    <li className={`relative ${last ? '' : 'pb-6'}`}>
-      <span className="absolute -left-9 top-[2px] flex size-[14px] items-center justify-center">
-        {tone === 'live' ? (
-          <motion.span
-            aria-hidden
-            animate={{ scale: [1, 2.4], opacity: [0.35, 0] }}
-            transition={{ duration: 2.2, repeat: Infinity, ease: 'easeOut' }}
-            className="absolute size-[10px] rounded-full bg-primary/40"
-          />
-        ) : null}
-        <span
-          className={`relative flex size-[10px] items-center justify-center rounded-full ring-[3px] ring-card transition-all duration-300 ease-in-out ${
-            tone === 'done'
-              ? 'bg-success/20 text-success'
-              : tone === 'live'
-                ? 'bg-primary'
-                : 'border border-border bg-card'
-          }`}
-        >
-          {tone === 'done' ? <Check className="size-[7px]" strokeWidth={4} /> : null}
-        </span>
+    <li className="relative flex items-start gap-4">
+      <span className="relative z-10 flex size-8 shrink-0 items-center justify-center">
+        {tone === 'done' ? (
+          <span className="flex size-8 items-center justify-center rounded-full border border-success/25 bg-success/10 shadow-[0_0_18px_-6px_color-mix(in_oklab,var(--success)_70%,transparent)]">
+            <Check className="size-4 text-success" strokeWidth={3} />
+          </span>
+        ) : tone === 'live' ? (
+          <>
+            <motion.span
+              aria-hidden
+              animate={{ scale: [0.85, 1.15, 0.85], opacity: [0.35, 0.12, 0.35] }}
+              transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }}
+              className="absolute size-8 rounded-full bg-primary/25"
+            />
+            <span className="relative size-4 rounded-full bg-primary ring-4 ring-card shadow-[0_0_14px_-2px_color-mix(in_oklab,var(--primary)_75%,transparent)]" />
+          </>
+        ) : (
+          <span className="flex size-8 items-center justify-center rounded-full border border-border/70 bg-card">
+            <span className="size-2 rounded-full bg-foreground/15" />
+          </span>
+        )}
       </span>
 
-      <p
-        className={`text-[13px] font-semibold leading-none tracking-tight transition-colors duration-300 ease-in-out ${
-          tone === 'idle' ? 'text-muted-foreground' : ''
-        }`}
-      >
-        {label}
-      </p>
-      <p className="tnum mt-1.5 text-[11.5px] leading-none text-muted-foreground/70">{value}</p>
+      <div className={`min-w-0 flex-1 pt-1 ${tone === 'idle' ? 'opacity-45' : ''}`}>
+        <div className="flex items-center gap-2">
+          <p
+            className={`text-[15px] font-semibold leading-tight tracking-tight transition-colors duration-300 ease-in-out ${
+              tone === 'live' ? 'text-primary' : 'text-foreground/90'
+            }`}
+          >
+            {label}
+          </p>
+          {tone === 'live' ? (
+            <motion.span
+              aria-hidden
+              animate={{ scale: [1, 2.2], opacity: [0.7, 0] }}
+              transition={{ duration: 1.8, repeat: Infinity, ease: 'easeOut' }}
+              className="size-1.5 rounded-full bg-primary"
+            />
+          ) : null}
+        </div>
 
-      {progress ? (
-        <span
-          aria-hidden
-          className="relative mt-2 block h-[2px] w-[92px] overflow-hidden rounded-full bg-border/60"
-        >
-          <motion.span
-            className="absolute inset-y-0 w-1/3 rounded-full bg-linear-to-r from-transparent via-primary to-transparent"
-            animate={{ x: ['-110%', '330%'] }}
-            transition={{ duration: 1.8, repeat: Infinity, ease: 'linear' }}
-          />
-        </span>
-      ) : null}
+        {value ? (
+          <p className="tnum mt-1 text-[13px] leading-tight text-muted-foreground/70">{value}</p>
+        ) : null}
+
+        {chip ? (
+          <div className="mt-2 inline-flex w-fit items-center gap-2 overflow-hidden rounded-lg border border-foreground/[0.07] bg-foreground/[0.03] px-3 py-1.5">
+            <span className="text-[12px] font-medium text-foreground/70">{chip.label}</span>
+            <span className="h-3 w-px bg-foreground/10" />
+            <span className="tnum text-[12px] font-bold text-primary">{chip.value}</span>
+          </div>
+        ) : null}
+      </div>
     </li>
+
   )
 }
 
