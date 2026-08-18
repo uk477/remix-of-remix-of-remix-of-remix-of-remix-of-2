@@ -318,11 +318,19 @@ export function BoostOrderScreen({ order }: { order: Order }) {
             ) : null}
           </div>
 
-          <ol className="relative mt-5 pl-9">
+          <ol className="relative mt-6 flex flex-col gap-y-7">
             <span
               aria-hidden
-              className="pointer-events-none absolute left-[6.5px] top-2 bottom-2 w-px bg-linear-to-b from-border via-border to-transparent"
-            />
+              className="pointer-events-none absolute bottom-4 left-[15px] top-4 w-[2px] overflow-hidden rounded-full bg-foreground/[0.06]"
+            >
+              <motion.span
+                initial={{ scaleY: 0 }}
+                animate={{ scaleY: done ? 1 : 0.5 }}
+                transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
+                style={{ transformOrigin: 'top' }}
+                className="absolute inset-x-0 top-0 h-full rounded-full bg-linear-to-b from-success via-primary to-transparent"
+              />
+            </span>
             <TimelineRow
               tone="done"
               label={ru ? 'Заказ оформлен' : 'Order placed'}
@@ -336,11 +344,13 @@ export function BoostOrderScreen({ order }: { order: Order }) {
                   ? ru
                     ? 'Все единицы доставлены'
                     : 'All units delivered'
-                  : ru
-                    ? `Идёт накрутка · ${nf(volume)}`
-                    : `In progress · ${nf(volume)}`
+                  : undefined
               }
-              progress={!done}
+              chip={
+                done
+                  ? undefined
+                  : { label: ru ? 'Идёт накрутка' : 'In progress', value: nf(volume) }
+              }
             />
             <TimelineRow
               tone={done ? 'done' : 'idle'}
@@ -359,6 +369,7 @@ export function BoostOrderScreen({ order }: { order: Order }) {
               }
             />
           </ol>
+
 
         </div>
 
