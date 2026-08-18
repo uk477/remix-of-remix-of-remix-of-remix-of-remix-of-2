@@ -385,22 +385,7 @@ export function BoostOrderScreen({ order }: { order: Order }) {
             </span>
           </div>
 
-          <div className="mt-3 flex gap-2 px-0.5">
-            {Array.from({ length: REFILL_LIMIT }).map((_, i) => (
-              <motion.span
-                key={i}
-                initial={{ opacity: 0, scaleX: 0.6 }}
-                animate={{ opacity: i < REFILL_LIMIT - used ? 1 : 0.2, scaleX: 1 }}
-                transition={{ duration: 0.45, delay: i * 0.06, ease: [0.22, 1, 0.36, 1] }}
-                style={{ transformOrigin: 'left' }}
-                className={`h-[3px] flex-1 rounded-full transition-all duration-300 ease-in-out ${
-                  i < REFILL_LIMIT - used ? 'bg-primary/70' : 'bg-muted-foreground'
-                }`}
-              />
-            ))}
-          </div>
-
-          <p className="mt-3.5 text-[11.5px] leading-[1.55] text-muted-foreground/85">
+          <p className="mt-2.5 text-[11.5px] leading-[1.55] text-muted-foreground/85">
             {ru ? (
               <>
                 Доступно {REFILL_LIMIT} рефилла в течение 48 часов после покупки — до{' '}
@@ -424,48 +409,89 @@ export function BoostOrderScreen({ order }: { order: Order }) {
             type="button"
             onClick={() => canRefill && !refilling && setAskRefill(true)}
             aria-disabled={!canRefill || refilling}
-            whileTap={canRefill ? { scale: 0.985 } : {}}
+            whileTap={canRefill ? { scale: 0.98 } : {}}
             transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-            className={`group mt-4 flex w-full items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-[13px] font-semibold tracking-tight transition-all duration-300 ease-in-out ${
+            className={`group relative mt-4 flex w-full items-center justify-between gap-3 overflow-hidden rounded-2xl border p-3.5 transition-all duration-300 ease-in-out ${
               canRefill
-                ? 'bg-primary text-primary-foreground shadow-[inset_0_1px_0_color-mix(in_oklab,white_26%,transparent),0_10px_26px_-20px_color-mix(in_oklab,var(--primary)_80%,transparent)] hover:brightness-[1.04]'
-                : 'border border-border/80 bg-transparent text-muted-foreground/70'
+                ? 'border-foreground/[0.09] bg-linear-to-br from-foreground/[0.08] to-foreground/[0.02] hover:border-primary/25'
+                : 'border-border/70 bg-transparent opacity-60'
             }`}
           >
-            <RotateCw
-              className={`size-4 transition-transform duration-300 ease-in-out ${
-                refilling ? 'animate-spin' : canRefill ? 'group-hover:-translate-y-px' : ''
-              }`}
-              strokeWidth={2.2}
-            />
-            <span>
-              {refilling
-                ? ru
-                  ? 'Отправляем…'
-                  : 'Submitting…'
-                : ru
-                  ? 'Запросить рефилл'
-                  : 'Request refill'}
+            {canRefill ? (
+              <span
+                aria-hidden
+                className="pointer-events-none absolute inset-0 -translate-x-full bg-linear-to-r from-transparent via-foreground/[0.06] to-transparent transition-transform duration-1000 group-hover:translate-x-full"
+              />
+            ) : null}
+
+            <span className="relative z-10 flex min-w-0 items-center gap-3">
+              <span
+                className={`flex size-9 shrink-0 items-center justify-center rounded-xl border transition-colors duration-300 ${
+                  canRefill
+                    ? 'border-primary/25 bg-primary/10'
+                    : 'border-border/70 bg-transparent'
+                }`}
+              >
+                <RotateCw
+                  className={`size-[18px] transition-transform duration-300 ease-in-out ${
+                    canRefill ? 'text-primary' : 'text-muted-foreground/70'
+                  } ${refilling ? 'animate-spin' : canRefill ? 'group-hover:-translate-y-px' : ''}`}
+                  strokeWidth={2}
+                />
+              </span>
+              <span className="min-w-0 text-left">
+                <span className="block text-[14px] font-bold tracking-tight text-foreground">
+                  {refilling
+                    ? ru
+                      ? 'Отправляем…'
+                      : 'Submitting…'
+                    : ru
+                      ? 'Запросить рефилл'
+                      : 'Request refill'}
+                </span>
+                <span className="mt-0.5 block truncate text-[10.5px] font-medium uppercase tracking-[0.18em] text-muted-foreground/60">
+                  {canRefill
+                    ? ru
+                      ? 'Доступно сейчас'
+                      : 'Available now'
+                    : !order.refillable
+                      ? ru
+                        ? 'Не предусмотрен'
+                        : 'Not available'
+                      : used >= REFILL_LIMIT
+                        ? ru
+                          ? 'Лимит исчерпан'
+                          : 'Limit reached'
+                        : ru
+                          ? 'Окно закрыто'
+                          : 'Window closed'}
+                </span>
+              </span>
+            </span>
+
+            <span className="relative z-10 flex shrink-0 items-center gap-1">
+              {Array.from({ length: REFILL_LIMIT }).map((_, i) => {
+                const on = i < REFILL_LIMIT - used
+                return (
+                  <motion.span
+                    key={i}
+                    initial={{ scaleY: 0.4, opacity: 0 }}
+                    animate={{ scaleY: 1, opacity: 1 }}
+                    transition={{ duration: 0.4, delay: i * 0.06, ease: [0.22, 1, 0.36, 1] }}
+                    className={`h-5 w-1 rounded-full transition-all duration-300 ease-in-out ${
+                      on && canRefill
+                        ? 'bg-primary shadow-[0_0_8px_-1px_color-mix(in_oklab,var(--primary)_60%,transparent)]'
+                        : on
+                          ? 'bg-foreground/25'
+                          : 'bg-foreground/10'
+                    }`}
+                  />
+                )
+              })}
             </span>
           </motion.button>
-
-
-          {!canRefill ? (
-            <p className="mt-2.5 text-center text-[10.5px] text-muted-foreground/60">
-              {!order.refillable
-                ? ru
-                  ? 'Для этой услуги рефилл не предусмотрен'
-                  : 'Refill is not available for this service'
-                : used >= REFILL_LIMIT
-                  ? ru
-                    ? 'Лимит рефиллов исчерпан'
-                    : 'Refill limit reached'
-                  : ru
-                    ? 'Окно 48 часов закрыто'
-                    : 'The 48-hour window has closed'}
-            </p>
-          ) : null}
         </div>
+
       </motion.section>
 
 
