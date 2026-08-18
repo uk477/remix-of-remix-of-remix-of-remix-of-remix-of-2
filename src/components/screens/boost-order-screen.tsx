@@ -161,7 +161,9 @@ export function BoostOrderScreen({ order }: { order: Order }) {
   /* ── Refill ──────────────────────────────────────────────────────────── */
   const [refills, setRefills] = useState<number[]>([])
   const [askRefill, setAskRefill] = useState(false)
+  const [refilling, setRefilling] = useState(false)
   useEffect(() => setRefills(readRefills(order.id)), [order.id])
+
 
   const windowEnd = order.date + REFILL_WINDOW_MS
   const inWindow = Date.now() < windowEnd
@@ -170,16 +172,21 @@ export function BoostOrderScreen({ order }: { order: Order }) {
 
   function doRefill() {
     const next = [...refills, Date.now()]
-    setRefills(next)
-    try {
-      localStorage.setItem(refillKey(order.id), JSON.stringify(next))
-    } catch {
-      /* ignore */
-    }
-    refillOrder(order.id)
     setAskRefill(false)
-    show(ru ? 'Рефилл отправлен в обработку' : 'Refill submitted')
+    setRefilling(true)
+    window.setTimeout(() => {
+      setRefills(next)
+      try {
+        localStorage.setItem(refillKey(order.id), JSON.stringify(next))
+      } catch {
+        /* ignore */
+      }
+      refillOrder(order.id)
+      setRefilling(false)
+      show(ru ? 'Рефилл отправлен в обработку' : 'Refill submitted')
+    }, 900)
   }
+
 
   async function copyId() {
     await copyText(orderId)
@@ -311,10 +318,10 @@ export function BoostOrderScreen({ order }: { order: Order }) {
             ) : null}
           </div>
 
-          <ol className="relative mt-5 pl-8">
+          <ol className="relative mt-5 pl-9">
             <span
               aria-hidden
-              className="absolute left-[7px] top-3 bottom-3 w-px bg-linear-to-b from-border via-border to-transparent"
+              className="pointer-events-none absolute left-[6.5px] top-2 bottom-2 w-px bg-linear-to-b from-border via-border to-transparent"
             />
             <TimelineRow
               tone="done"
@@ -333,6 +340,7 @@ export function BoostOrderScreen({ order }: { order: Order }) {
                     ? `Идёт накрутка · ${nf(volume)}`
                     : `In progress · ${nf(volume)}`
               }
+              progress={!done}
             />
             <TimelineRow
               tone={done ? 'done' : 'idle'}
@@ -351,38 +359,37 @@ export function BoostOrderScreen({ order }: { order: Order }) {
               }
             />
           </ol>
+
         </div>
 
         {/* Гарантия рефилла — отдельная «квитанция» */}
-        <div className="border-t border-dashed border-border/70 px-5 pb-5 pt-4">
+        <div className="border-t border-dashed border-border/70 px-5 pb-6 pt-5">
           <div className="flex items-baseline justify-between gap-3">
             <span className="inline-flex items-center gap-2 text-[12px] font-semibold tracking-tight">
               <ShieldCheck className="size-4 text-success/90" strokeWidth={2.2} />
               {ru ? 'Гарантия рефилла' : 'Refill guarantee'}
             </span>
             <span className="tnum text-[11px] font-medium text-muted-foreground/80">
-              {used} <span className="opacity-40">/</span> {REFILL_LIMIT}
+              {REFILL_LIMIT - used} <span className="opacity-40">/</span> {REFILL_LIMIT}
             </span>
           </div>
 
-          <div className="mt-2.5 flex gap-1.5">
+          <div className="mt-3 flex gap-2 px-0.5">
             {Array.from({ length: REFILL_LIMIT }).map((_, i) => (
-              <span
+              <motion.span
                 key={i}
-                className="relative h-[3px] flex-1 overflow-hidden rounded-full bg-border/70"
-              >
-                <motion.span
-                  initial={{ scaleX: 0 }}
-                  animate={{ scaleX: i < used ? 1 : 0 }}
-                  transition={{ duration: 0.5, delay: i * 0.06, ease: [0.22, 1, 0.36, 1] }}
-                  style={{ transformOrigin: 'left' }}
-                  className="absolute inset-0 rounded-full bg-primary/85"
-                />
-              </span>
+                initial={{ opacity: 0, scaleX: 0.6 }}
+                animate={{ opacity: i < REFILL_LIMIT - used ? 1 : 0.2, scaleX: 1 }}
+                transition={{ duration: 0.45, delay: i * 0.06, ease: [0.22, 1, 0.36, 1] }}
+                style={{ transformOrigin: 'left' }}
+                className={`h-[3px] flex-1 rounded-full transition-all duration-300 ease-in-out ${
+                  i < REFILL_LIMIT - used ? 'bg-primary/70' : 'bg-muted-foreground'
+                }`}
+              />
             ))}
           </div>
 
-          <p className="mt-3 text-[11.5px] leading-[1.55] text-muted-foreground/85">
+          <p className="mt-3.5 text-[11.5px] leading-[1.55] text-muted-foreground/85">
             {ru ? (
               <>
                 Доступно {REFILL_LIMIT} рефилла в течение 48 часов после покупки — до{' '}
@@ -404,22 +411,33 @@ export function BoostOrderScreen({ order }: { order: Order }) {
 
           <motion.button
             type="button"
-            onClick={() => canRefill && setAskRefill(true)}
-            aria-disabled={!canRefill}
+            onClick={() => canRefill && !refilling && setAskRefill(true)}
+            aria-disabled={!canRefill || refilling}
             whileTap={canRefill ? { scale: 0.985 } : {}}
             transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-            className={`group relative mt-4 flex h-[52px] w-full items-center justify-center gap-2.5 overflow-hidden rounded-[16px] text-[13.5px] font-semibold tracking-tight transition-colors duration-300 ${
+            className={`group mt-4 flex w-full items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-[13px] font-semibold tracking-tight transition-all duration-300 ease-in-out ${
               canRefill
-                ? 'bg-primary text-primary-foreground shadow-[inset_0_1px_0_color-mix(in_oklab,white_28%,transparent),0_1px_0_color-mix(in_oklab,black_35%,transparent),0_16px_34px_-24px_color-mix(in_oklab,var(--primary)_80%,transparent)]'
+                ? 'bg-primary text-primary-foreground shadow-[inset_0_1px_0_color-mix(in_oklab,white_26%,transparent),0_10px_26px_-20px_color-mix(in_oklab,var(--primary)_80%,transparent)] hover:brightness-[1.04]'
                 : 'border border-border/80 bg-transparent text-muted-foreground/70'
             }`}
           >
             <RotateCw
-              className={`size-[15px] transition-transform duration-500 ${canRefill ? 'group-active:-rotate-180' : ''}`}
-              strokeWidth={2.4}
+              className={`size-4 transition-transform duration-300 ease-in-out ${
+                refilling ? 'animate-spin' : canRefill ? 'group-hover:-translate-y-px' : ''
+              }`}
+              strokeWidth={2.2}
             />
-            <span>{ru ? 'Запросить рефилл' : 'Request refill'}</span>
+            <span>
+              {refilling
+                ? ru
+                  ? 'Отправляем…'
+                  : 'Submitting…'
+                : ru
+                  ? 'Запросить рефилл'
+                  : 'Request refill'}
+            </span>
           </motion.button>
+
 
           {!canRefill ? (
             <p className="mt-2.5 text-center text-[10.5px] text-muted-foreground/60">
@@ -460,46 +478,63 @@ function TimelineRow({
   label,
   value,
   last,
+  progress,
 }: {
   tone: 'done' | 'live' | 'idle'
   label: string
   value: string
   last?: boolean
+  progress?: boolean
 }) {
   return (
-    <li className={`relative ${last ? '' : 'pb-5'}`}>
-      <span className="absolute -left-8 top-[3px] flex size-[15px] items-center justify-center">
+    <li className={`relative ${last ? '' : 'pb-6'}`}>
+      <span className="absolute -left-9 top-[2px] flex size-[14px] items-center justify-center">
         {tone === 'live' ? (
           <motion.span
             aria-hidden
-            animate={{ scale: [1, 2.1], opacity: [0.4, 0] }}
+            animate={{ scale: [1, 2.4], opacity: [0.35, 0] }}
             transition={{ duration: 2.2, repeat: Infinity, ease: 'easeOut' }}
-            className="absolute size-[13px] rounded-full bg-primary/40"
+            className="absolute size-[10px] rounded-full bg-primary/40"
           />
         ) : null}
         <span
-          className={`relative size-[13px] rounded-full ring-4 ring-card ${
+          className={`relative flex size-[10px] items-center justify-center rounded-full ring-[3px] ring-card transition-all duration-300 ease-in-out ${
             tone === 'done'
-              ? 'flex items-center justify-center bg-success/20 text-success'
+              ? 'bg-success/20 text-success'
               : tone === 'live'
                 ? 'bg-primary'
                 : 'border border-border bg-card'
           }`}
         >
-          {tone === 'done' ? <Check className="size-2.5" strokeWidth={3.4} /> : null}
+          {tone === 'done' ? <Check className="size-[7px]" strokeWidth={4} /> : null}
         </span>
       </span>
+
       <p
-        className={`text-[13px] font-semibold leading-none tracking-tight ${
+        className={`text-[13px] font-semibold leading-none tracking-tight transition-colors duration-300 ease-in-out ${
           tone === 'idle' ? 'text-muted-foreground' : ''
         }`}
       >
         {label}
       </p>
       <p className="tnum mt-1.5 text-[11.5px] leading-none text-muted-foreground/70">{value}</p>
+
+      {progress ? (
+        <span
+          aria-hidden
+          className="relative mt-2 block h-[2px] w-[92px] overflow-hidden rounded-full bg-border/60"
+        >
+          <motion.span
+            className="absolute inset-y-0 w-1/3 rounded-full bg-linear-to-r from-transparent via-primary to-transparent"
+            animate={{ x: ['-110%', '330%'] }}
+            transition={{ duration: 1.8, repeat: Infinity, ease: 'linear' }}
+          />
+        </span>
+      ) : null}
     </li>
   )
 }
+
 
 
 /* ── Followers target: X profile card with growth arrow ───────────────── */
