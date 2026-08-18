@@ -526,9 +526,12 @@ function TimelineRow({
     <li className="relative flex items-start gap-4">
       <span className="relative z-10 flex size-8 shrink-0 items-center justify-center">
         {tone === 'done' ? (
-          <span className="flex size-8 items-center justify-center rounded-full border border-success/25 bg-success/10 shadow-[0_0_18px_-6px_color-mix(in_oklab,var(--success)_70%,transparent)]">
-            <Check className="size-4 text-success" strokeWidth={3} />
+          <span className="flex size-8 items-center justify-center rounded-full border border-success/25 bg-card shadow-[0_0_18px_-6px_color-mix(in_oklab,var(--success)_70%,transparent)]">
+            <span className="flex size-full items-center justify-center rounded-full bg-success/10">
+              <Check className="size-4 shrink-0 text-success" strokeWidth={2.6} />
+            </span>
           </span>
+
         ) : tone === 'live' ? (
           <>
             <motion.span
