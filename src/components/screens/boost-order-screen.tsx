@@ -823,65 +823,73 @@ function RefillSheet({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
+      transition={{ duration: 0.22 }}
       onClick={onClose}
-      className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-end justify-center bg-black/65 backdrop-blur-[6px]"
     >
       <motion.div
-        initial={{ y: '100%' }}
-        animate={{ y: 0 }}
-        exit={{ y: '100%' }}
-        transition={{ type: 'spring', stiffness: 320, damping: 32 }}
+        initial={{ y: 40, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        exit={{ y: 40, opacity: 0 }}
+        transition={{ type: 'spring', stiffness: 420, damping: 38 }}
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-[520px] rounded-t-[28px] border-t border-border bg-card px-5 pb-8 pt-3"
+        className="w-full max-w-[520px] rounded-t-[28px] border-t border-border bg-card px-5 pb-[max(2rem,env(safe-area-inset-bottom))] pt-3"
       >
-        <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-border" />
-        <div className="flex items-start gap-3">
-          <div className="flex size-11 shrink-0 items-center justify-center rounded-2xl border border-primary/30 bg-primary/10">
-            <RotateCw className="size-5 text-primary" strokeWidth={2.5} />
-          </div>
+        <div className="mx-auto mb-5 h-1 w-9 rounded-full bg-border" />
+
+        <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <h3 className="text-[15.5px] font-black leading-tight">
-              {ru ? 'Запустить рефилл?' : 'Start a refill?'}
+            <h3 className="text-[17px] font-semibold leading-tight tracking-tight">
+              {ru ? 'Запросить рефилл' : 'Request a refill'}
             </h3>
-            <p className="mt-1 text-[12px] leading-relaxed text-muted-foreground">
+            <p className="mt-1.5 text-[12.5px] leading-[1.55] text-muted-foreground">
               {ru
-                ? 'Мы дозакажем недостающие единицы по этому заказу и вернём его в работу.'
-                : 'We will top up the missing units and put the order back in progress.'}
+                ? 'Дозакажем недостающие единицы и вернём заказ в работу.'
+                : 'We top up the missing units and put the order back in progress.'}
             </p>
           </div>
           <button
             onClick={onClose}
             aria-label="Close"
-            className="ml-auto flex size-8 shrink-0 items-center justify-center rounded-full border border-border text-muted-foreground active:scale-95"
+            className="-mr-1 flex size-8 shrink-0 items-center justify-center rounded-full text-muted-foreground/70 transition-colors active:text-foreground"
           >
-            <X className="size-4" />
+            <X className="size-[18px]" />
           </button>
         </div>
 
-        <div className="mt-4 flex gap-2.5 rounded-2xl border border-primary/20 bg-primary/[0.06] p-3">
-          <TriangleAlert className="mt-0.5 size-4 shrink-0 text-primary" />
-          <p className="text-[11.5px] leading-relaxed text-foreground/85">
-            {ru
-              ? `Рефилл доступен только в течение 48 часов после покупки и не более 4 раз суммарно. Использовано: ${used} из ${REFILL_LIMIT}.`
-              : `Refills are available for 48 hours after purchase, up to 4 times in total. Used: ${used} of ${REFILL_LIMIT}.`}
-          </p>
-        </div>
+        <dl className="mt-5 space-y-2.5 border-t border-border/70 pt-4 text-[12.5px]">
+          <div className="flex items-center justify-between gap-3">
+            <dt className="text-muted-foreground">{ru ? 'Использовано' : 'Used'}</dt>
+            <dd className="tnum font-medium">
+              {used} <span className="text-muted-foreground/50">/ {REFILL_LIMIT}</span>
+            </dd>
+          </div>
+          <div className="flex items-center justify-between gap-3">
+            <dt className="text-muted-foreground">{ru ? 'Окно гарантии' : 'Guarantee window'}</dt>
+            <dd className="font-medium">{ru ? '48 часов' : '48 hours'}</dd>
+          </div>
+          <div className="flex items-center justify-between gap-3">
+            <dt className="text-muted-foreground">{ru ? 'Стоимость' : 'Price'}</dt>
+            <dd className="font-medium text-success">{ru ? 'Бесплатно' : 'Free'}</dd>
+          </div>
+        </dl>
 
-        <div className="mt-4 flex gap-2">
+        <div className="mt-5 grid grid-cols-[1fr_1.4fr] gap-2.5">
           <button
             onClick={onClose}
-            className="h-12 flex-1 rounded-2xl border border-border bg-secondary/50 text-[13px] font-bold text-foreground active:scale-[0.98]"
+            className="h-[52px] rounded-[16px] border border-border/80 text-[13.5px] font-medium text-muted-foreground transition-colors active:bg-secondary/40"
           >
             {ru ? 'Отмена' : 'Cancel'}
           </button>
           <button
             onClick={onConfirm}
-            className="h-12 flex-1 rounded-2xl bg-gold-gradient text-[13px] font-black uppercase tracking-[0.1em] text-[#111] shadow-[0_10px_26px_-14px_color-mix(in_oklab,var(--primary)_90%,transparent)] active:scale-[0.98]"
+            className="h-[52px] rounded-[16px] bg-primary text-[13.5px] font-semibold tracking-tight text-primary-foreground shadow-[inset_0_1px_0_color-mix(in_oklab,white_28%,transparent),0_16px_34px_-24px_color-mix(in_oklab,var(--primary)_80%,transparent)] transition-transform active:scale-[0.985]"
           >
-            {ru ? 'Подтвердить' : 'Confirm'}
+            {ru ? 'Подтвердить рефилл' : 'Confirm refill'}
           </button>
         </div>
       </motion.div>
+
     </motion.div>
   )
 }
