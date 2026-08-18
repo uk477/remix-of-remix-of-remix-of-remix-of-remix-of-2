@@ -311,10 +311,10 @@ export function BoostOrderScreen({ order }: { order: Order }) {
             ) : null}
           </div>
 
-          <ol className="relative mt-5 pl-8">
+          <ol className="relative mt-5 pl-9">
             <span
               aria-hidden
-              className="absolute left-[7px] top-3 bottom-3 w-px bg-linear-to-b from-border via-border to-transparent"
+              className="pointer-events-none absolute left-[6.5px] top-2 bottom-2 w-px bg-linear-to-b from-border via-border to-transparent"
             />
             <TimelineRow
               tone="done"
@@ -333,6 +333,7 @@ export function BoostOrderScreen({ order }: { order: Order }) {
                     ? `Идёт накрутка · ${nf(volume)}`
                     : `In progress · ${nf(volume)}`
               }
+              progress={!done}
             />
             <TimelineRow
               tone={done ? 'done' : 'idle'}
@@ -351,6 +352,7 @@ export function BoostOrderScreen({ order }: { order: Order }) {
               }
             />
           </ol>
+
         </div>
 
         {/* Гарантия рефилла — отдельная «квитанция» */}
