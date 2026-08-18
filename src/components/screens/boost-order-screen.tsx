@@ -172,16 +172,21 @@ export function BoostOrderScreen({ order }: { order: Order }) {
 
   function doRefill() {
     const next = [...refills, Date.now()]
-    setRefills(next)
-    try {
-      localStorage.setItem(refillKey(order.id), JSON.stringify(next))
-    } catch {
-      /* ignore */
-    }
-    refillOrder(order.id)
     setAskRefill(false)
-    show(ru ? 'Рефилл отправлен в обработку' : 'Refill submitted')
+    setRefilling(true)
+    window.setTimeout(() => {
+      setRefills(next)
+      try {
+        localStorage.setItem(refillKey(order.id), JSON.stringify(next))
+      } catch {
+        /* ignore */
+      }
+      refillOrder(order.id)
+      setRefilling(false)
+      show(ru ? 'Рефилл отправлен в обработку' : 'Refill submitted')
+    }, 900)
   }
+
 
   async function copyId() {
     await copyText(orderId)
