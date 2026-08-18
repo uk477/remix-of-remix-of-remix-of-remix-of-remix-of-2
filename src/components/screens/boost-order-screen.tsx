@@ -305,7 +305,7 @@ export function BoostOrderScreen({ order }: { order: Order }) {
         transition={{ delay: 0.12, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
         className="mt-3 border-y border-border bg-card sm:mx-4 sm:rounded-[26px] sm:border"
       >
-        <div className="px-5 pb-5 pt-5">
+        <div className="px-6 pb-7 pt-6">
           <div className="flex items-center justify-between">
             <h2 className="text-[10.5px] font-semibold uppercase tracking-[0.26em] text-muted-foreground/70">
               {ru ? 'Статус заказа' : 'Order status'}
