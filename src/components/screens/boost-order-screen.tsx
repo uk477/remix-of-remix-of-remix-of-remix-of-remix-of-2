@@ -161,7 +161,9 @@ export function BoostOrderScreen({ order }: { order: Order }) {
   /* ── Refill ──────────────────────────────────────────────────────────── */
   const [refills, setRefills] = useState<number[]>([])
   const [askRefill, setAskRefill] = useState(false)
+  const [refilling, setRefilling] = useState(false)
   useEffect(() => setRefills(readRefills(order.id)), [order.id])
+
 
   const windowEnd = order.date + REFILL_WINDOW_MS
   const inWindow = Date.now() < windowEnd
