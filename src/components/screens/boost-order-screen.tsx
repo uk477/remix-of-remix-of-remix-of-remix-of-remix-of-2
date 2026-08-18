@@ -488,61 +488,71 @@ function TimelineRow({
   tone,
   label,
   value,
-  last,
-  progress,
+  chip,
 }: {
   tone: 'done' | 'live' | 'idle'
   label: string
-  value: string
+  value?: string
   last?: boolean
-  progress?: boolean
+  chip?: { label: string; value: string }
 }) {
   return (
-    <li className={`relative ${last ? '' : 'pb-6'}`}>
-      <span className="absolute -left-9 top-[2px] flex size-[14px] items-center justify-center">
-        {tone === 'live' ? (
-          <motion.span
-            aria-hidden
-            animate={{ scale: [1, 2.4], opacity: [0.35, 0] }}
-            transition={{ duration: 2.2, repeat: Infinity, ease: 'easeOut' }}
-            className="absolute size-[10px] rounded-full bg-primary/40"
-          />
-        ) : null}
-        <span
-          className={`relative flex size-[10px] items-center justify-center rounded-full ring-[3px] ring-card transition-all duration-300 ease-in-out ${
-            tone === 'done'
-              ? 'bg-success/20 text-success'
-              : tone === 'live'
-                ? 'bg-primary'
-                : 'border border-border bg-card'
-          }`}
-        >
-          {tone === 'done' ? <Check className="size-[7px]" strokeWidth={4} /> : null}
-        </span>
+    <li className="relative flex items-start gap-4">
+      <span className="relative z-10 flex size-8 shrink-0 items-center justify-center">
+        {tone === 'done' ? (
+          <span className="flex size-8 items-center justify-center rounded-full border border-success/25 bg-success/10 shadow-[0_0_18px_-6px_color-mix(in_oklab,var(--success)_70%,transparent)]">
+            <Check className="size-4 text-success" strokeWidth={3} />
+          </span>
+        ) : tone === 'live' ? (
+          <>
+            <motion.span
+              aria-hidden
+              animate={{ scale: [0.85, 1.15, 0.85], opacity: [0.35, 0.12, 0.35] }}
+              transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }}
+              className="absolute size-8 rounded-full bg-primary/25"
+            />
+            <span className="relative size-4 rounded-full bg-primary ring-4 ring-card shadow-[0_0_14px_-2px_color-mix(in_oklab,var(--primary)_75%,transparent)]" />
+          </>
+        ) : (
+          <span className="flex size-8 items-center justify-center rounded-full border border-border/70 bg-card">
+            <span className="size-2 rounded-full bg-foreground/15" />
+          </span>
+        )}
       </span>
 
-      <p
-        className={`text-[13px] font-semibold leading-none tracking-tight transition-colors duration-300 ease-in-out ${
-          tone === 'idle' ? 'text-muted-foreground' : ''
-        }`}
-      >
-        {label}
-      </p>
-      <p className="tnum mt-1.5 text-[11.5px] leading-none text-muted-foreground/70">{value}</p>
+      <div className={`min-w-0 flex-1 pt-1 ${tone === 'idle' ? 'opacity-45' : ''}`}>
+        <div className="flex items-center gap-2">
+          <p
+            className={`text-[15px] font-semibold leading-tight tracking-tight transition-colors duration-300 ease-in-out ${
+              tone === 'live' ? 'text-primary' : 'text-foreground/90'
+            }`}
+          >
+            {label}
+          </p>
+          {tone === 'live' ? (
+            <motion.span
+              aria-hidden
+              animate={{ scale: [1, 2.2], opacity: [0.7, 0] }}
+              transition={{ duration: 1.8, repeat: Infinity, ease: 'easeOut' }}
+              className="size-1.5 rounded-full bg-primary"
+            />
+          ) : null}
+        </div>
 
-      {progress ? (
-        <span
-          aria-hidden
-          className="relative mt-2 block h-[2px] w-[92px] overflow-hidden rounded-full bg-border/60"
-        >
-          <motion.span
-            className="absolute inset-y-0 w-1/3 rounded-full bg-linear-to-r from-transparent via-primary to-transparent"
-            animate={{ x: ['-110%', '330%'] }}
-            transition={{ duration: 1.8, repeat: Infinity, ease: 'linear' }}
-          />
-        </span>
-      ) : null}
+        {value ? (
+          <p className="tnum mt-1 text-[13px] leading-tight text-muted-foreground/70">{value}</p>
+        ) : null}
+
+        {chip ? (
+          <div className="mt-2 inline-flex w-fit items-center gap-2 overflow-hidden rounded-lg border border-foreground/[0.07] bg-foreground/[0.03] px-3 py-1.5">
+            <span className="text-[12px] font-medium text-foreground/70">{chip.label}</span>
+            <span className="h-3 w-px bg-foreground/10" />
+            <span className="tnum text-[12px] font-bold text-primary">{chip.value}</span>
+          </div>
+        ) : null}
+      </div>
     </li>
+
   )
 }
 
