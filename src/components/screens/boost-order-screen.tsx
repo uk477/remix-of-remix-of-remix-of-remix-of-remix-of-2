@@ -356,35 +356,33 @@ export function BoostOrderScreen({ order }: { order: Order }) {
         </div>
 
         {/* Гарантия рефилла — отдельная «квитанция» */}
-        <div className="border-t border-dashed border-border/70 px-5 pb-5 pt-4">
+        <div className="border-t border-dashed border-border/70 px-5 pb-6 pt-5">
           <div className="flex items-baseline justify-between gap-3">
             <span className="inline-flex items-center gap-2 text-[12px] font-semibold tracking-tight">
               <ShieldCheck className="size-4 text-success/90" strokeWidth={2.2} />
               {ru ? 'Гарантия рефилла' : 'Refill guarantee'}
             </span>
             <span className="tnum text-[11px] font-medium text-muted-foreground/80">
-              {used} <span className="opacity-40">/</span> {REFILL_LIMIT}
+              {REFILL_LIMIT - used} <span className="opacity-40">/</span> {REFILL_LIMIT}
             </span>
           </div>
 
-          <div className="mt-2.5 flex gap-1.5">
+          <div className="mt-3 flex gap-2 px-0.5">
             {Array.from({ length: REFILL_LIMIT }).map((_, i) => (
-              <span
+              <motion.span
                 key={i}
-                className="relative h-[3px] flex-1 overflow-hidden rounded-full bg-border/70"
-              >
-                <motion.span
-                  initial={{ scaleX: 0 }}
-                  animate={{ scaleX: i < used ? 1 : 0 }}
-                  transition={{ duration: 0.5, delay: i * 0.06, ease: [0.22, 1, 0.36, 1] }}
-                  style={{ transformOrigin: 'left' }}
-                  className="absolute inset-0 rounded-full bg-primary/85"
-                />
-              </span>
+                initial={{ opacity: 0, scaleX: 0.6 }}
+                animate={{ opacity: i < REFILL_LIMIT - used ? 1 : 0.2, scaleX: 1 }}
+                transition={{ duration: 0.45, delay: i * 0.06, ease: [0.22, 1, 0.36, 1] }}
+                style={{ transformOrigin: 'left' }}
+                className={`h-[3px] flex-1 rounded-full transition-all duration-300 ease-in-out ${
+                  i < REFILL_LIMIT - used ? 'bg-primary/70' : 'bg-muted-foreground'
+                }`}
+              />
             ))}
           </div>
 
-          <p className="mt-3 text-[11.5px] leading-[1.55] text-muted-foreground/85">
+          <p className="mt-3.5 text-[11.5px] leading-[1.55] text-muted-foreground/85">
             {ru ? (
               <>
                 Доступно {REFILL_LIMIT} рефилла в течение 48 часов после покупки — до{' '}
@@ -406,22 +404,33 @@ export function BoostOrderScreen({ order }: { order: Order }) {
 
           <motion.button
             type="button"
-            onClick={() => canRefill && setAskRefill(true)}
-            aria-disabled={!canRefill}
+            onClick={() => canRefill && !refilling && setAskRefill(true)}
+            aria-disabled={!canRefill || refilling}
             whileTap={canRefill ? { scale: 0.985 } : {}}
             transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-            className={`group relative mt-4 flex h-[52px] w-full items-center justify-center gap-2.5 overflow-hidden rounded-[16px] text-[13.5px] font-semibold tracking-tight transition-colors duration-300 ${
+            className={`group mt-4 flex w-full items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-[13px] font-semibold tracking-tight transition-all duration-300 ease-in-out ${
               canRefill
-                ? 'bg-primary text-primary-foreground shadow-[inset_0_1px_0_color-mix(in_oklab,white_28%,transparent),0_1px_0_color-mix(in_oklab,black_35%,transparent),0_16px_34px_-24px_color-mix(in_oklab,var(--primary)_80%,transparent)]'
+                ? 'bg-primary text-primary-foreground shadow-[inset_0_1px_0_color-mix(in_oklab,white_26%,transparent),0_10px_26px_-20px_color-mix(in_oklab,var(--primary)_80%,transparent)] hover:brightness-[1.04]'
                 : 'border border-border/80 bg-transparent text-muted-foreground/70'
             }`}
           >
             <RotateCw
-              className={`size-[15px] transition-transform duration-500 ${canRefill ? 'group-active:-rotate-180' : ''}`}
-              strokeWidth={2.4}
+              className={`size-4 transition-transform duration-300 ease-in-out ${
+                refilling ? 'animate-spin' : canRefill ? 'group-hover:-translate-y-px' : ''
+              }`}
+              strokeWidth={2.2}
             />
-            <span>{ru ? 'Запросить рефилл' : 'Request refill'}</span>
+            <span>
+              {refilling
+                ? ru
+                  ? 'Отправляем…'
+                  : 'Submitting…'
+                : ru
+                  ? 'Запросить рефилл'
+                  : 'Request refill'}
+            </span>
           </motion.button>
+
 
           {!canRefill ? (
             <p className="mt-2.5 text-center text-[10.5px] text-muted-foreground/60">
