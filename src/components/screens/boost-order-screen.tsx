@@ -462,46 +462,63 @@ function TimelineRow({
   label,
   value,
   last,
+  progress,
 }: {
   tone: 'done' | 'live' | 'idle'
   label: string
   value: string
   last?: boolean
+  progress?: boolean
 }) {
   return (
-    <li className={`relative ${last ? '' : 'pb-5'}`}>
-      <span className="absolute -left-8 top-[3px] flex size-[15px] items-center justify-center">
+    <li className={`relative ${last ? '' : 'pb-6'}`}>
+      <span className="absolute -left-9 top-[2px] flex size-[14px] items-center justify-center">
         {tone === 'live' ? (
           <motion.span
             aria-hidden
-            animate={{ scale: [1, 2.1], opacity: [0.4, 0] }}
+            animate={{ scale: [1, 2.4], opacity: [0.35, 0] }}
             transition={{ duration: 2.2, repeat: Infinity, ease: 'easeOut' }}
-            className="absolute size-[13px] rounded-full bg-primary/40"
+            className="absolute size-[10px] rounded-full bg-primary/40"
           />
         ) : null}
         <span
-          className={`relative size-[13px] rounded-full ring-4 ring-card ${
+          className={`relative flex size-[10px] items-center justify-center rounded-full ring-[3px] ring-card transition-all duration-300 ease-in-out ${
             tone === 'done'
-              ? 'flex items-center justify-center bg-success/20 text-success'
+              ? 'bg-success/20 text-success'
               : tone === 'live'
                 ? 'bg-primary'
                 : 'border border-border bg-card'
           }`}
         >
-          {tone === 'done' ? <Check className="size-2.5" strokeWidth={3.4} /> : null}
+          {tone === 'done' ? <Check className="size-[7px]" strokeWidth={4} /> : null}
         </span>
       </span>
+
       <p
-        className={`text-[13px] font-semibold leading-none tracking-tight ${
+        className={`text-[13px] font-semibold leading-none tracking-tight transition-colors duration-300 ease-in-out ${
           tone === 'idle' ? 'text-muted-foreground' : ''
         }`}
       >
         {label}
       </p>
       <p className="tnum mt-1.5 text-[11.5px] leading-none text-muted-foreground/70">{value}</p>
+
+      {progress ? (
+        <span
+          aria-hidden
+          className="relative mt-2 block h-[2px] w-[92px] overflow-hidden rounded-full bg-border/60"
+        >
+          <motion.span
+            className="absolute inset-y-0 w-1/3 rounded-full bg-linear-to-r from-transparent via-primary to-transparent"
+            animate={{ x: ['-110%', '330%'] }}
+            transition={{ duration: 1.8, repeat: Infinity, ease: 'linear' }}
+          />
+        </span>
+      ) : null}
     </li>
   )
 }
+
 
 
 /* ── Followers target: X profile card with growth arrow ───────────────── */
