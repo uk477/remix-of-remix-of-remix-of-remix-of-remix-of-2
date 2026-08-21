@@ -229,6 +229,15 @@ export function BoostOrderScreen({ order }: { order: Order }) {
         : 'In progress'
 
   const serviceName = service?.name[lang] ?? order.title
+  const UNITS: Record<string, [string, string]> = {
+    followers: ['фолловеров', 'followers'],
+    likes: ['лайков', 'likes'],
+    retweets: ['репостов', 'reposts'],
+    views: ['просмотров', 'views'],
+    bookmarks: ['закладок', 'bookmarks'],
+    comments: ['комментариев', 'comments'],
+  }
+  const unitWord = (UNITS[category] ?? ['ед.', 'units'])[ru ? 0 : 1]
   const caption = done
     ? ru
       ? 'Заказ полностью выполнен и закрыт.'
@@ -238,8 +247,8 @@ export function BoostOrderScreen({ order }: { order: Order }) {
         ? 'Заказ принят и скоро будет запущен.'
         : 'The order is accepted and starts shortly.'
       : ru
-        ? `Заказ запущен и сейчас набирает ${serviceName.toLowerCase()}.`
-        : `The order is running and delivering ${serviceName.toLowerCase()}.`
+        ? 'Заказ запущен, показатели растут в реальном времени.'
+        : 'The order is running and the numbers are growing live.'
 
   return (
     <div className="min-h-full">
@@ -258,7 +267,7 @@ export function BoostOrderScreen({ order }: { order: Order }) {
             region ? <RegionMark region={region} className="size-7" /> : <Mark className="size-7" />
           }
           service={serviceName}
-          amountLabel={`${nf(volume)} · ${serviceName}`}
+          amountLabel={`${nf(volume)} ${unitWord} · ${fullDate(order.date, lang)}`}
           orderId={orderId}
           orderLabel={ru ? 'Номер заказа' : 'Order number'}
           statusLabel={statusLabel}
