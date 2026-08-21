@@ -268,7 +268,7 @@ export function BoostOrderScreen({ order }: { order: Order }) {
       >
         <OrderSummaryCard
           mark={
-            region ? <RegionMark region={region} className="size-7" /> : <Mark className="size-7" />
+            region ? <RegionMark region={region} className="size-9" /> : <Mark className="size-9" />
           }
           service={serviceName}
           amountLabel={`${nf(volume)} ${unitWord}`}
@@ -276,10 +276,10 @@ export function BoostOrderScreen({ order }: { order: Order }) {
           orderLabel={ru ? 'Номер заказа' : 'Order number'}
           statusLabel={statusLabel}
           statusTone={statusTone}
-          
           caption={caption}
           onCopied={() => show(ru ? 'Номер скопирован' : 'Number copied')}
         />
+
 
         {isFollowers ? (
           <ProfilePreview
