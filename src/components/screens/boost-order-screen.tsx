@@ -18,6 +18,8 @@ import { OrderSummaryCard } from '../order/order-summary-card'
 import { SocialPostPreview } from '../order/social-post-preview'
 import { OrderProgressCard } from '../order/order-progress-card'
 import { dbStatusToOrderStatus, orderStatusView } from '@/lib/order-status'
+import { useServerFn } from '@tanstack/react-start'
+import { getOrderRefundState } from '@/lib/admin-orders.functions'
 import {
   RecoveryStatusCard,
   RefundStatusCard,
@@ -143,6 +145,24 @@ export function BoostOrderScreen({ order }: { order: Order }) {
     return
   }, [adminStatus])
 
+  useEffect(() => {
+    if (adminStatus === 'failed') setErrorNotice(true)
+  }, [adminStatus])
+
+  /** Закрытие окна: подтягиваем фактический статус возврата с бэкенда. */
+  const closeErrorNotice = async () => {
+    setErrorNotice(false)
+    const dbId = refill.state?.dbOrderId
+    if (!dbId) return
+    try {
+      const st = await refundStateFn({ data: { orderId: dbId } })
+      if (st.refunded) applyAdminStatus('refunded')
+      await refill.reload()
+    } catch {
+      /* оставляем текущий статус */
+    }
+  }
+
   const done = visibleStatus === 'completed'
   const waiting = visibleStatus === 'waiting'
   const cancelled = visibleStatus === 'cancelled'
@@ -195,6 +215,9 @@ export function BoostOrderScreen({ order }: { order: Order }) {
 
   /* ── Refill: состояние живёт на сервере, строго для ЭТОГО заказа ─────── */
   const [askRefill, setAskRefill] = useState(false)
+  /** Окно «Не удалось выполнить заказ» — возврат уже запущен на бэкенде. */
+  const [errorNotice, setErrorNotice] = useState(false)
+  const refundStateFn = useServerFn(getOrderRefundState)
   const refill = useRefill(order.id)
   const refillReload = refill.reload
   // Статус заказа изменился (в т.ч. через админ-панель) — гарантия пересчитывается с сервера.
@@ -593,6 +616,28 @@ export function BoostOrderScreen({ order }: { order: Order }) {
         />
         )}
 
+
+        {errorNotice ? (
+          <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 p-4 backdrop-blur-sm sm:items-center">
+            <div className="w-full max-w-[420px] rounded-[24px] border border-border bg-card p-5 shadow-2xl">
+              <h3 className="font-display text-[19px] font-bold leading-tight">
+                {ru ? 'Не удалось выполнить заказ' : 'Order could not be completed'}
+              </h3>
+              <p className="mt-2 text-[13.5px] leading-[1.55] text-muted-foreground">
+                {ru
+                  ? 'Во время выполнения произошла ошибка. Возврат средств уже запущен автоматически.'
+                  : 'An error occurred during processing. A refund has already been started automatically.'}
+              </p>
+              <button
+                type="button"
+                onClick={() => void closeErrorNotice()}
+                className="pressable mt-4 w-full rounded-[16px] bg-info px-4 py-3 text-[14px] font-bold text-background"
+              >
+                {ru ? 'Понятно' : 'Got it'}
+              </button>
+            </div>
+          </div>
+        ) : null}
 
         {cancelled ? (
           <Reveal delay={0.15} className="flex flex-col gap-3">
