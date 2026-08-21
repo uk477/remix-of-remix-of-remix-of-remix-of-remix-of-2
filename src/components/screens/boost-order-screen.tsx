@@ -60,10 +60,6 @@ function nf(n: number) {
   return n.toLocaleString('en-US')
 }
 
-/** Rough delivery estimate — the backend has no per-unit feed yet. */
-function estimateMs(volume: number) {
-  return 12 * 60 * 1000 + (Math.max(volume, 0) / 1000) * 8 * 60 * 1000
-}
 
 export function BoostOrderScreen({ order }: { order: Order }) {
   const { lang, t } = useI18n()
@@ -133,11 +129,8 @@ export function BoostOrderScreen({ order }: { order: Order }) {
     return () => window.clearInterval(id)
   }, [done, waiting])
 
-  const est = estimateMs(volume)
-  const elapsed = Math.max(0, now - order.date)
-  const percent = done ? 1 : waiting ? 0 : Math.min(0.97, elapsed / est)
-  const delivered = Math.round(volume * percent)
-  const minutesLeft = done || waiting ? 0 : Math.max(1, Math.ceil((est - elapsed) / 60000))
+  /* No per-unit delivery feed exists, so we never derive a fake count here. */
+
 
   /* ── Refill ──────────────────────────────────────────────────────────── */
   const [refills, setRefills] = useState<number[]>([])
@@ -268,7 +261,7 @@ export function BoostOrderScreen({ order }: { order: Order }) {
       >
         <OrderSummaryCard
           mark={
-            region ? <RegionMark region={region} className="size-7" /> : <Mark className="size-7" />
+            region ? <RegionMark region={region} className="size-9" /> : <Mark className="size-9" />
           }
           service={serviceName}
           amountLabel={`${nf(volume)} ${unitWord}`}
@@ -276,10 +269,10 @@ export function BoostOrderScreen({ order }: { order: Order }) {
           orderLabel={ru ? 'Номер заказа' : 'Order number'}
           statusLabel={statusLabel}
           statusTone={statusTone}
-          
           caption={caption}
           onCopied={() => show(ru ? 'Номер скопирован' : 'Number copied')}
         />
+
 
         {isFollowers ? (
           <ProfilePreview
@@ -310,15 +303,21 @@ export function BoostOrderScreen({ order }: { order: Order }) {
           title={ru ? 'Выполнение заказа' : 'Delivery'}
           badgeLabel={statusLabel}
           badgeTone={statusTone}
-          delivered={delivered}
-          total={volume}
-          percent={percent}
-          percentLabel={
-            ru
-              ? `${Math.round(percent * 100)}% выполнено`
-              : `${Math.round(percent * 100)}% delivered`
+          complete={done}
+          headline={
+            done
+              ? ru
+                ? 'Заказ выполнен'
+                : 'Order completed'
+              : waiting
+                ? ru
+                  ? 'Заказ принят'
+                  : 'Order accepted'
+                : ru
+                  ? 'Заказ выполняется'
+                  : 'Order in progress'
           }
-          etaLabel={
+          note={
             done
               ? undefined
               : waiting
@@ -326,8 +325,8 @@ export function BoostOrderScreen({ order }: { order: Order }) {
                   ? 'Запуск в течение нескольких минут'
                   : 'Starting within a few minutes'
                 : ru
-                  ? `Осталось примерно ${minutesLeft} мин`
-                  : `About ${minutesLeft} min remaining`
+                  ? 'Показатели обновятся после завершения'
+                  : 'The numbers update once the order completes'
           }
           steps={[
             {
@@ -345,9 +344,12 @@ export function BoostOrderScreen({ order }: { order: Order }) {
                   ? ru
                     ? 'Скоро'
                     : 'Soon'
-                  : `${Math.round(percent * 100)}%`,
+                  : ru
+                    ? 'Идёт'
+                    : 'Running',
               state: done ? 'done' : waiting ? 'idle' : 'live',
             },
+
             {
               label: ru ? 'Заказ завершён' : 'Completed',
               meta: done

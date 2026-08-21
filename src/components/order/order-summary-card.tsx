@@ -31,31 +31,33 @@ export function OrderSummaryCard({
 }) {
   return (
     <Reveal className="px-1 pt-1">
-      <div className="flex items-start gap-3.5">
-        <span
-          className="relative flex size-12 shrink-0 items-center justify-center rounded-[15px] text-foreground"
-          style={{
-            background:
-              'linear-gradient(150deg, color-mix(in oklab, var(--foreground) 11%, transparent), color-mix(in oklab, var(--foreground) 3%, transparent))',
-            boxShadow:
-              'inset 0 1px 0 color-mix(in oklab, white 14%, transparent), inset 0 0 0 1px color-mix(in oklab, white 6%, transparent)',
-          }}
-        >
+      <div className="flex items-center gap-3.5">
+        <span className="relative flex size-12 shrink-0 items-center justify-center text-foreground">
+          <span
+            aria-hidden
+            className="pointer-events-none absolute inset-0 rounded-full"
+            style={{
+              background:
+                'radial-gradient(circle, color-mix(in oklab, var(--primary) 26%, transparent) 0%, transparent 68%)',
+              filter: 'blur(6px)',
+            }}
+          />
           {mark}
         </span>
 
-        <div className="min-w-0 flex-1 pt-0.5">
-          <div className="flex items-start gap-3">
+        <div className="min-w-0 flex-1">
+          <div className="flex items-baseline gap-3">
             <h2 className="min-w-0 flex-1 font-display text-[20px] font-bold leading-[1.2] tracking-[-0.02em] text-balance">
               {service}
             </h2>
-            <span className="shrink-0 pt-1">
+            <span className="shrink-0">
               <StatusText tone={statusTone} label={statusLabel} pulse={statusTone === 'live'} />
             </span>
           </div>
-          <p className="mt-1.5 text-[14px] leading-tight text-muted-foreground">{amountLabel}</p>
+          <p className="mt-1 text-[14px] leading-tight text-muted-foreground">{amountLabel}</p>
         </div>
       </div>
+
 
       <p className="mt-3.5 max-w-[42ch] text-[13.5px] leading-[1.55] text-muted-foreground">
         {caption}
