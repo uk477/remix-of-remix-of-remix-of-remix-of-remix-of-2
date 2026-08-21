@@ -1,21 +1,32 @@
 'use client'
 
-import { BarChart3, Bookmark, ExternalLink, Heart, MessageCircle, Repeat2 } from 'lucide-react'
 import { motion } from 'framer-motion'
-import { AurxMark } from '../aurx-mark'
+import { Eyebrow, Reveal, Skeleton } from './primitives'
+import {
+  GlyphArrowUpRight,
+  XBookmark,
+  XLike,
+  XMark,
+  XReply,
+  XRepost,
+  XViews,
+} from './icons'
 import { VerifiedBadge } from '../icons/verified-badge'
-import { OrderCard, Skeleton } from './primitives'
 import { compactNumber } from '@/lib/format'
 import { decodeTweetText, verifiedTone, type XTweet } from '@/lib/x-tweet'
 
 const METRIC_TINT: Record<string, string> = {
   reply: '#1d9bf0',
-  reposts: '#00ba7c',
+  retweets: '#00ba7c',
   likes: '#f91880',
   views: '#1d9bf0',
   bookmarks: '#1d9bf0',
 }
 
+/**
+ * The target post, framed as a quoted document: hairline panel, no shadow,
+ * native X iconography. Deliberately quieter than the progress deck.
+ */
 export function SocialPostPreview({
   tweet,
   missing,
@@ -54,28 +65,27 @@ export function SocialPostPreview({
     : ''
 
   const body = loading ? (
-    <div className="flex gap-3 p-4">
+    <div className="flex gap-3">
       <Skeleton className="size-10 shrink-0 rounded-full" />
       <div className="min-w-0 flex-1 space-y-2 pt-1">
         <Skeleton className="h-3 w-1/3" />
         <Skeleton className="h-3 w-full" />
         <Skeleton className="h-3 w-4/5" />
-        <Skeleton className="h-3 w-24" />
       </div>
     </div>
   ) : p ? (
-    <div className="p-4">
+    <>
       <div className="flex items-center gap-2.5">
-        <span className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white/[0.06]">
+        <span className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-foreground/[0.06]">
           {p.author_avatar_url ? (
             <img src={p.author_avatar_url} alt="" className="size-full object-cover" />
           ) : (
-            <AurxMark className="size-[70%] opacity-90" />
+            <XMark className="size-[42%] text-foreground/70" />
           )}
         </span>
         <span className="min-w-0 flex-1">
           <span className="flex min-w-0 items-center gap-1">
-            <span className="truncate text-[15px] font-semibold leading-tight">
+            <span className="truncate text-[14.5px] font-semibold leading-tight">
               {p.author_name || handle || '—'}
             </span>
             {tone ? <VerifiedBadge className={`size-[15px] shrink-0 ${tone}`} /> : null}
@@ -85,90 +95,104 @@ export function SocialPostPreview({
             {postedAt ? ` · ${postedAt}` : ''}
           </span>
         </span>
-        <ExternalLink className="size-4 shrink-0 text-muted-foreground" strokeWidth={2} />
+        <XMark className="size-[15px] shrink-0 text-foreground/45" />
       </div>
 
       {text ? (
-        <p className="mt-3 whitespace-pre-wrap break-words text-[15px] leading-[1.45] text-foreground">
+        <p className="mt-3 whitespace-pre-wrap break-words text-[14.5px] leading-[1.45] text-foreground/92">
           {text}
         </p>
       ) : null}
 
-      <div className="mt-3.5 flex items-center gap-4 border-t border-white/[0.06] pt-3 text-muted-foreground">
+      <div
+        className="mt-3.5 flex items-center gap-4 pt-3 text-muted-foreground/85"
+        style={{ borderTop: '1px solid color-mix(in oklab, var(--foreground) 7%, transparent)' }}
+      >
         {(
           [
-            { key: 'reply', icon: MessageCircle, value: p.reply_count ?? 0 },
-            { key: 'reposts', icon: Repeat2, value: p.retweet_count ?? 0 },
-            { key: 'likes', icon: Heart, value: p.like_count ?? 0 },
-            { key: 'views', icon: BarChart3, value: p.view_count ?? 0 },
-            { key: 'bookmarks', icon: Bookmark, value: p.bookmark_count ?? 0 },
+            { key: 'reply', Icon: XReply, value: p.reply_count ?? 0 },
+            { key: 'retweets', Icon: XRepost, value: p.retweet_count ?? 0 },
+            { key: 'likes', Icon: XLike, value: p.like_count ?? 0 },
+            { key: 'views', Icon: XViews, value: p.view_count ?? 0 },
+            { key: 'bookmarks', Icon: XBookmark, value: p.bookmark_count ?? 0 },
           ] as const
         ).map((m) => {
-          const isTarget = m.key === category
-          const active = isTarget && done
+          const active = m.key === category && done
           const tint = METRIC_TINT[m.key]
           const value = active ? m.value + volume : m.value
-          const Icon = m.icon
+          const Icon = m.Icon as (props: {
+            className?: string
+            filled?: boolean
+          }) => React.ReactElement
           return (
-            <span
+            <motion.span
               key={m.key}
+              initial={false}
+              animate={active ? { scale: [1, 1.12, 1] } : {}}
+              transition={{ duration: 0.5, ease: 'easeOut' }}
               className="flex shrink-0 items-center gap-1.5 whitespace-nowrap"
               style={active ? { color: tint } : undefined}
             >
-              <Icon
-                className="size-4 shrink-0"
-                strokeWidth={1.8}
-                fill={active && (m.key === 'likes' || m.key === 'bookmarks') ? tint : 'none'}
-              />
+              <Icon className="size-[15px] shrink-0" filled={active} />
               {value > 0 ? (
-                <span className="text-[12.5px] leading-none tabular-nums">
+                <span className="text-[12px] leading-none tabular-nums">
                   {compactNumber(value)}
                 </span>
               ) : null}
-            </span>
+            </motion.span>
           )
         })}
       </div>
-    </div>
+    </>
   ) : (
-    <div className="flex items-start gap-3 p-4">
-      <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-white/[0.05]">
-        <AurxMark className="size-[55%] opacity-70" />
+    <div className="flex items-start gap-3">
+      <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-foreground/[0.05]">
+        <XMark className="size-[40%] text-foreground/55" />
       </span>
       <span className="min-w-0 flex-1">
         <span className="block text-[14px] font-semibold leading-tight">
           {ru ? 'Превью публикации недоступно' : 'Post preview unavailable'}
         </span>
-        <span className="mt-1 block text-[13px] leading-snug text-muted-foreground">
+        <span className="mt-1 block text-[13px] leading-[1.5] text-muted-foreground">
           {ru
             ? 'Заказ выполняется по ссылке, указанной при оформлении.'
             : 'The order runs on the link submitted at checkout.'}
         </span>
         {url ? (
-          <span className="mt-2 block truncate rounded-lg bg-white/[0.04] px-2 py-1 text-[12px] text-muted-foreground">
+          <span className="mt-2 block truncate font-mono text-[11.5px] text-muted-foreground/70">
             {url}
           </span>
         ) : null}
       </span>
-      {href ? <ExternalLink className="size-4 shrink-0 text-muted-foreground" /> : null}
     </div>
   )
 
   return (
-    <OrderCard delay={delay} className="overflow-hidden p-0">
-      {href ? (
-        <motion.a
-          href={href}
-          target="_blank"
-          rel="noopener noreferrer"
-          whileTap={{ scale: 0.99 }}
-          className="block transition-colors hover:bg-white/[0.02]"
-        >
-          {body}
-        </motion.a>
-      ) : (
-        body
-      )}
-    </OrderCard>
+    <Reveal delay={delay} className="px-1">
+      <div className="mb-2 flex items-center justify-between gap-3 px-0.5">
+        <Eyebrow>{ru ? 'Публикация' : 'Target post'}</Eyebrow>
+        {href ? (
+          <a
+            href={href}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-1 text-[12px] font-medium text-muted-foreground transition-colors hover:text-foreground active:opacity-60"
+          >
+            {ru ? 'Открыть' : 'Open'}
+            <GlyphArrowUpRight className="size-[13px]" />
+          </a>
+        ) : null}
+      </div>
+
+      <div
+        className="rounded-[18px] p-4"
+        style={{
+          background: 'color-mix(in oklab, var(--foreground) 3%, transparent)',
+          boxShadow: 'inset 0 0 0 1px color-mix(in oklab, var(--foreground) 7%, transparent)',
+        }}
+      >
+        {body}
+      </div>
+    </Reveal>
   )
 }
