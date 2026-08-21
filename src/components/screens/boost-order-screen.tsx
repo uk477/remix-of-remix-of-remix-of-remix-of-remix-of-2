@@ -7,7 +7,7 @@
  * ───────────────────────────────────────────────────────────── */
 
 import { AnimatePresence, motion } from 'framer-motion'
-import { X } from 'lucide-react'
+import { RotateCcw, X } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { BOOST_MARKS, RegionMark, type BoostMarkId } from '../boost-icons'
