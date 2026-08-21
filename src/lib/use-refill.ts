@@ -98,8 +98,7 @@ export function useRefill(orderId: string) {
   const remaining = Math.max(0, max - used)
   const cooldownLeft = nextAt ? Math.max(0, nextAt - now()) : 0
 
-  // Приоритет состояний:
-  // not_completed → submitting → limit_exhausted → guarantee_expired → cooldown → available
+  // Backend is authoritative: the client only renders its persisted decision.
   const derived: RefillPhase =
     phase != null
       ? phase
@@ -113,7 +112,9 @@ export function useRefill(orderId: string) {
                 ? 'guarantee_expired'
                 : cooldownLeft > 0
                   ? 'cooldown'
-                  : 'available'
+                  : state.canRequest
+                    ? 'available'
+                    : 'not_completed'
 
   // При 00:00:00 сначала перепроверяем состояние на сервере.
   const revalidating = useRef(false)

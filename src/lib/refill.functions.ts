@@ -6,6 +6,9 @@ export type RefillServerState = {
   orderId: string
   /** Реальный UUID заказа в базе (нужен админ-панели); null для локальных заказов. */
   dbOrderId: string | null
+  orderStatus: string | null
+  paid: boolean
+  refillable: boolean
   eligible: boolean
   guaranteeStartedAt: string | null
   guaranteeEndsAt: string | null
@@ -14,6 +17,7 @@ export type RefillServerState = {
   lastRefillAt: string | null
   nextRefillAt: string | null
   canRequest: boolean
+  canRequestRefill: boolean
   serverNow: string
 }
 

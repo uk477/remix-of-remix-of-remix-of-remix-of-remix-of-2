@@ -96,7 +96,15 @@ const isLocalOrder = (id: string) => id.startsWith('test-') || id.startsWith('de
 // ORDERS
 // ═══════════════════════════════════════════════════════════════════════════
 
-type OrderStatus = 'pending' | 'in_progress' | 'waiting' | 'completed' | 'declined' | 'refunded'
+type OrderStatus =
+  | 'pending'
+  | 'in_progress'
+  | 'waiting'
+  | 'completed'
+  | 'declined'
+  | 'refunded'
+  | 'failed'
+  | 'refilling'
 const ORDER_STATUSES: OrderStatus[] = [
   'pending',
   'in_progress',
@@ -104,6 +112,8 @@ const ORDER_STATUSES: OrderStatus[] = [
   'completed',
   'declined',
   'refunded',
+  'failed',
+  'refilling',
 ]
 const orderLabel = (s: OrderStatus) =>
   ({
