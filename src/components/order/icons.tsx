@@ -130,6 +130,14 @@ export function GlyphCheck(p: P) {
   )
 }
 
+export function GlyphX(p: P) {
+  return (
+    <Line strokeWidth={2.4} {...p}>
+      <path d="M6 6l12 12M18 6L6 18" />
+    </Line>
+  )
+}
+
 export function GlyphShield(p: P) {
   return (
     <Line {...p}>
@@ -144,6 +152,15 @@ export function GlyphRefill(p: P) {
     <Line {...p}>
       <path d="M20 12a8 8 0 1 1-2.6-5.9" />
       <path d="M20.4 3.6v4.2h-4.2" />
+    </Line>
+  )
+}
+
+export function GlyphRefund(p: P) {
+  return (
+    <Line {...p}>
+      <path d="M4 14.5a8 8 0 1 1 16 0" />
+      <path d="M8 14.5 4 18.5 8 22.5" />
     </Line>
   )
 }

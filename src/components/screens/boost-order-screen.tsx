@@ -7,7 +7,7 @@
  * ───────────────────────────────────────────────────────────── */
 
 import { AnimatePresence, motion } from 'framer-motion'
-import { X } from 'lucide-react'
+import { RotateCcw, X } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { BOOST_MARKS, RegionMark, type BoostMarkId } from '../boost-icons'
@@ -20,7 +20,7 @@ import { OrderProgressCard } from '../order/order-progress-card'
 import { RefillGuaranteeCard, type RefillState } from '../order/refill-guarantee-card'
 import { SupportAction } from '../order/support-action'
 import { Eyebrow, Reveal, type OrderTone } from '../order/primitives'
-import { XMark } from '../order/icons'
+import { GlyphRefund, GlyphX, XMark } from '../order/icons'
 import { SERVICES } from '@/lib/data'
 import { useI18n } from '@/lib/i18n'
 import { projectOrderId } from '@/lib/order-id'
@@ -85,6 +85,7 @@ export function BoostOrderScreen({ order }: { order: Order }) {
   const orderId = projectOrderId(order.date)
   const done = order.status === 'completed'
   const waiting = order.status === 'waiting'
+  const cancelled = order.status === 'cancelled'
 
   /* ── Target data ─────────────────────────────────────────────────────── */
   const [profile, setProfile] = useState<XProfileRow | null>(null)
@@ -212,45 +213,63 @@ export function BoostOrderScreen({ order }: { order: Order }) {
   }
 
   /* ── Status copy ─────────────────────────────────────────────────────── */
-  const statusTone: OrderTone = done ? 'success' : waiting ? 'neutral' : 'live'
-  const statusLabel = done
+  const statusTone: OrderTone = cancelled ? 'danger' : done ? 'success' : waiting ? 'neutral' : 'live'
+  const statusLabel = cancelled
     ? ru
-      ? 'Завершён'
-      : 'Completed'
-    : waiting
+      ? 'Отменён'
+      : 'Cancelled'
+    : done
       ? ru
-        ? 'Заказ оформлен'
-        : 'Placed'
-      : ru
-        ? 'В процессе'
-        : 'In progress'
+        ? 'Завершён'
+        : 'Completed'
+      : waiting
+        ? ru
+          ? 'Заказ оформлен'
+          : 'Placed'
+        : ru
+          ? 'В процессе'
+          : 'In progress'
 
-  const progressBadgeLabel = done
+  const progressBadgeLabel = cancelled
     ? ru
-      ? 'Завершён'
-      : 'Completed'
-    : waiting
+      ? 'Отменён'
+      : 'Cancelled'
+    : done
       ? ru
-        ? 'Заказ оформлен'
-        : 'Placed'
-      : ru
-        ? 'В работе'
-        : 'In progress'
+        ? 'Завершён'
+        : 'Completed'
+      : waiting
+        ? ru
+          ? 'Заказ оформлен'
+          : 'Placed'
+        : ru
+          ? 'В работе'
+          : 'In progress'
 
   const progressTitle = ru ? 'Статус заказа' : 'Order status'
-  const progressHeadline = done
+  const progressHeadline = cancelled
     ? ru
-      ? 'Заказ завершён'
-      : 'Order completed'
-    : waiting
+      ? 'Заказ отменён'
+      : 'Order cancelled'
+    : done
       ? ru
-        ? 'Заказ принят'
-        : 'Order accepted'
-      : ru
-        ? 'Продвижение запущено'
-        : 'Campaign started'
+        ? 'Заказ завершён'
+        : 'Order completed'
+      : waiting
+        ? ru
+          ? 'Заказ принят'
+          : 'Order accepted'
+        : ru
+          ? 'Продвижение запущено'
+          : 'Campaign started'
 
-  const progressNote = done
+  const progressSubtitle = cancelled
+    ? ru
+      ? 'Мы не смогли выполнить этот заказ'
+      : 'We were unable to complete this order'
+    : undefined
+
+  const progressNote = done || cancelled
     ? undefined
     : waiting
       ? ru
@@ -259,6 +278,10 @@ export function BoostOrderScreen({ order }: { order: Order }) {
       : ru
         ? 'Результат появится после завершения'
         : 'Result will appear after completion'
+
+  const cancelReason =
+    order.cancelReason ??
+    (ru ? 'Публикация недоступна' : 'Publication unavailable')
 
   const serviceName = service?.name[lang] ?? order.title
   const UNITS: Record<string, [string, string]> = {
@@ -270,17 +293,21 @@ export function BoostOrderScreen({ order }: { order: Order }) {
     comments: ['комментариев', 'comments'],
   }
   const unitWord = (UNITS[category] ?? ['ед.', 'units'])[ru ? 0 : 1]
-  const caption = done
+  const caption = cancelled
     ? ru
-      ? 'Заказ полностью выполнен и закрыт.'
-      : 'The order is fully delivered and closed.'
-    : waiting
+      ? 'Заказ отменён, средства возвращены на баланс.'
+      : 'Order cancelled and funds returned to your balance.'
+    : done
       ? ru
-        ? 'Заказ принят и скоро будет запущен.'
-        : 'The order is accepted and starts shortly.'
-      : ru
-        ? 'Заказ запущен, показатели растут в реальном времени.'
-        : 'The order is running and the numbers are growing live.'
+        ? 'Заказ полностью выполнен и закрыт.'
+        : 'The order is fully delivered and closed.'
+      : waiting
+        ? ru
+          ? 'Заказ принят и скоро будет запущен.'
+          : 'The order is accepted and starts shortly.'
+        : ru
+          ? 'Заказ запущен, показатели растут в реальном времени.'
+          : 'The order is running and the numbers are growing live.'
 
   return (
     <div className="min-h-full">
@@ -339,53 +366,125 @@ export function BoostOrderScreen({ order }: { order: Order }) {
           badgeLabel={progressBadgeLabel}
           badgeTone={statusTone}
           complete={done}
+          cancelled={cancelled}
           headline={progressHeadline}
+          subtitle={progressSubtitle}
           note={progressNote}
-          steps={[
-            {
-              label: ru ? 'Заказ оформлен' : 'Order placed',
-              meta: fullDate(order.date, lang),
-              state: 'done',
-            },
-            {
-              label: ru ? 'В процессе' : 'In progress',
-              state: done ? 'done' : waiting ? 'idle' : 'live',
-            },
-            {
-              label: ru ? 'Заказ завершён' : 'Order completed',
-              meta: done
-                ? order.completedAt
-                  ? fullDate(order.completedAt, lang)
-                  : ru
-                    ? 'Готово'
-                    : 'Done'
-                : ru
-                  ? 'Ожидает'
-                  : 'Pending',
-              state: done ? 'done' : 'idle',
-            },
-          ]}
+          dangerIcon={
+            cancelled ? (
+              <span className="flex size-12 items-center justify-center rounded-full bg-destructive/[0.08] ring-1 ring-inset ring-destructive/30">
+                <GlyphX className="size-5 text-destructive" />
+              </span>
+            ) : undefined
+          }
+          reason={
+            cancelled
+              ? {
+                  label: ru ? 'Причина' : 'Reason',
+                  text: cancelReason,
+                }
+              : undefined
+          }
+          steps={
+            cancelled
+              ? [
+                  {
+                    label: ru ? 'Заказ оформлен' : 'Order placed',
+                    meta: fullDate(order.date, lang),
+                    state: 'done',
+                  },
+                  {
+                    label: ru ? 'Заказ отменён' : 'Order cancelled',
+                    state: 'danger',
+                  },
+                  {
+                    label: ru ? 'Средства возвращены на баланс' : 'Funds returned to balance',
+                    state: 'idle',
+                    icon: <GlyphRefund className="size-[13px]" />,
+                  },
+                ]
+              : [
+                  {
+                    label: ru ? 'Заказ оформлен' : 'Order placed',
+                    meta: fullDate(order.date, lang),
+                    state: 'done',
+                  },
+                  {
+                    label: ru ? 'В процессе' : 'In progress',
+                    state: done ? 'done' : waiting ? 'idle' : 'live',
+                  },
+                  {
+                    label: ru ? 'Заказ завершён' : 'Order completed',
+                    meta: done
+                      ? order.completedAt
+                        ? fullDate(order.completedAt, lang)
+                        : ru
+                          ? 'Готово'
+                          : 'Done'
+                      : ru
+                        ? 'Ожидает'
+                        : 'Pending',
+                    state: done ? 'done' : 'idle',
+                  },
+                ]
+          }
         />
 
-        {order.refillable ? (
-        <RefillGuaranteeCard
-          delay={0.15}
-          title={ru ? 'Гарантия рефилла' : 'Refill guarantee'}
-          countLabel={ru ? `${left} из ${REFILL_LIMIT}` : `${left} of ${REFILL_LIMIT}`}
-          description={refillDescription}
-          untilLabel={ru ? 'Гарантия действует до' : 'Guarantee valid until'}
-          untilValue={fullDate(windowEnd, lang)}
-          state={refillState}
-          buttonLabel={refillButtonLabel}
-          onRequest={() => setAskRefill(true)}
-        />
-        ) : null}
+        {cancelled ? (
+          <Reveal delay={0.15} className="flex flex-col gap-3">
+            <button
+              onClick={() => void navigate({ to: '/catalog' })}
+              className="group relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-[18px] bg-transparent px-4 py-3.5 font-semibold text-destructive transition-transform duration-200 active:scale-[0.98]"
+              style={{
+                boxShadow: 'inset 0 0 0 1px color-mix(in oklab, var(--destructive) 35%, transparent)',
+              }}
+              type="button"
+            >
+              <span className="relative z-10 flex items-center gap-2">
+                <RotateCcw className="size-4" />
+                {ru ? 'Повторить заказ' : 'Repeat order'}
+              </span>
+              <span
+                aria-hidden
+                className="absolute inset-0 -z-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                style={{
+                  background:
+                    'color-mix(in oklab, var(--destructive) 6%, transparent)',
+                }}
+              />
+            </button>
 
-        <SupportAction
-          label={ru ? 'Нужна помощь?' : 'Need help?'}
-          hint={ru ? 'Проблема с заказом — напишите в поддержку' : 'Something wrong? Contact support'}
-          onClick={() => void navigate({ to: '/support' })}
-        />
+            <button
+              onClick={() => void navigate({ to: '/support' })}
+              className="text-center text-[13px] font-medium text-muted-foreground transition-colors hover:text-foreground"
+              type="button"
+            >
+              {ru ? 'Связаться с поддержкой' : 'Contact support'}
+            </button>
+          </Reveal>
+        ) : (
+          <>
+            {order.refillable ? (
+              <RefillGuaranteeCard
+                delay={0.15}
+                title={ru ? 'Гарантия рефилла' : 'Refill guarantee'}
+                countLabel={ru ? `${left} из ${REFILL_LIMIT}` : `${left} of ${REFILL_LIMIT}`}
+                description={refillDescription}
+                untilLabel={ru ? 'Гарантия действует до' : 'Guarantee valid until'}
+                untilValue={fullDate(windowEnd, lang)}
+                state={refillState}
+                buttonLabel={refillButtonLabel}
+                onRequest={() => setAskRefill(true)}
+              />
+            ) : null}
+
+            <SupportAction
+              label={ru ? 'Нужна помощь?' : 'Need help?'}
+              hint={ru ? 'Проблема с заказом — напишите в поддержку' : 'Something wrong? Contact support'}
+              onClick={() => void navigate({ to: '/support' })}
+            />
+          </>
+        )}
       </div>
 
       <AnimatePresence>

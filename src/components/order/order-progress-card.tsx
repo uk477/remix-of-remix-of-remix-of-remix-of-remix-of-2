@@ -1,5 +1,6 @@
 'use client'
 
+import type { ReactNode } from 'react'
 import {
   Eyebrow,
   IndeterminateBar,
@@ -22,8 +23,12 @@ export function OrderProgressCard({
   badgeLabel,
   badgeTone,
   headline,
+  subtitle,
   note,
   complete,
+  cancelled,
+  dangerIcon,
+  reason,
   steps,
   delay,
 }: {
@@ -31,8 +36,12 @@ export function OrderProgressCard({
   badgeLabel: string
   badgeTone: OrderTone
   headline: string
+  subtitle?: string
   note?: string
   complete?: boolean
+  cancelled?: boolean
+  dangerIcon?: ReactNode
+  reason?: { label: string; text: string }
   steps: TimelineStep[]
   delay?: number
 }) {
@@ -55,18 +64,56 @@ export function OrderProgressCard({
         <StatusText tone={badgeTone} label={badgeLabel} pulse={badgeTone === 'live'} />
       </div>
 
-      <p className="mt-3 font-display text-[22px] font-bold leading-tight tracking-[-0.025em]">
-        {headline}
-      </p>
+      <div className="mt-3 flex items-start gap-3.5">
+        {dangerIcon ? (
+          <span className="relative flex size-12 shrink-0 items-center justify-center rounded-full text-destructive">
+            <span
+              aria-hidden
+              className="pointer-events-none absolute inset-0 rounded-full"
+              style={{
+                background:
+                  'radial-gradient(circle, color-mix(in oklab, var(--destructive) 30%, transparent) 0%, transparent 68%)',
+                filter: 'blur(6px)',
+              }}
+            />
+            {dangerIcon}
+          </span>
+        ) : null}
+        <div className={dangerIcon ? 'min-w-0 flex-1' : ''}>
+          <p className="font-display text-[22px] font-bold leading-tight tracking-[-0.025em]">
+            {headline}
+          </p>
+          {subtitle ? (
+            <p className="mt-1 text-[13.5px] leading-[1.5] text-muted-foreground">{subtitle}</p>
+          ) : null}
+        </div>
+      </div>
 
-      {complete ? (
-        <ProgressBar value={1} tone="success" className="mt-3.5" />
-      ) : (
-        <IndeterminateBar className="mt-3.5" />
-      )}
+      {!cancelled ? (
+        complete ? (
+          <ProgressBar value={1} tone="success" className="mt-3.5" />
+        ) : (
+          <IndeterminateBar className="mt-3.5" />
+        )
+      ) : null}
 
       {note ? (
         <p className="mt-2.5 text-[12.5px] leading-tight text-muted-foreground">{note}</p>
+      ) : null}
+
+      {reason ? (
+        <div
+          className="mt-4 rounded-[16px] px-4 py-3.5"
+          style={{
+            background: 'color-mix(in oklab, var(--foreground) 4.5%, transparent)',
+            boxShadow: 'inset 0 0 0 1px color-mix(in oklab, var(--foreground) 7%, transparent)',
+          }}
+        >
+          <Eyebrow className="text-[10px] tracking-[0.18em]">{reason.label}</Eyebrow>
+          <p className="mt-1.5 text-[15px] font-semibold leading-tight text-foreground">
+            {reason.text}
+          </p>
+        </div>
       ) : null}
 
       <div

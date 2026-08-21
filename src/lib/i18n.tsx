@@ -279,6 +279,7 @@ const DICT: Dict = {
   status_waiting: { en: 'Waiting', ru: 'Ожидание', ar: 'قيد الانتظار', zh: '等待中', es: 'Esperando', tr: 'Bekliyor', pt: 'Aguardando', fr: 'En attente', uk: 'Очікування' },
   status_in_progress: { en: 'In progress', ru: 'В работе', ar: 'قيد التنفيذ', zh: '进行中', es: 'En progreso', tr: 'Devam ediyor', pt: 'Em andamento', fr: 'En cours', uk: 'В роботі' },
   status_completed: { en: 'Completed', ru: 'Выполнен', ar: 'مكتمل', zh: '已完成', es: 'Completado', tr: 'Tamamlandı', pt: 'Concluído', fr: 'Terminé', uk: 'Виконано' },
+  status_cancelled: { en: 'Cancelled', ru: 'Отменён', ar: 'ملغى', zh: '已取消', es: 'Cancelado', tr: 'İptal edildi', pt: 'Cancelado', fr: 'Annulé', uk: 'Скасовано' },
   do_refill: { en: 'Refill', ru: 'Рефилл', ar: 'إعادة تعبئة', zh: '补量', es: 'Refill', tr: 'Refill', pt: 'Refill', fr: 'Refill', uk: 'Рефілл' },
   refill_done: { en: 'Refill requested (2-day guarantee)', ru: 'Рефилл запрошен (гарантия 2 дня)', ar: 'تم طلب إعادة التعبئة (ضمان يومين)', zh: '已申请补量（2 天保证）', es: 'Refill solicitado (garantía 2 días)', tr: 'Refill talep edildi (2 günlük garanti)', pt: 'Refill solicitado (garantia 2 dias)', fr: 'Refill demandé (garantie 2 jours)', uk: 'Рефілл запитано (гарантія 2 дні)' },
   // profile — new

@@ -51,6 +51,7 @@ type DBTopupStatus = 'pending' | 'success' | 'declined' | 'expired'
 
 function dbToOrderStatus(s: DBOrderStatus): OrderStatus {
   if (s === 'completed' || s === 'refunded') return 'completed'
+  if (s === 'declined') return 'cancelled'
   if (s === 'in_progress') return 'in_progress'
   return 'waiting'
 }
@@ -62,6 +63,7 @@ function dbToTopupStatus(s: DBTopupStatus): TopupStatus {
 }
 
 function orderStatusToDB(s: OrderStatus): DBOrderStatus {
+  if (s === 'cancelled') return 'declined'
   return s === 'waiting' ? 'pending' : s
 }
 
@@ -114,6 +116,7 @@ function mapOrderRow(o: OrderRow): Order {
     startFollowers:
       typeof m['start_followers'] === 'number' ? (m['start_followers'] as number) : undefined,
     completedAt: (m['completed_at'] as number | undefined) ?? undefined,
+    cancelReason: (m['cancel_reason'] as string | undefined) ?? undefined,
   }
 }
 
@@ -375,6 +378,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
             ? { start_followers: order.startFollowers }
             : {}),
           ...(order.completedAt ? { completed_at: order.completedAt } : {}),
+          ...(order.cancelReason ? { cancel_reason: order.cancelReason } : {}),
         },
       })
       .then(({ error }) => {

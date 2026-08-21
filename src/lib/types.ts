@@ -108,7 +108,7 @@ export type CartItem = {
   meta?: Record<string, string>
 }
 
-export type OrderStatus = 'waiting' | 'in_progress' | 'completed'
+export type OrderStatus = 'waiting' | 'in_progress' | 'completed' | 'cancelled'
 
 export type Order = {
   id: string
@@ -144,6 +144,8 @@ export type Order = {
   startFollowers?: number
   /** When the order was marked completed. */
   completedAt?: number
+  /** Human-readable cancellation reason shown when the order is cancelled by API. */
+  cancelReason?: string
 }
 
 export type TopupStatus = 'success' | 'declined' | 'pending'

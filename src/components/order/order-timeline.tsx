@@ -3,16 +3,20 @@
 import { motion, useReducedMotion } from 'framer-motion'
 import { EASE } from './primitives'
 import { cn } from '@/lib/utils'
+import type { ReactNode } from 'react'
 
 export type TimelineStep = {
   label: string
   meta?: string
-  state: 'done' | 'live' | 'idle'
+  state: 'done' | 'live' | 'idle' | 'danger'
+  /** Optional icon override for the node. */
+  icon?: ReactNode
 }
 
 /**
  * Hairline rail with drawn markers — a tick that strokes itself in, a live
- * node that breathes, and a hollow marker for what is still ahead.
+ * node that breathes, a hollow marker for what is still ahead, and a red X
+ * for cancelled / failed steps.
  */
 export function OrderTimeline({ steps }: { steps: TimelineStep[] }) {
   const reduce = useReducedMotion()
@@ -27,15 +31,19 @@ export function OrderTimeline({ steps }: { steps: TimelineStep[] }) {
               style={{
                 height: 'calc(100% - 6px)',
                 background:
-                  s.state === 'done'
-                    ? 'linear-gradient(180deg, color-mix(in oklab, var(--success) 42%, transparent), color-mix(in oklab, var(--foreground) 8%, transparent))'
-                    : 'color-mix(in oklab, var(--foreground) 8%, transparent)',
+                  s.state === 'danger'
+                    ? 'linear-gradient(180deg, color-mix(in oklab, var(--destructive) 42%, transparent), color-mix(in oklab, var(--foreground) 8%, transparent))'
+                    : s.state === 'done'
+                      ? 'linear-gradient(180deg, color-mix(in oklab, var(--success) 42%, transparent), color-mix(in oklab, var(--foreground) 8%, transparent))'
+                      : 'color-mix(in oklab, var(--foreground) 8%, transparent)',
               }}
             />
           ) : null}
 
           <span className="relative z-10 flex size-[17px] shrink-0 items-center justify-center">
-            {s.state === 'done' ? (
+            {s.icon ? (
+              <span className="text-muted-foreground/70">{s.icon}</span>
+            ) : s.state === 'done' ? (
               <motion.svg
                 viewBox="0 0 24 24"
                 fill="none"
@@ -50,6 +58,23 @@ export function OrderTimeline({ steps }: { steps: TimelineStep[] }) {
                   initial={reduce ? false : { pathLength: 0 }}
                   animate={{ pathLength: 1 }}
                   transition={{ duration: 0.45, ease: EASE, delay: 0.25 + i * 0.08 }}
+                />
+              </motion.svg>
+            ) : s.state === 'danger' ? (
+              <motion.svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={3}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="size-[13px] text-destructive"
+              >
+                <motion.path
+                  d="M6 6l12 12M18 6L6 18"
+                  initial={reduce ? false : { pathLength: 0 }}
+                  animate={{ pathLength: 1 }}
+                  transition={{ duration: 0.35, ease: EASE, delay: 0.25 + i * 0.08 }}
                 />
               </motion.svg>
             ) : s.state === 'live' ? (
@@ -86,7 +111,9 @@ export function OrderTimeline({ steps }: { steps: TimelineStep[] }) {
                 ? 'text-muted-foreground/70'
                 : s.state === 'live'
                   ? 'font-semibold text-foreground'
-                  : 'font-medium text-foreground/85',
+                  : s.state === 'danger'
+                    ? 'font-semibold text-foreground'
+                    : 'font-medium text-foreground/85',
             )}
           >
             {s.label}
