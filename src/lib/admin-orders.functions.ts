@@ -1,24 +1,16 @@
 import { createServerFn } from '@tanstack/react-start'
 import { requireSupabaseAuth } from '@/integrations/supabase/auth-middleware'
+import {
+  parseAdminOrderId,
+  parseAdminOrderStatus,
+  type AdminOrderStatus,
+} from './admin-orders.shared'
 
 /**
  * Админ-оверрайд для одного КОНКРЕТНОГО заказа.
  * Роль проверяется на сервере (внутри SECURITY DEFINER функций через has_role),
  * поэтому обычный клиент не может вызвать это ни из консоли, ни напрямую по URL.
  */
-
-export const ADMIN_ORDER_STATUSES = [
-  'pending',
-  'in_progress',
-  'waiting',
-  'completed',
-  'declined',
-  'failed',
-  'refilling',
-  'refunded',
-] as const
-
-export type AdminOrderStatus = (typeof ADMIN_ORDER_STATUSES)[number]
 
 export type AdminRefillRecord = {
   refillId: string
@@ -43,18 +35,12 @@ export type AdminRefillOverview = {
   serverNow: string
 }
 
-const uuid = (v: unknown) => {
-  const s = String(v ?? '')
-  if (!/^[0-9a-f-]{36}$/i.test(s)) throw new Error('orderId must be a real order id')
-  return s
-}
-
 export const adminSetOrderStatus = createServerFn({ method: 'POST' })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { orderId: string; status: AdminOrderStatus }) => {
-    if (!ADMIN_ORDER_STATUSES.includes(input?.status)) throw new Error('Unknown status')
-    return { orderId: uuid(input?.orderId), status: input.status }
-  })
+  .inputValidator((input: { orderId: string; status: AdminOrderStatus }) => ({
+    orderId: parseAdminOrderId(input?.orderId),
+    status: parseAdminOrderStatus(input?.status),
+  }))
   .handler(async ({ data, context }) => {
     const { data: row, error } = await context.supabase.rpc('admin_set_order_status', {
       _order_id: data.orderId,
@@ -67,7 +53,7 @@ export const adminSetOrderStatus = createServerFn({ method: 'POST' })
 export const adminForceRefill = createServerFn({ method: 'POST' })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { orderId: string; note?: string }) => ({
-    orderId: uuid(input?.orderId),
+    orderId: parseAdminOrderId(input?.orderId),
     note: input?.note ? String(input.note).slice(0, 300) : undefined,
   }))
   .handler(async ({ data, context }) => {
@@ -81,7 +67,7 @@ export const adminForceRefill = createServerFn({ method: 'POST' })
 
 export const adminOrderRefills = createServerFn({ method: 'POST' })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { orderId: string }) => ({ orderId: uuid(input?.orderId) }))
+  .inputValidator((input: { orderId: string }) => ({ orderId: parseAdminOrderId(input?.orderId) }))
   .handler(async ({ data, context }) => {
     const { data: res, error } = await context.supabase.rpc('admin_order_refills', {
       _order_id: data.orderId,

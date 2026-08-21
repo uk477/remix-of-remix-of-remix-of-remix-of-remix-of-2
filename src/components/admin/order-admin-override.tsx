@@ -17,13 +17,12 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { useServerFn } from '@tanstack/react-start'
 import { Loader2, RefreshCw, ShieldAlert, Zap } from 'lucide-react'
 import {
-  ADMIN_ORDER_STATUSES,
   adminForceRefill,
   adminOrderRefills,
   adminSetOrderStatus,
-  type AdminOrderStatus,
   type AdminRefillOverview,
 } from '@/lib/admin-orders.functions'
+import { ADMIN_ORDER_STATUSES, type AdminOrderStatus } from '@/lib/admin-orders.shared'
 import { formatCountdown } from '@/lib/use-refill'
 import { useToast } from '../toast'
 import { GhostButton, PrimaryButton } from './primitives'
@@ -100,8 +99,8 @@ export function OrderAdminOverride({
     if (saving) return
     setSaving(true)
     try {
-      await setStatusFn({ data: { orderId, status: target } })
-      onStatusChange?.(target)
+      const updated = await setStatusFn({ data: { orderId, status: target } })
+      onStatusChange?.(updated.status)
       show(`Статус → ${STATUS_LABEL[target]}`)
       await load()
     } catch (e) {

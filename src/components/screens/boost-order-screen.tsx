@@ -26,6 +26,7 @@ import { useAuth } from '@/lib/auth'
 import { SERVICES } from '@/lib/data'
 import { useI18n } from '@/lib/i18n'
 import { projectOrderId } from '@/lib/order-id'
+import type { AdminOrderStatus } from '@/lib/admin-orders.shared'
 import { useRefill } from '@/lib/use-refill'
 import { useStore } from '@/lib/store'
 import { loadXTweetFast, extractTweetId, type XTweet } from '@/lib/x-tweet'
@@ -72,9 +73,20 @@ export function BoostOrderScreen({ order }: { order: Order }) {
 
   const volume = order.qty ?? 0
   const orderId = projectOrderId(order.date)
-  const done = order.status === 'completed'
-  const waiting = order.status === 'waiting'
-  const cancelled = order.status === 'cancelled'
+  const [visibleStatus, setVisibleStatus] = useState(order.status)
+  useEffect(() => setVisibleStatus(order.status), [order.status])
+
+  const applyAdminStatus = (next: AdminOrderStatus) => {
+    if (next === 'completed' || next === 'refunded') setVisibleStatus('completed')
+    else if (next === 'declined' || next === 'failed') setVisibleStatus('cancelled')
+    else if (next === 'in_progress' || next === 'refilling') setVisibleStatus('in_progress')
+    else setVisibleStatus('waiting')
+    void refill.reload()
+  }
+
+  const done = visibleStatus === 'completed'
+  const waiting = visibleStatus === 'waiting'
+  const cancelled = visibleStatus === 'cancelled'
 
   /* ── Target data ─────────────────────────────────────────────────────── */
   const [profile, setProfile] = useState<XProfileRow | null>(null)
@@ -317,8 +329,8 @@ export function BoostOrderScreen({ order }: { order: Order }) {
           <OrderAdminOverride
             key={refill.state.dbOrderId}
             orderId={refill.state.dbOrderId}
-            status={order.status}
-            onStatusChange={() => void refill.reload()}
+            status={visibleStatus}
+            onStatusChange={applyAdminStatus}
           />
         ) : null}
 
