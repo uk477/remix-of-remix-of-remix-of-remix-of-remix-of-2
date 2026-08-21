@@ -4,6 +4,8 @@ import { requireSupabaseAuth } from '@/integrations/supabase/auth-middleware'
 /** Серверное состояние рефилл-гарантии — всегда для одного конкретного заказа. */
 export type RefillServerState = {
   orderId: string
+  /** Реальный UUID заказа в базе (нужен админ-панели); null для локальных заказов. */
+  dbOrderId: string | null
   eligible: boolean
   guaranteeStartedAt: string | null
   guaranteeEndsAt: string | null
