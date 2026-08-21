@@ -164,8 +164,9 @@ export function BoostOrderScreen({ order }: { order: Order }) {
         : 'Submitting…'
       : refillState === 'sent'
         ? ru
-          ? 'Рефилл отправлен'
-          : 'Refill submitted'
+          ? 'Рефилл запрошен'
+          : 'Refill requested'
+
         : refillState === 'available'
           ? ru
             ? 'Сделать рефилл'
