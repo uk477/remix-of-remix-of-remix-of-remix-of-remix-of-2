@@ -553,6 +553,8 @@ export function BoostOrderScreen({ order }: { order: Order }) {
                 ]
           }
         />
+        )}
+
 
         {cancelled ? (
           <Reveal delay={0.15} className="flex flex-col gap-3">
