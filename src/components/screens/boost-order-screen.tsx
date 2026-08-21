@@ -624,40 +624,43 @@ function RefillShield() {
           animate={{ pathLength: 1 }}
           transition={{ duration: 0.9, ease: 'easeOut' }}
         />
-        <motion.g
-          style={{ originX: '50px', originY: '58px' }}
-          animate={{ rotate: 360 }}
-          transition={{ duration: 8, repeat: Infinity, ease: 'linear' }}
-        >
-          <path
-            d="M28 58a22 22 0 0 1 34-18.5"
-            fill="none"
+        <g transform="translate(50 58)">
+          <motion.g
+            style={{ transformBox: 'fill-box', transformOrigin: 'center' }}
+            animate={{ rotate: 360 }}
+            transition={{ duration: 9, repeat: Infinity, ease: 'linear' }}
+          >
+            <path
+              d="M-22 0a22 22 0 0 1 34-18.5"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="4.5"
+              strokeLinecap="round"
+            />
+            <path d="M13 -28 v11 h-11" fill="none" stroke="currentColor" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round" />
+            <path
+              d="M22 0a22 22 0 0 1-34 18.5"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="4.5"
+              strokeLinecap="round"
+            />
+            <path d="M-13 28 v-11 h11" fill="none" stroke="currentColor" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round" />
+          </motion.g>
+          <motion.g
             stroke="currentColor"
             strokeWidth="4.5"
             strokeLinecap="round"
-          />
-          <path d="M63 30 v11 h-11" fill="none" stroke="currentColor" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round" />
-          <path
-            d="M72 58a22 22 0 0 1-34 18.5"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="4.5"
-            strokeLinecap="round"
-          />
-          <path d="M37 86 v-11 h11" fill="none" stroke="currentColor" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round" />
-        </motion.g>
-        <motion.g
-          stroke="currentColor"
-          strokeWidth="4.5"
-          strokeLinecap="round"
-          initial={{ scale: 0, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ delay: 0.45, type: 'spring', stiffness: 320, damping: 16 }}
-          style={{ originX: '50px', originY: '58px' }}
-        >
-          <path d="M50 49 v18" />
-          <path d="M41 58 h18" />
-        </motion.g>
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: 0.45, type: 'spring', stiffness: 320, damping: 16 }}
+            style={{ transformBox: 'fill-box', transformOrigin: 'center' }}
+          >
+            <path d="M0 -9 v18" />
+            <path d="M-9 0 h18" />
+          </motion.g>
+        </g>
+
       </motion.svg>
     </div>
   )
@@ -793,19 +796,30 @@ function RefillSheet({
           initial={{ opacity: 0, y: 14 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.34, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-          whileTap={{ scale: 0.975 }}
+          whileHover={{
+            y: -2,
+            boxShadow:
+              'inset 0 1px 0 color-mix(in oklab, white 40%, transparent), 0 16px 40px -12px color-mix(in oklab, var(--success) 85%, transparent)',
+          }}
+          whileTap={{ scale: 0.975, y: 0 }}
           onClick={onConfirm}
-          className="mt-6 flex h-[58px] w-full items-center justify-center gap-2.5 rounded-2xl text-[17px] font-semibold tracking-tight text-black"
+          className="group mt-6 flex h-[58px] w-full items-center justify-center gap-2.5 rounded-2xl text-[17px] font-semibold tracking-tight text-black"
           style={{
             background: 'linear-gradient(180deg, color-mix(in oklab, var(--success) 88%, white 12%), var(--success))',
             boxShadow:
               'inset 0 1px 0 color-mix(in oklab, white 35%, transparent), 0 10px 30px -12px color-mix(in oklab, var(--success) 70%, transparent)',
           }}
         >
-          <svg viewBox="0 0 24 24" fill="none" className="size-[21px]">
+          <motion.svg
+            viewBox="0 0 24 24"
+            fill="none"
+            className="size-[21px]"
+            initial={false}
+            whileHover={{ scale: 1.06 }}
+          >
             <path d="M12 3 20 6v5.5c0 4.7-3.3 8.2-8 9.5-4.7-1.3-8-4.8-8-9.5V6l8-3Z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
             <path d="m8.8 12.1 2.2 2.2 4.2-4.4" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
+          </motion.svg>
           {ru ? 'Подтвердить' : 'Confirm'}
         </motion.button>
 
@@ -815,10 +829,11 @@ function RefillSheet({
           transition={{ delay: 0.4, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
           whileTap={{ scale: 0.975 }}
           onClick={onClose}
-          className="mt-3 h-[54px] w-full rounded-2xl bg-white/[0.02] text-[16px] font-medium text-muted-foreground ring-1 ring-inset ring-white/[0.08] transition-colors active:text-foreground"
+          className="mt-3 h-[54px] w-full rounded-2xl bg-white/[0.02] text-[16px] font-medium text-muted-foreground ring-1 ring-inset ring-white/[0.08] transition-all duration-200 hover:bg-destructive/10 hover:text-destructive hover:ring-destructive/40 hover:shadow-[0_10px_30px_-14px_color-mix(in_oklab,var(--destructive)_80%,transparent)] active:text-destructive"
         >
           {ru ? 'Отмена' : 'Cancel'}
         </motion.button>
+
       </motion.div>
     </motion.div>
   )
