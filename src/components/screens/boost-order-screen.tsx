@@ -271,7 +271,7 @@ export function BoostOrderScreen({ order }: { order: Order }) {
             region ? <RegionMark region={region} className="size-7" /> : <Mark className="size-7" />
           }
           service={serviceName}
-          amountLabel={`${nf(volume)} ${unitWord} · ${fullDate(order.date, lang)}`}
+          amountLabel={`${nf(volume)} ${unitWord}`}
           orderId={orderId}
           orderLabel={ru ? 'Номер заказа' : 'Order number'}
           statusLabel={statusLabel}
@@ -364,6 +364,7 @@ export function BoostOrderScreen({ order }: { order: Order }) {
           ]}
         />
 
+        {order.refillable ? (
         <RefillGuaranteeCard
           delay={0.15}
           title={ru ? 'Гарантия рефилла' : 'Refill guarantee'}
@@ -375,6 +376,7 @@ export function BoostOrderScreen({ order }: { order: Order }) {
           buttonLabel={refillButtonLabel}
           onRequest={() => setAskRefill(true)}
         />
+        ) : null}
 
         <SupportAction
           label={ru ? 'Нужна помощь?' : 'Need help?'}
