@@ -7,44 +7,25 @@
  * ───────────────────────────────────────────────────────────── */
 
 import { AnimatePresence, motion } from 'framer-motion'
-import {
-  ArrowLeft,
-  
-  BadgeCheck,
-  BarChart3,
-  Bookmark,
-  Check,
-  Copy,
-  Gauge,
-  Heart,
-  MessageCircle,
-  MoreHorizontal,
-  Repeat2,
-  RotateCw,
-  Share,
-  ShieldCheck,
-  
-  X,
-} from 'lucide-react'
+import { Check, Clock3, X } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { BOOST_MARKS, RegionMark, type BoostMarkId } from '../boost-icons'
 import { VerifiedBadge } from '../icons/verified-badge'
 import { AurxMark } from '../aurx-mark'
 import { useToast } from '../toast'
-import { copyText } from '@/lib/clipboard'
+import { OrderHeader } from '../order/order-header'
+import { OrderSummaryCard } from '../order/order-summary-card'
+import { SocialPostPreview } from '../order/social-post-preview'
+import { OrderProgressCard } from '../order/order-progress-card'
+import { RefillGuaranteeCard, type RefillState } from '../order/refill-guarantee-card'
+import { SupportAction } from '../order/support-action'
+import { OrderCard, StatusBadge, type OrderTone } from '../order/primitives'
 import { SERVICES } from '@/lib/data'
-import { compactNumber, money } from '@/lib/format'
 import { useI18n } from '@/lib/i18n'
 import { projectOrderId } from '@/lib/order-id'
 import { useStore } from '@/lib/store'
-import {
-  loadXTweetFast,
-  extractTweetId,
-  decodeTweetText,
-  verifiedTone,
-  type XTweet,
-} from '@/lib/x-tweet'
+import { loadXTweetFast, extractTweetId, type XTweet } from '@/lib/x-tweet'
 import { loadXProfileFast, normalizeXHandle } from '@/lib/x-profile'
 import type { XProfileRow } from '@/lib/x-profile.functions'
 import type { Order } from '@/lib/types'
@@ -70,35 +51,18 @@ function fullDate(ts: number, lang: string) {
   return new Date(ts).toLocaleString(lang === 'ru' ? 'ru-RU' : 'en-US', {
     day: '2-digit',
     month: 'short',
-    year: 'numeric',
     hour: '2-digit',
     minute: '2-digit',
   })
 }
 
-/** Thin-space grouping reads cleaner in RU and stays neutral in EN. */
 function nf(n: number) {
-  return n.toLocaleString('en-US').replace(/,/g, '\u2009')
+  return n.toLocaleString('en-US')
 }
 
-/* ── Animated counter: rolls digits when the value changes ───────────────── */
-function Digits({ value, className }: { value: number; className?: string }) {
-  const chars = nf(value).split('')
-  return (
-    <span className={className}>
-      {chars.map((c, i) => (
-        <motion.span
-          key={`${i}-${c}`}
-          initial={{ y: '-55%', opacity: 0, filter: 'blur(3px)' }}
-          animate={{ y: '0%', opacity: 1, filter: 'blur(0px)' }}
-          transition={{ duration: 0.42, delay: i * 0.03, ease: [0.22, 1, 0.36, 1] }}
-          className="inline-block tabular-nums"
-        >
-          {c}
-        </motion.span>
-      ))}
-    </span>
-  )
+/** Rough delivery estimate — the backend has no per-unit feed yet. */
+function estimateMs(volume: number) {
+  return 12 * 60 * 1000 + (Math.max(volume, 0) / 1000) * 8 * 60 * 1000
 }
 
 export function BoostOrderScreen({ order }: { order: Order }) {
@@ -121,9 +85,10 @@ export function BoostOrderScreen({ order }: { order: Order }) {
   const Mark = BOOST_MARKS[category] ?? BOOST_MARKS.followers
   const region = isFollowers ? service?.region : undefined
 
-  const volume = order.qty && order.qty > 1 ? order.qty : (order.qty ?? 0)
+  const volume = order.qty ?? 0
   const orderId = projectOrderId(order.date)
   const done = order.status === 'completed'
+  const waiting = order.status === 'waiting'
 
   /* ── Target data ─────────────────────────────────────────────────────── */
   const [profile, setProfile] = useState<XProfileRow | null>(null)
@@ -139,7 +104,11 @@ export function BoostOrderScreen({ order }: { order: Order }) {
         const row = await loadXProfileFast(target).catch(() => null)
         if (alive) setProfile(row)
       } else if (extractTweetId(target)) {
-        const row = await loadXTweetFast(target).catch(() => null)
+        // Never leave the preview stuck on a skeleton if the API hangs.
+        const row = await Promise.race([
+          loadXTweetFast(target).catch(() => null),
+          new Promise<null>((r) => window.setTimeout(() => r(null), 6000)),
+        ])
         if (alive) {
           setTweet(row)
           setTweetMissing(!row)
@@ -155,20 +124,80 @@ export function BoostOrderScreen({ order }: { order: Order }) {
 
   const handle = normalizeXHandle(profile?.user_name || tweet?.author_username || target)
   const startFollowers = order.startFollowers ?? profile?.followers ?? 0
-  const projected = startFollowers + volume
-  const liveFollowers = profile?.followers ?? projected
+
+  /* ── Live-ish progress ───────────────────────────────────────────────── */
+  const [now, setNow] = useState(() => Date.now())
+  useEffect(() => {
+    if (done || waiting) return
+    const id = window.setInterval(() => setNow(Date.now()), 15000)
+    return () => window.clearInterval(id)
+  }, [done, waiting])
+
+  const est = estimateMs(volume)
+  const elapsed = Math.max(0, now - order.date)
+  const percent = done ? 1 : waiting ? 0 : Math.min(0.97, elapsed / est)
+  const delivered = Math.round(volume * percent)
+  const minutesLeft = done || waiting ? 0 : Math.max(1, Math.ceil((est - elapsed) / 60000))
 
   /* ── Refill ──────────────────────────────────────────────────────────── */
   const [refills, setRefills] = useState<number[]>([])
   const [askRefill, setAskRefill] = useState(false)
   const [refilling, setRefilling] = useState(false)
+  const [justSent, setJustSent] = useState(false)
   useEffect(() => setRefills(readRefills(order.id)), [order.id])
 
-
   const windowEnd = order.date + REFILL_WINDOW_MS
-  const inWindow = Date.now() < windowEnd
+  const inWindow = now < windowEnd
   const used = refills.length
-  const canRefill = Boolean(order.refillable) && inWindow && used < REFILL_LIMIT
+  const left = REFILL_LIMIT - used
+  const canRefill = Boolean(order.refillable) && done && inWindow && left > 0
+
+  const refillState: RefillState = refilling
+    ? 'loading'
+    : justSent
+      ? 'sent'
+      : canRefill
+        ? 'available'
+        : !order.refillable || left <= 0 || !inWindow
+          ? 'unavailable'
+          : 'locked'
+
+  const refillButtonLabel =
+    refillState === 'loading'
+      ? ru
+        ? 'Отправляем…'
+        : 'Submitting…'
+      : refillState === 'sent'
+        ? ru
+          ? 'Рефилл отправлен'
+          : 'Refill submitted'
+        : refillState === 'available'
+          ? ru
+            ? 'Запросить рефилл'
+            : 'Request refill'
+          : refillState === 'locked'
+            ? ru
+              ? 'Доступно после завершения'
+              : 'Available once completed'
+            : !order.refillable
+              ? ru
+                ? 'Не предусмотрен'
+                : 'Not included'
+              : left <= 0
+                ? ru
+                  ? 'Лимит исчерпан'
+                  : 'Limit reached'
+                : ru
+                  ? 'Срок гарантии истёк'
+                  : 'Guarantee expired'
+
+  const refillDescription = done
+    ? ru
+      ? 'Если показатели просядут, восстановим списания бесплатно в течение 48 часов после завершения.'
+      : 'If the numbers drop, we restore them free of charge within 48 hours of completion.'
+    : ru
+      ? 'Рефилл станет доступен после завершения заказа и будет действовать 48 часов.'
+      : 'Refill unlocks once the order completes and stays valid for 48 hours.'
 
   function doRefill() {
     const next = [...refills, Date.now()]
@@ -183,317 +212,178 @@ export function BoostOrderScreen({ order }: { order: Order }) {
       }
       refillOrder(order.id)
       setRefilling(false)
+      setJustSent(true)
       show(ru ? 'Рефилл отправлен в обработку' : 'Refill submitted')
+      window.setTimeout(() => setJustSent(false), 4000)
     }, 900)
   }
 
+  /* ── Status copy ─────────────────────────────────────────────────────── */
+  const statusTone: OrderTone = done ? 'success' : waiting ? 'neutral' : 'live'
+  const statusLabel = done
+    ? ru
+      ? 'Выполнен'
+      : 'Completed'
+    : waiting
+      ? ru
+        ? 'Заказ оформлен'
+        : 'Placed'
+      : ru
+        ? 'Выполняется'
+        : 'In progress'
 
-  async function copyId() {
-    await copyText(orderId)
-    show(ru ? 'ID заказа скопирован' : 'Order ID copied')
+  const serviceName = service?.name[lang] ?? order.title
+  const UNITS: Record<string, [string, string]> = {
+    followers: ['фолловеров', 'followers'],
+    likes: ['лайков', 'likes'],
+    retweets: ['репостов', 'reposts'],
+    views: ['просмотров', 'views'],
+    bookmarks: ['закладок', 'bookmarks'],
+    comments: ['комментариев', 'comments'],
   }
+  const unitWord = (UNITS[category] ?? ['ед.', 'units'])[ru ? 0 : 1]
+  const caption = done
+    ? ru
+      ? 'Заказ полностью выполнен и закрыт.'
+      : 'The order is fully delivered and closed.'
+    : waiting
+      ? ru
+        ? 'Заказ принят и скоро будет запущен.'
+        : 'The order is accepted and starts shortly.'
+      : ru
+        ? 'Заказ запущен, показатели растут в реальном времени.'
+        : 'The order is running and the numbers are growing live.'
 
   return (
-    <div className="mx-auto w-full max-w-[560px] pb-24">
-      <div className="px-4 pt-5">
-        <button
-          onClick={() => void navigate({ to: '/history' })}
-          className="flex items-center gap-2 text-[13px] font-semibold text-muted-foreground active:opacity-60"
-        >
-          <ArrowLeft className="size-4" />
-          {t('back')}
-        </button>
-      </div>
+    <div className="min-h-full">
+      <OrderHeader
+        title={ru ? 'Детали заказа' : 'Order details'}
+        backLabel={t('back')}
+        onBack={() => void navigate({ to: '/history' })}
+      />
 
-      {/* ── 1. Заголовок заказа ─────────────────────────────────────────── */}
-      <motion.section
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-        className="relative mt-3 overflow-hidden border-y border-border bg-card px-5 py-3.5 sm:mx-4 sm:rounded-[22px] sm:border"
+      <div
+        className="mx-auto flex w-full max-w-[520px] flex-col gap-4 px-4 pt-3"
+        style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 2rem)' }}
       >
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -right-16 -top-20 size-44 rounded-full bg-primary/10 blur-3xl"
-        />
-        <motion.div
-          aria-hidden
-          animate={{ x: ['-120%', '220%'] }}
-          transition={{ duration: 5.5, repeat: Infinity, ease: 'easeInOut', repeatDelay: 2.5 }}
-          className="pointer-events-none absolute inset-y-0 w-1/3 bg-linear-to-r from-transparent via-primary/[0.06] to-transparent"
-        />
-
-        {/* Строка 1: услуга + статус */}
-        <div className="relative flex items-center gap-3">
-          <div className="flex size-9 shrink-0 items-center justify-center">
-            {region ? <RegionMark region={region} className="size-9" /> : <Mark className="size-9" />}
-          </div>
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-[13.5px] font-bold leading-tight">
-              {service?.name[lang] ?? order.title}
-              {volume > 1 ? (
-                <>
-                  {' '}
-                  <span className="text-muted-foreground/50">·</span>{' '}
-                  <span className="tnum text-primary">{nf(volume)}</span>
-                </>
-              ) : null}
-            </p>
-            <div className="mt-1 flex items-center gap-1.5">
-              <motion.span
-                aria-hidden
-                animate={done ? {} : { opacity: [1, 0.2, 1] }}
-                transition={{ duration: 1.8, repeat: Infinity }}
-                className={`size-[5px] rounded-full ${done ? 'bg-success' : 'bg-primary'}`}
-              />
-              <span
-                className={`text-[9.5px] font-semibold uppercase tracking-[0.2em] ${done ? 'text-success/90' : 'text-primary/90'}`}
-              >
-                {done ? t('status_completed') : t('status_in_progress')}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* Строка 2: номер заказа */}
-        <button
-          onClick={() => void copyId()}
-          className="group relative mt-3 flex w-full items-center gap-2 border-t border-border/60 pt-2.5 text-left active:opacity-70"
-        >
-          <span className="text-[9.5px] font-bold uppercase tracking-[0.22em] text-muted-foreground/60">
-            {ru ? 'Ваш заказ' : 'Your order'}
-          </span>
-          <span className="tnum ml-auto font-display text-[15px] font-extrabold leading-none tracking-tight">
-            <span className="mr-0.5 text-[12px] font-bold text-primary/60">#</span>
-            {orderId}
-          </span>
-          <Copy className="size-3 text-muted-foreground/50 transition-colors group-hover:text-foreground" />
-        </button>
-      </motion.section>
-
-
-      {/* ── 2. Цель заказа ──────────────────────────────────────────────── */}
-      {isFollowers ? (
-        <FollowersTarget
-          profile={profile}
-          handle={handle}
-          start={startFollowers}
-          projected={projected}
-          live={liveFollowers}
-          done={done}
-          ru={ru}
-        />
-      ) : (
-        <PostTarget
-          tweet={tweet}
-          missing={tweetMissing}
-          handle={handle}
-          url={target}
-          ru={ru}
-          category={category}
-          volume={volume}
-          done={done}
-
+        <OrderSummaryCard
+          mark={
+            region ? <RegionMark region={region} className="size-7" /> : <Mark className="size-7" />
+          }
+          service={serviceName}
+          amountLabel={`${nf(volume)} ${unitWord}`}
+          orderId={orderId}
+          orderLabel={ru ? 'Номер заказа' : 'Order number'}
+          statusLabel={statusLabel}
+          statusTone={statusTone}
+          statusIcon={done ? <Check className="size-3.5" strokeWidth={3} /> : undefined}
+          caption={caption}
+          onCopied={() => show(ru ? 'Номер скопирован' : 'Number copied')}
         />
 
-      )}
+        {isFollowers ? (
+          <ProfilePreview
+            profile={profile}
+            handle={handle}
+            start={startFollowers}
+            projected={startFollowers + volume}
+            done={done}
+            ru={ru}
+            delay={0.05}
+          />
+        ) : (
+          <SocialPostPreview
+            tweet={tweet}
+            missing={tweetMissing}
+            handle={handle}
+            url={target}
+            ru={ru}
+            category={category}
+            volume={volume}
+            done={done}
+            delay={0.05}
+          />
+        )}
 
-      {/* ── 3. Статус заказа ────────────────────────────────────────────── */}
-      <motion.section
-        initial={{ opacity: 0, y: 14 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.12, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-        className="mt-3 border-y border-border bg-card sm:mx-4 sm:rounded-[26px] sm:border"
-      >
-        <div className="px-6 pb-7 pt-6">
-          <div className="flex items-center justify-between">
-            <h2 className="text-[10.5px] font-semibold uppercase tracking-[0.26em] text-muted-foreground/70">
-              {ru ? 'Статус заказа' : 'Order status'}
-            </h2>
-            {service ? (
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-border/60 px-2.5 py-1 text-[10px] font-medium text-muted-foreground/90">
-                <Gauge className="size-3 opacity-70" />
-                {service.speed[lang]}
-              </span>
-            ) : null}
-          </div>
-
-          <ol className="relative mt-7 flex flex-col gap-y-10">
-            <span
-              aria-hidden
-              className="pointer-events-none absolute inset-y-[38px] left-[15px] w-[2px] overflow-hidden rounded-full bg-foreground/[0.06]"
-            >
-              <motion.span
-                initial={{ scaleY: 0 }}
-                animate={{ scaleY: done ? 1 : 0.5 }}
-                transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
-                style={{ transformOrigin: 'top' }}
-                className="absolute inset-x-0 top-0 h-full rounded-full bg-linear-to-b from-success via-primary to-transparent"
-              />
-            </span>
-            <TimelineRow
-              tone="done"
-              label={ru ? 'Заказ оформлен' : 'Order placed'}
-              value={fullDate(order.date, lang)}
-            />
-            <TimelineRow
-              tone={done ? 'done' : 'live'}
-              label={ru ? 'Выполнение' : 'Delivery'}
-              value={
-                done
+        <OrderProgressCard
+          delay={0.1}
+          title={ru ? 'Выполнение заказа' : 'Delivery'}
+          badgeLabel={statusLabel}
+          badgeTone={statusTone}
+          delivered={delivered}
+          total={volume}
+          percent={percent}
+          percentLabel={
+            ru
+              ? `${Math.round(percent * 100)}% выполнено`
+              : `${Math.round(percent * 100)}% delivered`
+          }
+          etaLabel={
+            done
+              ? undefined
+              : waiting
+                ? ru
+                  ? 'Запуск в течение нескольких минут'
+                  : 'Starting within a few minutes'
+                : ru
+                  ? `Осталось примерно ${minutesLeft} мин`
+                  : `About ${minutesLeft} min remaining`
+          }
+          steps={[
+            {
+              label: ru ? 'Заказ оформлен' : 'Order placed',
+              meta: fullDate(order.date, lang),
+              state: 'done',
+            },
+            {
+              label: ru ? 'Выполнение' : 'Delivery',
+              meta: done
+                ? ru
+                  ? 'Готово'
+                  : 'Done'
+                : waiting
                   ? ru
-                    ? 'Все единицы доставлены'
-                    : 'All units delivered'
-                  : undefined
-              }
-              chip={
-                done
-                  ? undefined
-                  : { label: ru ? 'Идёт накрутка' : 'In progress', value: nf(volume) }
-              }
-            />
-            <TimelineRow
-              tone={done ? 'done' : 'idle'}
-              last
-              label={ru ? 'Заказ выполнен' : 'Completed'}
-              value={
-                done
-                  ? order.completedAt
-                    ? fullDate(order.completedAt, lang)
-                    : ru
-                      ? 'Готово'
-                      : 'Done'
+                    ? 'Скоро'
+                    : 'Soon'
+                  : `${Math.round(percent * 100)}%`,
+              state: done ? 'done' : waiting ? 'idle' : 'live',
+            },
+            {
+              label: ru ? 'Заказ завершён' : 'Completed',
+              meta: done
+                ? order.completedAt
+                  ? fullDate(order.completedAt, lang)
                   : ru
-                    ? 'Ожидается'
-                    : 'Pending'
-              }
-            />
-          </ol>
+                    ? 'Готово'
+                    : 'Done'
+                : ru
+                  ? 'Начнётся после выполнения'
+                  : 'After delivery',
+              state: done ? 'done' : 'idle',
+            },
+          ]}
+        />
 
+        {order.refillable ? (
+        <RefillGuaranteeCard
+          delay={0.15}
+          title={ru ? 'Гарантия рефилла' : 'Refill guarantee'}
+          countLabel={ru ? `${left} из ${REFILL_LIMIT}` : `${left} of ${REFILL_LIMIT}`}
+          description={refillDescription}
+          untilLabel={ru ? 'Гарантия действует до' : 'Guarantee valid until'}
+          untilValue={fullDate(windowEnd, lang)}
+          state={refillState}
+          buttonLabel={refillButtonLabel}
+          onRequest={() => setAskRefill(true)}
+        />
+        ) : null}
 
-        </div>
-
-        {/* Гарантия рефилла — отдельная «квитанция» */}
-        <div className="border-t border-dashed border-border/70 px-6 pb-7 pt-6">
-          <div className="flex items-baseline justify-between gap-3">
-            <span className="inline-flex items-center gap-2 text-[12px] font-semibold tracking-tight">
-              <ShieldCheck className="size-4 text-success/90" strokeWidth={2.2} />
-              {ru ? 'Гарантия рефилла' : 'Refill guarantee'}
-            </span>
-            <span className="tnum text-[11px] font-medium text-muted-foreground/80">
-              {REFILL_LIMIT - used} <span className="opacity-40">/</span> {REFILL_LIMIT}
-            </span>
-          </div>
-
-          <p className="mt-2.5 text-[11.5px] leading-[1.55] text-muted-foreground/85">
-            {ru ? (
-              <>
-                Доступно {REFILL_LIMIT} рефилла в течение 48 часов после покупки — до{' '}
-                <span className="tnum font-medium text-foreground/80">
-                  {fullDate(windowEnd, lang)}
-                </span>
-                .
-              </>
-            ) : (
-              <>
-                {REFILL_LIMIT} refills within 48 hours of purchase — until{' '}
-                <span className="tnum font-medium text-foreground/80">
-                  {fullDate(windowEnd, lang)}
-                </span>
-                .
-              </>
-            )}
-          </p>
-
-          <motion.button
-            type="button"
-            onClick={() => canRefill && !refilling && setAskRefill(true)}
-            aria-disabled={!canRefill || refilling}
-            whileTap={canRefill ? { scale: 0.98 } : {}}
-            transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-            className={`group relative mt-4 flex w-full items-center justify-between gap-3 overflow-hidden rounded-2xl border p-3.5 transition-all duration-300 ease-in-out ${
-              canRefill
-                ? 'border-foreground/[0.09] bg-linear-to-br from-foreground/[0.08] to-foreground/[0.02] hover:border-primary/25'
-                : 'border-border/70 bg-transparent opacity-60'
-            }`}
-          >
-            {canRefill ? (
-              <span
-                aria-hidden
-                className="pointer-events-none absolute inset-0 -translate-x-full bg-linear-to-r from-transparent via-foreground/[0.06] to-transparent transition-transform duration-1000 group-hover:translate-x-full"
-              />
-            ) : null}
-
-            <span className="relative z-10 flex min-w-0 items-center gap-3">
-              <span
-                className={`flex size-9 shrink-0 items-center justify-center rounded-xl border transition-colors duration-300 ${
-                  canRefill
-                    ? 'border-primary/25 bg-primary/10'
-                    : 'border-border/70 bg-transparent'
-                }`}
-              >
-                <RotateCw
-                  className={`size-[18px] transition-transform duration-300 ease-in-out ${
-                    canRefill ? 'text-primary' : 'text-muted-foreground/70'
-                  } ${refilling ? 'animate-spin' : canRefill ? 'group-hover:-translate-y-px' : ''}`}
-                  strokeWidth={2}
-                />
-              </span>
-              <span className="min-w-0 text-left">
-                <span className="block text-[14px] font-bold tracking-tight text-foreground">
-                  {refilling
-                    ? ru
-                      ? 'Отправляем…'
-                      : 'Submitting…'
-                    : ru
-                      ? 'Запросить рефилл'
-                      : 'Request refill'}
-                </span>
-                <span className="mt-0.5 block truncate text-[10.5px] font-medium uppercase tracking-[0.18em] text-muted-foreground/60">
-                  {canRefill
-                    ? ru
-                      ? 'Доступно сейчас'
-                      : 'Available now'
-                    : !order.refillable
-                      ? ru
-                        ? 'Не предусмотрен'
-                        : 'Not available'
-                      : used >= REFILL_LIMIT
-                        ? ru
-                          ? 'Лимит исчерпан'
-                          : 'Limit reached'
-                        : ru
-                          ? 'Окно закрыто'
-                          : 'Window closed'}
-                </span>
-              </span>
-            </span>
-
-            <span className="relative z-10 flex shrink-0 items-center gap-1">
-              {Array.from({ length: REFILL_LIMIT }).map((_, i) => {
-                const on = i < REFILL_LIMIT - used
-                return (
-                  <motion.span
-                    key={i}
-                    initial={{ scaleY: 0.4, opacity: 0 }}
-                    animate={{ scaleY: 1, opacity: 1 }}
-                    transition={{ duration: 0.4, delay: i * 0.06, ease: [0.22, 1, 0.36, 1] }}
-                    className={`h-5 w-1 rounded-full transition-all duration-300 ease-in-out ${
-                      on && canRefill
-                        ? 'bg-primary shadow-[0_0_8px_-1px_color-mix(in_oklab,var(--primary)_60%,transparent)]'
-                        : on
-                          ? 'bg-foreground/25'
-                          : 'bg-foreground/10'
-                    }`}
-                  />
-                )
-              })}
-            </span>
-          </motion.button>
-        </div>
-
-      </motion.section>
-
+        <SupportAction
+          label={ru ? 'Нужна помощь?' : 'Need help?'}
+          hint={ru ? 'Проблема с заказом — напишите в поддержку' : 'Something wrong? Contact support'}
+          onClick={() => void navigate({ to: '/support' })}
+        />
+      </div>
 
       <AnimatePresence>
         {askRefill ? (
@@ -509,106 +399,27 @@ export function BoostOrderScreen({ order }: { order: Order }) {
   )
 }
 
-/* ── Timeline row ─────────────────────────────────────────────────────── */
-function TimelineRow({
-  tone,
-  label,
-  value,
-  chip,
-}: {
-  tone: 'done' | 'live' | 'idle'
-  label: string
-  value?: string
-  last?: boolean
-  chip?: { label: string; value: string }
-}) {
-  return (
-    <li className="relative flex items-start gap-4">
-      <span className="relative z-10 flex size-8 shrink-0 items-center justify-center">
-        {tone === 'done' ? (
-          <span className="flex size-8 items-center justify-center rounded-full border border-success/25 bg-card shadow-[0_0_18px_-6px_color-mix(in_oklab,var(--success)_70%,transparent)]">
-            <span className="flex size-full items-center justify-center rounded-full bg-success/10">
-              <Check className="size-4 shrink-0 text-success" strokeWidth={2.6} />
-            </span>
-          </span>
-
-        ) : tone === 'live' ? (
-          <>
-            <motion.span
-              aria-hidden
-              animate={{ scale: [0.85, 1.15, 0.85], opacity: [0.35, 0.12, 0.35] }}
-              transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }}
-              className="absolute size-8 rounded-full bg-primary/25"
-            />
-            <span className="relative size-4 rounded-full bg-primary ring-4 ring-card shadow-[0_0_14px_-2px_color-mix(in_oklab,var(--primary)_75%,transparent)]" />
-          </>
-        ) : (
-          <span className="flex size-8 items-center justify-center rounded-full border border-border/70 bg-card">
-            <span className="size-2 rounded-full bg-foreground/15" />
-          </span>
-        )}
-      </span>
-
-      <div className={`min-w-0 flex-1 pt-1 ${tone === 'idle' ? 'opacity-45' : ''}`}>
-        <div className="flex items-center gap-2">
-          <p
-            className={`text-[15px] font-semibold leading-tight tracking-tight transition-colors duration-300 ease-in-out ${
-              tone === 'live' ? 'text-primary' : 'text-foreground/90'
-            }`}
-          >
-            {label}
-          </p>
-          {tone === 'live' ? (
-            <motion.span
-              aria-hidden
-              animate={{ scale: [1, 1.9], opacity: [0.55, 0] }}
-              transition={{ duration: 1.8, repeat: Infinity, ease: 'easeOut' }}
-              className="size-1 rounded-full bg-primary"
-            />
-
-          ) : null}
-        </div>
-
-        {value ? (
-          <p className="tnum mt-1 text-[13px] leading-tight text-muted-foreground/70">{value}</p>
-        ) : null}
-
-        {chip ? (
-          <div className="mt-2 inline-flex w-fit items-center gap-2 overflow-hidden rounded-lg border border-foreground/[0.07] bg-foreground/[0.03] px-3 py-1.5">
-            <span className="text-[12px] font-medium text-foreground/70">{chip.label}</span>
-            <span className="h-3 w-px bg-foreground/10" />
-            <span className="tnum text-[12px] font-bold text-primary">{chip.value}</span>
-          </div>
-        ) : null}
-      </div>
-    </li>
-
-  )
-}
-
-
-
-/* ── Followers target: X profile card with growth arrow ───────────────── */
-function FollowersTarget({
+/* ── Followers target: compact profile card ───────────────────────────── */
+function ProfilePreview({
   profile,
   handle,
   start,
   projected,
-  live,
   done,
   ru,
+  delay,
 }: {
   profile: XProfileRow | null
   handle: string
   start: number
   projected: number
-  live: number
   done: boolean
   ru: boolean
+  delay?: number
 }) {
   const p = profile && !profile.not_found ? profile : null
   const vt = (p?.verified_type ?? '').toLowerCase()
-  const verifiedTone =
+  const tone =
     p && (p.is_blue_verified || p.is_verified || vt)
       ? vt === 'business' || vt === 'organization'
         ? 'text-[#e2b719]'
@@ -618,279 +429,52 @@ function FollowersTarget({
       : null
 
   return (
-    <motion.section
-      initial={{ opacity: 0, y: 14 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.06, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-      className="mt-3 overflow-hidden border-y border-white/10 bg-black sm:mx-4 sm:rounded-[26px] sm:border"
-    >
-      <div className="h-[78px] overflow-hidden bg-[#333639]">
-        {p?.banner_url ? <img src={p.banner_url} alt="" className="size-full object-cover" /> : null}
-      </div>
-
-      <div className="px-4 pb-4">
-        <div className="-mt-10 flex size-[72px] items-center justify-center overflow-hidden rounded-full border-[4px] border-black bg-[#1d1f23]">
+    <OrderCard delay={delay} className="p-4">
+      <div className="flex items-center gap-3">
+        <span className="flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white/[0.06]">
           {p?.avatar_url ? (
             <img src={p.avatar_url} alt="" className="size-full object-cover" />
           ) : (
-            <AurxMark className="size-[70%] opacity-90" />
+            <AurxMark className="size-[65%] opacity-90" />
           )}
-        </div>
-
-        <div className="mt-2">
-          <p
-            className="flex items-center gap-1 text-[19px] font-extrabold leading-tight tracking-[-0.01em] text-white"
-            style={{ fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif' }}
-          >
-            <span className="min-w-0 truncate">{p?.name || handle || '—'}</span>
-            {verifiedTone ? (
-              <VerifiedBadge className={`size-[19px] shrink-0 ${verifiedTone}`} />
-            ) : null}
-          </p>
-          <p className="text-[14px] leading-tight text-[#71767b]">@{handle || 'username'}</p>
-        </div>
-
-        {/* Followers: current → projected */}
-        <div className="mt-4 rounded-2xl border border-white/10 bg-white/[0.03] p-3">
-          <p className="text-[9.5px] font-bold uppercase tracking-[0.22em] text-white/40">
-            {ru ? 'Фолловеры' : 'Followers'}
-          </p>
-          {done ? (
-            <div className="mt-1.5 flex items-baseline gap-2">
-              <Digits value={live} className="font-display text-[26px] font-black text-white" />
-              <span className="inline-flex items-center gap-1 text-[11px] font-bold text-success">
-                <BadgeCheck className="size-3.5" />
-                {ru ? 'доставлено' : 'delivered'}
-              </span>
-            </div>
-          ) : (
-            <div className="mt-1.5 flex flex-wrap items-center gap-x-2.5 gap-y-1">
-              <span className="tnum font-display text-[22px] font-black leading-none text-white/85">
-                {nf(start)}
-              </span>
-              <motion.span
-                aria-hidden
-                animate={{ x: [0, 5, 0], opacity: [0.55, 1, 0.55] }}
-                transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
-                className="text-primary"
-              >
-                <svg viewBox="0 0 34 12" className="h-3 w-8">
-                  <path
-                    d="M1 6h27M23 1.5 28.5 6 23 10.5"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </motion.span>
-              <motion.span
-                animate={{ opacity: [0.75, 1, 0.75] }}
-                transition={{ duration: 2.2, repeat: Infinity }}
-                className="tnum font-display text-[22px] font-black leading-none text-primary"
-              >
-                {nf(projected)}
-              </motion.span>
-              <span className="text-[10.5px] font-semibold text-white/40">
-                {ru ? '(примерно)' : '(approx.)'}
-              </span>
-            </div>
-          )}
-          {!done ? (
-            <p className="mt-2 text-[10.5px] leading-relaxed text-white/45">
-              {ru
-                ? 'Значение обновится автоматически, как только заказ будет выполнен.'
-                : 'The number updates automatically once the order is complete.'}
-            </p>
-          ) : null}
-        </div>
-      </div>
-    </motion.section>
-  )
-}
-
-/* ── Метрика поста, которую крутим ────────────────────────────────────── */
-const METRIC_TINT: Record<string, string> = {
-  reply: '#1d9bf0',
-  reposts: '#00ba7c',
-  likes: '#f91880',
-  views: '#1d9bf0',
-  bookmarks: '#1d9bf0',
-}
-
-
-
-/* ── Post target: tweet card ──────────────────────────────────────────── */
-function PostTarget({
-  tweet,
-  missing,
-  handle,
-  url,
-  ru,
-  category,
-  volume,
-  done,
-}: {
-  tweet: XTweet | null
-  missing: boolean
-  handle: string
-  url: string
-  ru: boolean
-  category: string
-  volume: number
-  done: boolean
-}) {
-  const p = tweet && !tweet.not_found ? tweet : null
-  const href = url.startsWith('http') ? url : handle ? `https://x.com/${handle}` : null
-  const loading = !p && !missing
-  const tone = p ? verifiedTone(p) : null
-  const text = p
-    ? decodeTweetText(p.text)
-        .replace(/\s*https:\/\/t\.co\/\w+\s*$/g, '')
-        .trim()
-    : ''
-  const postedAt = p?.posted_at
-    ? new Date(p.posted_at).toLocaleDateString(ru ? 'ru-RU' : 'en-US', {
-        month: 'short',
-        day: 'numeric',
-      })
-    : ''
-
-  return (
-    <motion.section
-      initial={{ opacity: 0, y: 14 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.06, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-      className="relative mx-4 mt-3 mb-5 overflow-hidden rounded-2xl border border-white/10 bg-black"
-      style={{ fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif' }}
-    >
-      {loading ? (
-        /* ── скелетон, пока подтягиваем пост ── */
-        <div className="flex animate-pulse gap-3 px-4 py-3.5">
-          <div className="size-11 shrink-0 rounded-full bg-white/[0.07]" />
-          <div className="min-w-0 flex-1 space-y-2 pt-1">
-            <div className="h-3 w-1/3 rounded-full bg-white/[0.07]" />
-            <div className="h-3 w-full rounded-full bg-white/[0.05]" />
-            <div className="h-3 w-4/5 rounded-full bg-white/[0.05]" />
-            <div className="h-3 w-24 rounded-full bg-white/[0.04]" />
-          </div>
-        </div>
-      ) : p ? (
-        /* ── реальный пост: текст и метрики на всю ширину карточки ── */
-        <div className="px-4 pt-3.5 pb-3">
-          <div className="flex items-center gap-2.5">
-            <div className="flex size-[40px] shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#1d1f23]">
-              {p.author_avatar_url ? (
-                <img src={p.author_avatar_url} alt="" className="size-full object-cover" />
-              ) : (
-                <AurxMark className="size-[70%] opacity-90" />
-              )}
-            </div>
-            <div className="flex min-w-0 flex-1 items-center gap-1 overflow-hidden">
-              <span className="shrink-0 truncate text-[15px] leading-5 font-bold text-white">
-                {p.author_name || handle || '—'}
-              </span>
-              {tone ? <VerifiedBadge className={`size-[16px] shrink-0 ${tone}`} /> : null}
-              <span className="min-w-0 truncate text-[15px] leading-5 text-[#71767b]">
-                @{p.author_username || handle}
-              </span>
-              {postedAt ? (
-                <span className="shrink-0 whitespace-nowrap text-[15px] leading-5 text-[#71767b]">
-                  · {postedAt}
-                </span>
-              ) : null}
-            </div>
-            <span className="flex size-7 shrink-0 items-center justify-center rounded-full text-[#71767b]">
-              <MoreHorizontal className="size-[18px]" strokeWidth={2} />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="flex min-w-0 items-center gap-1">
+            <span className="truncate text-[15px] font-semibold leading-tight">
+              {p?.name || handle || '—'}
             </span>
-          </div>
+            {tone ? <VerifiedBadge className={`size-[15px] shrink-0 ${tone}`} /> : null}
+          </span>
+          <span className="mt-0.5 block truncate text-[13px] leading-tight text-muted-foreground">
+            @{handle || 'username'}
+          </span>
+        </span>
+        <StatusBadge
+          tone={done ? 'success' : 'neutral'}
+          label={done ? (ru ? 'Доставлено' : 'Delivered') : ru ? 'Цель' : 'Target'}
+          icon={
+            done ? (
+              <Check className="size-3.5" strokeWidth={3} />
+            ) : (
+              <Clock3 className="size-3.5" strokeWidth={2.2} />
+            )
+          }
+        />
+      </div>
 
-          {text ? (
-            <p className="mt-2.5 whitespace-pre-wrap break-words text-[15px] leading-[21px] text-white">
-              {text}
-            </p>
-          ) : null}
-
-          <div className="mt-3 flex items-center gap-[18px] text-[#71767b]">
-            {(
-              [
-                { key: 'reply', icon: MessageCircle, size: 16.5, value: p.reply_count ?? 0 },
-                { key: 'reposts', icon: Repeat2, size: 17.5, value: p.retweet_count ?? 0 },
-                { key: 'likes', icon: Heart, size: 16.5, value: p.like_count ?? 0 },
-                { key: 'views', icon: BarChart3, size: 16.5, value: p.view_count ?? 0 },
-                { key: 'bookmarks', icon: Bookmark, size: 16.5, value: p.bookmark_count ?? 0 },
-              ] as const
-            ).map((m) => {
-              const Icon = m.icon
-              const isTarget = m.key === category
-              const active = isTarget && done
-              const tint = METRIC_TINT[m.key]
-              const value = active && isTarget ? m.value + volume : m.value
-              return (
-                <span
-                  key={m.key}
-                  className="flex shrink-0 items-center gap-1.5 whitespace-nowrap"
-                  style={active ? { color: tint } : undefined}
-                >
-                  <Icon
-                    className="shrink-0"
-                    style={{ width: m.size, height: m.size }}
-                    strokeWidth={1.7}
-                    fill={active && (m.key === 'likes' || m.key === 'bookmarks') ? tint : 'none'}
-                  />
-                  {value > 0 ? (
-                    <span
-                      className={`text-[13px] leading-none tabular-nums ${active ? 'font-semibold' : ''}`}
-                    >
-                      {compactNumber(value)}
-                    </span>
-                  ) : null}
-                </span>
-              )
-            })}
-          </div>
-        </div>
-
-
-
-      ) : (
-        /* ── превью недоступно: честный компактный блок ── */
-        <div className="flex items-start gap-3 px-4 py-3.5">
-          <div className="flex size-11 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.03]">
-            <AurxMark className="size-[55%] opacity-70" />
-          </div>
-          <div className="min-w-0 flex-1">
-            <p className="text-[13px] font-bold leading-tight text-white">
-              {ru ? 'Превью поста недоступно' : 'Post preview unavailable'}
-            </p>
-            <p className="mt-1 text-[12px] leading-snug text-white/45">
-              {ru
-                ? 'Заказ выполняется по ссылке, которую вы указали при оформлении.'
-                : 'The order runs on the link you submitted at checkout.'}
-            </p>
-            {url ? (
-              <p className="mt-2 truncate rounded-lg border border-white/10 bg-white/[0.03] px-2 py-1 text-[11px] text-white/55">
-                {url}
-              </p>
-            ) : null}
-            {href ? (
-              <a
-                href={href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-2.5 inline-block max-w-full truncate rounded-full border border-white/15 px-3 py-1 text-[11px] font-semibold text-white/70 active:scale-95"
-              >
-                {ru ? 'Открыть в X' : 'Open in X'}
-              </a>
-            ) : null}
-          </div>
-        </div>
-      )}
-    </motion.section>
+      <div className="mt-3 flex items-center justify-between gap-3 rounded-xl bg-white/[0.04] px-3 py-2.5">
+        <span className="text-[13px] text-muted-foreground">
+          {ru ? 'Фолловеры' : 'Followers'}
+        </span>
+        <span className="tabular-nums text-[13.5px] font-semibold">
+          {nf(start)}
+          <span className="mx-1.5 text-muted-foreground">→</span>
+          <span className="text-primary">{nf(projected)}</span>
+        </span>
+      </div>
+    </OrderCard>
   )
 }
-
 
 /* ── Refill confirmation sheet ────────────────────────────────────────── */
 function RefillSheet({
@@ -919,16 +503,16 @@ function RefillSheet({
         exit={{ y: 40, opacity: 0 }}
         transition={{ type: 'spring', stiffness: 420, damping: 38 }}
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-[520px] rounded-t-[28px] border-t border-border bg-card px-5 pb-[max(2rem,env(safe-area-inset-bottom))] pt-3"
+        className="w-full max-w-[520px] rounded-t-[24px] border-t border-white/[0.07] bg-card px-5 pb-[max(2rem,env(safe-area-inset-bottom))] pt-3"
       >
-        <div className="mx-auto mb-5 h-1 w-9 rounded-full bg-border" />
+        <div className="mx-auto mb-5 h-1 w-9 rounded-full bg-white/15" />
 
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <h3 className="text-[17px] font-semibold leading-tight tracking-tight">
               {ru ? 'Запросить рефилл' : 'Request a refill'}
             </h3>
-            <p className="mt-1.5 text-[12.5px] leading-[1.55] text-muted-foreground">
+            <p className="mt-1.5 text-[13px] leading-[1.5] text-muted-foreground">
               {ru
                 ? 'Дозакажем недостающие единицы и вернём заказ в работу.'
                 : 'We top up the missing units and put the order back in progress.'}
@@ -937,17 +521,17 @@ function RefillSheet({
           <button
             onClick={onClose}
             aria-label="Close"
-            className="-mr-1 flex size-8 shrink-0 items-center justify-center rounded-full text-muted-foreground/70 transition-colors active:text-foreground"
+            className="-mr-1 flex size-11 shrink-0 items-center justify-center rounded-full text-muted-foreground active:text-foreground"
           >
             <X className="size-[18px]" />
           </button>
         </div>
 
-        <dl className="mt-5 space-y-2.5 border-t border-border/70 pt-4 text-[12.5px]">
+        <dl className="mt-4 space-y-2.5 border-t border-white/[0.06] pt-4 text-[13px]">
           <div className="flex items-center justify-between gap-3">
             <dt className="text-muted-foreground">{ru ? 'Использовано' : 'Used'}</dt>
-            <dd className="tnum font-medium">
-              {used} <span className="text-muted-foreground/50">/ {REFILL_LIMIT}</span>
+            <dd className="tabular-nums font-medium">
+              {used} <span className="text-muted-foreground">/ {REFILL_LIMIT}</span>
             </dd>
           </div>
           <div className="flex items-center justify-between gap-3">
@@ -963,19 +547,18 @@ function RefillSheet({
         <div className="mt-5 grid grid-cols-[1fr_1.4fr] gap-2.5">
           <button
             onClick={onClose}
-            className="h-[52px] rounded-[16px] border border-border/80 text-[13.5px] font-medium text-muted-foreground transition-colors active:bg-secondary/40"
+            className="h-12 rounded-xl bg-white/[0.05] text-[14px] font-medium text-muted-foreground ring-1 ring-inset ring-white/[0.07] active:scale-[0.98]"
           >
             {ru ? 'Отмена' : 'Cancel'}
           </button>
           <button
             onClick={onConfirm}
-            className="h-[52px] rounded-[16px] bg-primary text-[13.5px] font-semibold tracking-tight text-primary-foreground shadow-[inset_0_1px_0_color-mix(in_oklab,white_28%,transparent),0_16px_34px_-24px_color-mix(in_oklab,var(--primary)_80%,transparent)] transition-transform active:scale-[0.985]"
+            className="h-12 rounded-xl bg-primary text-[14px] font-semibold tracking-tight text-primary-foreground shadow-[inset_0_1px_0_color-mix(in_oklab,white_28%,transparent)] transition-transform active:scale-[0.98]"
           >
-            {ru ? 'Подтвердить рефилл' : 'Confirm refill'}
+            {ru ? 'Подтвердить' : 'Confirm refill'}
           </button>
         </div>
       </motion.div>
-
     </motion.div>
   )
 }
