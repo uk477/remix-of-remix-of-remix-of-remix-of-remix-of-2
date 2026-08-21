@@ -51,6 +51,7 @@ type DBTopupStatus = 'pending' | 'success' | 'declined' | 'expired'
 
 function dbToOrderStatus(s: DBOrderStatus): OrderStatus {
   if (s === 'completed' || s === 'refunded') return 'completed'
+  if (s === 'declined') return 'cancelled'
   if (s === 'in_progress') return 'in_progress'
   return 'waiting'
 }
