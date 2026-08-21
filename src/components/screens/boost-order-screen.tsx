@@ -138,58 +138,77 @@ export function BoostOrderScreen({ order }: { order: Order }) {
   const [askRefill, setAskRefill] = useState(false)
   const [refilling, setRefilling] = useState(false)
   const [justSent, setJustSent] = useState(false)
+  const [refillError, setRefillError] = useState(false)
   useEffect(() => setRefills(readRefills(order.id)), [order.id])
 
   // Гарантия отсчитывается от завершения заказа. Пока заказ не завершён,
   // окно ещё не стартовало — значит истечь оно не может.
   const windowStart = done ? (order.completedAt ?? order.date) : null
   const windowEnd = windowStart != null ? windowStart + REFILL_WINDOW_MS : null
-  const inWindow = windowEnd == null || now < windowEnd
+  const expired = windowEnd != null && now >= windowEnd
   const used = refills.length
-  const left = REFILL_LIMIT - used
-  const canRefill = Boolean(order.refillable) && inWindow && left > 0
+  const left = Math.max(0, REFILL_LIMIT - used)
 
+  // Единая state machine — ровно одно состояние в каждый момент времени.
   const refillState: RefillState = refilling
     ? 'loading'
     : justSent
       ? 'sent'
-      : canRefill
-        ? 'available'
-        : 'unavailable'
+      : refillError
+        ? 'error'
+        : left <= 0
+          ? 'exhausted'
+          : expired
+            ? 'expired'
+            : !done
+              ? 'pending'
+              : 'available'
 
-  const refillButtonLabel =
-    refillState === 'loading'
+  const refillButtonLabel = {
+    loading: ru ? 'Отправляем…' : 'Submitting…',
+    sent: ru ? 'Рефилл запрошен' : 'Refill requested',
+    error: ru ? 'Повторить запрос' : 'Try again',
+    exhausted: ru ? 'Лимит исчерпан' : 'Limit reached',
+    expired: ru ? 'Срок гарантии истёк' : 'Guarantee expired',
+    pending: ru ? 'Доступно после завершения' : 'Available after completion',
+    available: ru ? 'Сделать рефилл' : 'Request refill',
+  }[refillState]
+
+  const refillStatusValue = {
+    loading: ru ? 'Запрос обрабатывается' : 'Processing request',
+    sent: ru ? 'Запрос принят' : 'Request accepted',
+    error: ru ? 'Не удалось отправить' : 'Request failed',
+    exhausted: ru ? 'Все рефиллы использованы' : 'All refills used',
+    expired: ru ? 'Гарантия завершена' : 'Guarantee ended',
+    pending: ru ? 'Активируется после завершения' : 'Starts after completion',
+    available: windowEnd != null ? fullDate(windowEnd, lang) : ru ? '48 ч после завершения' : '48 h after completion',
+  }[refillState]
+
+  const refillBadgeLabel =
+    left <= 0
       ? ru
-        ? 'Отправляем…'
-        : 'Submitting…'
-      : refillState === 'sent'
+        ? 'Исчерпано'
+        : 'Used up'
+      : refillState === 'expired'
         ? ru
-          ? 'Рефилл запрошен'
-          : 'Refill requested'
-
-        : refillState === 'available'
+          ? 'Истекло'
+          : 'Expired'
+        : refillState === 'pending'
           ? ru
-            ? 'Сделать рефилл'
-            : 'Request refill'
-          : !order.refillable
-            ? ru
-              ? 'Не предусмотрен'
-              : 'Not included'
-            : left <= 0
-              ? ru
-                ? 'Лимит исчерпан'
-                : 'Limit reached'
-              : ru
-                ? 'Срок гарантии истёк'
-                : 'Guarantee expired'
+            ? 'Скоро'
+            : 'Soon'
+          : ru
+            ? `${left} доступны`
+            : `${left} available`
 
-  const refillDescription = ru
-    ? `Доступно ${left} из ${REFILL_LIMIT} рефиллов. Если показатели просядут, восстановим списания бесплатно в течение 48 часов.`
-    : `${left} of ${REFILL_LIMIT} refills available. If the numbers drop, we restore them free of charge within 48 hours.`
+
+
 
   function doRefill() {
+    if (refilling) return
     const next = [...refills, Date.now()]
     setAskRefill(false)
+    setRefillError(false)
     setRefilling(true)
     window.setTimeout(() => {
       setRefills(next)
@@ -205,6 +224,7 @@ export function BoostOrderScreen({ order }: { order: Order }) {
       window.setTimeout(() => setJustSent(false), 4000)
     }, 900)
   }
+
 
   /* ── Status copy ─────────────────────────────────────────────────────── */
   const statusTone: OrderTone = cancelled ? 'danger' : done ? 'success' : waiting ? 'neutral' : 'live'
@@ -464,28 +484,21 @@ export function BoostOrderScreen({ order }: { order: Order }) {
                 title={ru ? 'Рефилл-гарантия' : 'Refill guarantee'}
                 used={used}
                 total={REFILL_LIMIT}
-                availableLabel={
-                  ru ? `${left} доступны` : `${left} available`
-                }
+                badgeLabel={refillBadgeLabel}
                 countLabel={
-                  ru ? `Осталось ${left} из ${REFILL_LIMIT}` : `${left} of ${REFILL_LIMIT} left`
+                  ru ? `Использовано ${used} из ${REFILL_LIMIT}` : `${used} of ${REFILL_LIMIT} used`
                 }
                 description={
                   ru
                     ? 'Бесплатно восстановим списанные показатели.'
                     : 'We restore lost metrics free of charge.'
                 }
-                untilValue={
-                  windowEnd != null
-                    ? fullDate(windowEnd, lang)
-                    : ru
-                      ? '48 ч после завершения'
-                      : '48 h after completion'
-                }
+                statusValue={refillStatusValue}
                 state={refillState}
                 buttonLabel={refillButtonLabel}
                 onRequest={() => setAskRefill(true)}
               />
+
 
             ) : null}
 
