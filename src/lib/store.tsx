@@ -9,6 +9,11 @@ import {
 } from 'react'
 import { useLocalState } from './persistent-state'
 import type { CartItem, Order, OrderStatus, Topup, TopupStatus } from './types'
+import {
+  dbStatusToOrderStatus,
+  orderStatusToDbStatus,
+  type DbOrderStatus,
+} from './order-status'
 import { supabase } from '@/integrations/supabase/client'
 import { useAuth } from './auth'
 import { TEST_ORDERS_EVENT, loadTestOrders } from './demo-orders'
@@ -46,25 +51,16 @@ const K = {
 } as const
 
 // ─── Mappers between DB rows and local shapes ────────────────────────────────
-type DBOrderStatus = 'pending' | 'in_progress' | 'waiting' | 'completed' | 'declined' | 'refunded'
+type DBOrderStatus = DbOrderStatus
 type DBTopupStatus = 'pending' | 'success' | 'declined' | 'expired'
 
-function dbToOrderStatus(s: DBOrderStatus): OrderStatus {
-  if (s === 'completed' || s === 'refunded') return 'completed'
-  if (s === 'declined') return 'cancelled'
-  if (s === 'in_progress') return 'in_progress'
-  return 'waiting'
-}
+const dbToOrderStatus = dbStatusToOrderStatus
+const orderStatusToDB = orderStatusToDbStatus
 
 function dbToTopupStatus(s: DBTopupStatus): TopupStatus {
   if (s === 'success') return 'success'
   if (s === 'pending') return 'pending'
   return 'declined'
-}
-
-function orderStatusToDB(s: OrderStatus): DBOrderStatus {
-  if (s === 'cancelled') return 'declined'
-  return s === 'waiting' ? 'pending' : s
 }
 
 function topupStatusToDB(s: TopupStatus): DBTopupStatus {

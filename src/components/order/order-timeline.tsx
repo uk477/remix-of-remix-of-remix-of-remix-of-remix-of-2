@@ -9,6 +9,8 @@ export type TimelineStep = {
   label: string
   meta?: string
   state: 'done' | 'live' | 'idle' | 'danger'
+  /** Цвет активной точки: gold по умолчанию, green для refill, blue для возврата. */
+  tone?: 'primary' | 'success' | 'info'
   /** Optional icon override for the node. */
   icon?: ReactNode
 }
@@ -18,6 +20,10 @@ export type TimelineStep = {
  * node that breathes, a hollow marker for what is still ahead, and a red X
  * for cancelled / failed steps.
  */
+function liveColor(tone: TimelineStep['tone']) {
+  return tone === 'success' ? 'var(--success)' : tone === 'info' ? 'var(--info)' : 'var(--primary)'
+}
+
 export function OrderTimeline({ steps }: { steps: TimelineStep[] }) {
   const reduce = useReducedMotion()
   return (
@@ -84,13 +90,15 @@ export function OrderTimeline({ steps }: { steps: TimelineStep[] }) {
                     aria-hidden
                     animate={{ scale: [1, 2.2], opacity: [0.4, 0] }}
                     transition={{ duration: 2.2, repeat: Infinity, ease: 'easeOut' }}
-                    className="absolute size-[9px] rounded-full bg-primary"
+                    className="absolute size-[9px] rounded-full"
+                    style={{ background: liveColor(s.tone) }}
                   />
                 )}
                 <span
-                  className="relative size-[9px] rounded-full bg-primary"
+                  className="relative size-[9px] rounded-full"
                   style={{
-                    boxShadow: '0 0 10px -1px color-mix(in oklab, var(--primary) 80%, transparent)',
+                    background: liveColor(s.tone),
+                    boxShadow: `0 0 10px -1px color-mix(in oklab, ${liveColor(s.tone)} 80%, transparent)`,
                   }}
                 />
               </>

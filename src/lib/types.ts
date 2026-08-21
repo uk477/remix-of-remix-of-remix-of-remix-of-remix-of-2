@@ -108,7 +108,14 @@ export type CartItem = {
   meta?: Record<string, string>
 }
 
-export type OrderStatus = 'waiting' | 'in_progress' | 'completed' | 'cancelled'
+export type OrderStatus =
+  | 'waiting'
+  | 'in_progress'
+  | 'completed'
+  | 'cancelled'
+  | 'refilling'
+  | 'refunded'
+  | 'failed'
 
 export type Order = {
   id: string

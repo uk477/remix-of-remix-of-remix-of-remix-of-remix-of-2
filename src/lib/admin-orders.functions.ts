@@ -75,3 +75,59 @@ export const adminOrderRefills = createServerFn({ method: 'POST' })
     if (error) throw new Error(error.message)
     return res as unknown as AdminRefillOverview
   })
+
+/* ── Возврат средств ─────────────────────────────────────────────────────
+ * Ручной (админ) и автоматический (ошибка выполнения) возврат идут через
+ * одну и ту же серверную функцию `refund_order`, которая проверяет заказ,
+ * оплату, владельца и идемпотентность (одна запись возврата на orderId).
+ */
+
+export type RefundResult = {
+  refundId: string
+  orderId: string
+  userId: string
+  amount: number
+  refundSource: 'admin' | 'automatic_error'
+  status: 'processing' | 'completed' | 'failed'
+  alreadyRefunded: boolean
+  orderStatus: string
+  serverNow: string
+}
+
+export type RefundState = {
+  orderId: string
+  orderStatus: string
+  refunded: boolean
+  refundId: string | null
+  refundSource: 'admin' | 'automatic_error' | null
+  refundStatus: 'processing' | 'completed' | 'failed' | null
+  amount: number | null
+  completedAt: string | null
+  serverNow: string
+}
+
+export const adminRefundOrder = createServerFn({ method: 'POST' })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { orderId: string; reason?: string }) => ({
+    orderId: parseAdminOrderId(input?.orderId),
+    reason: input?.reason ? String(input.reason).slice(0, 300) : undefined,
+  }))
+  .handler(async ({ data, context }) => {
+    const { data: res, error } = await context.supabase.rpc('admin_refund_order', {
+      _order_id: data.orderId,
+      _reason: data.reason ?? undefined,
+    })
+    if (error) throw new Error(error.message)
+    return res as unknown as RefundResult
+  })
+
+export const getOrderRefundState = createServerFn({ method: 'POST' })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { orderId: string }) => ({ orderId: parseAdminOrderId(input?.orderId) }))
+  .handler(async ({ data, context }) => {
+    const { data: res, error } = await context.supabase.rpc('order_refund_state', {
+      _order_id: data.orderId,
+    })
+    if (error) throw new Error(error.message)
+    return res as unknown as RefundState
+  })

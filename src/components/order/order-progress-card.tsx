@@ -31,6 +31,7 @@ export function OrderProgressCard({
   reason,
   steps,
   delay,
+  barTone = 'live',
 }: {
   title: string
   badgeLabel: string
@@ -44,6 +45,7 @@ export function OrderProgressCard({
   reason?: { label: string; text: string }
   steps: TimelineStep[]
   delay?: number
+  barTone?: 'live' | 'success' | 'info'
 }) {
   return (
     <Reveal delay={delay} className="relative overflow-hidden rounded-[22px] px-5 pb-5 pt-4.5">
@@ -93,7 +95,7 @@ export function OrderProgressCard({
         complete ? (
           <ProgressBar value={1} tone="success" className="mt-3.5" />
         ) : (
-          <IndeterminateBar className="mt-3.5" />
+          <IndeterminateBar tone={barTone} className="mt-3.5" />
         )
       ) : null}
 

@@ -12,13 +12,14 @@ import { GlyphCheck, GlyphCopy } from './icons'
 import { copyText } from '@/lib/clipboard'
 import { cn } from '@/lib/utils'
 
-export type OrderTone = 'neutral' | 'live' | 'success' | 'warning' | 'danger'
+export type OrderTone = 'neutral' | 'live' | 'success' | 'warning' | 'info' | 'danger'
 
 const DOT: Record<OrderTone, string> = {
   neutral: 'bg-muted-foreground/60',
   live: 'bg-primary',
   success: 'bg-success',
   warning: 'bg-warning',
+  info: 'bg-info',
   danger: 'bg-destructive',
 }
 
@@ -27,6 +28,7 @@ const TEXT: Record<OrderTone, string> = {
   live: 'text-primary',
   success: 'text-success',
   warning: 'text-warning',
+  info: 'text-info',
   danger: 'text-destructive',
 }
 
@@ -117,12 +119,13 @@ export function ProgressBar({
 }: {
   /** 0..1 */
   value: number
-  tone?: 'live' | 'success'
+  tone?: 'live' | 'success' | 'info'
   className?: string
 }) {
   const reduce = useReducedMotion()
   const pct = Math.max(0, Math.min(1, value))
-  const c = tone === 'success' ? 'var(--success)' : 'var(--primary)'
+  const c =
+    tone === 'success' ? 'var(--success)' : tone === 'info' ? 'var(--info)' : 'var(--primary)'
   return (
     <div
       role="progressbar"
@@ -296,9 +299,10 @@ export function IndeterminateBar({
   tone = 'live',
 }: {
   className?: string
-  tone?: 'live' | 'success'
+  tone?: 'live' | 'success' | 'info'
 }) {
-  const c = tone === 'success' ? 'var(--success)' : 'var(--primary)'
+  const c =
+    tone === 'success' ? 'var(--success)' : tone === 'info' ? 'var(--info)' : 'var(--primary)'
   return (
     <div
       role="progressbar"

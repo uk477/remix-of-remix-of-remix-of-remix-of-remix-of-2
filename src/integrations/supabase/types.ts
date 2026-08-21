@@ -530,6 +530,56 @@ export type Database = {
           },
         ]
       }
+      order_refunds: {
+        Row: {
+          amount_usd: number
+          completed_at: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          order_id: string
+          reason: string | null
+          source: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount_usd?: number
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          order_id: string
+          reason?: string | null
+          source: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount_usd?: number
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          order_id?: string
+          reason?: string | null
+          source?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_refunds_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: true
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       orders: {
         Row: {
           admin_note: string | null
@@ -1172,6 +1222,10 @@ export type Database = {
         Returns: Json
       }
       admin_order_refills: { Args: { _order_id: string }; Returns: Json }
+      admin_refund_order: {
+        Args: { _order_id: string; _reason?: string }
+        Returns: Json
+      }
       admin_set_maintenance: {
         Args: {
           _enabled: boolean
@@ -1282,6 +1336,7 @@ export type Database = {
         Returns: boolean
       }
       is_bot_accessible: { Args: { _user_id: string }; Returns: boolean }
+      order_refund_state: { Args: { _order_id: string }; Returns: Json }
       place_order: {
         Args: { _amount: number; _meta?: Json; _qty?: number; _title: string }
         Returns: Json
@@ -1311,6 +1366,15 @@ export type Database = {
       }
       refill_state: {
         Args: { _fallback_completed_at?: string; _order_key: string }
+        Returns: Json
+      }
+      refund_order: {
+        Args: {
+          _actor?: string
+          _order_id: string
+          _reason?: string
+          _source: string
+        }
         Returns: Json
       }
       request_refill: {

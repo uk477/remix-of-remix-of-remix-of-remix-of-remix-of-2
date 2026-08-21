@@ -17,6 +17,9 @@ import { OrderHeader } from '../order/order-header'
 import { OrderSummaryCard } from '../order/order-summary-card'
 import { SocialPostPreview } from '../order/social-post-preview'
 import { OrderProgressCard } from '../order/order-progress-card'
+import { dbStatusToOrderStatus, orderStatusView } from '@/lib/order-status'
+import { useServerFn } from '@tanstack/react-start'
+import { getOrderRefundState } from '@/lib/admin-orders.functions'
 import {
   RecoveryStatusCard,
   RefundStatusCard,
@@ -142,6 +145,24 @@ export function BoostOrderScreen({ order }: { order: Order }) {
     return
   }, [adminStatus])
 
+  useEffect(() => {
+    if (adminStatus === 'failed') setErrorNotice(true)
+  }, [adminStatus])
+
+  /** Закрытие окна: подтягиваем фактический статус возврата с бэкенда. */
+  const closeErrorNotice = async () => {
+    setErrorNotice(false)
+    const dbId = refill.state?.dbOrderId
+    if (!dbId) return
+    try {
+      const st = await refundStateFn({ data: { orderId: dbId } })
+      if (st.refunded) applyAdminStatus('refunded')
+      await refill.reload()
+    } catch {
+      /* оставляем текущий статус */
+    }
+  }
+
   const done = visibleStatus === 'completed'
   const waiting = visibleStatus === 'waiting'
   const cancelled = visibleStatus === 'cancelled'
@@ -194,6 +215,9 @@ export function BoostOrderScreen({ order }: { order: Order }) {
 
   /* ── Refill: состояние живёт на сервере, строго для ЭТОГО заказа ─────── */
   const [askRefill, setAskRefill] = useState(false)
+  /** Окно «Не удалось выполнить заказ» — возврат уже запущен на бэкенде. */
+  const [errorNotice, setErrorNotice] = useState(false)
+  const refundStateFn = useServerFn(getOrderRefundState)
   const refill = useRefill(order.id)
   const refillReload = refill.reload
   // Статус заказа изменился (в т.ч. через админ-панель) — гарантия пересчитывается с сервера.
@@ -336,6 +360,33 @@ export function BoostOrderScreen({ order }: { order: Order }) {
     order.cancelReason ??
     (ru ? 'Публикация недоступна' : 'Publication unavailable')
 
+  /* ── Единые цвета/тексты по фактическому статусу с backend ──────────── */
+  const backendStatus = dbStatusToOrderStatus(adminStatus)
+  const isRefill = adminStatus === 'refilling'
+  const isRefund = adminStatus === 'refunded'
+  const isFailed = adminStatus === 'failed'
+  const override = isRefill || isRefund || isFailed
+  const overrideView = orderStatusView(backendStatus)
+  const finalTone: OrderTone = override
+    ? (overrideView.tone === 'warning' ? 'warning' : overrideView.tone === 'live' ? 'live' : overrideView.tone)
+    : statusTone
+  const finalStatusLabel = override ? (ru ? overrideView.ru : overrideView.en) : statusLabel
+  const finalBadgeLabel = override ? (ru ? overrideView.ru : overrideView.en) : progressBadgeLabel
+  const finalHeadline = isRefill
+    ? ru
+      ? 'Восстанавливаем показатели'
+      : 'Restoring the numbers'
+    : isRefund
+      ? ru
+        ? 'Возврат средств'
+        : 'Refund in progress'
+      : isFailed
+        ? ru
+          ? 'Не удалось выполнить заказ'
+          : 'Order failed'
+        : progressHeadline
+  const barTone: 'live' | 'success' | 'info' = isRefill ? 'success' : isRefund ? 'info' : 'live'
+
   const serviceName = service?.name[lang] ?? order.title
   const UNITS: Record<string, [string, string]> = {
     followers: ['фолловеров', 'followers'],
@@ -382,8 +433,8 @@ export function BoostOrderScreen({ order }: { order: Order }) {
           amountLabel={`${nf(volume)} ${unitWord}`}
           orderId={orderId}
           orderLabel={ru ? 'Номер заказа' : 'Order number'}
-          statusLabel={statusLabel}
-          statusTone={statusTone}
+          statusLabel={finalStatusLabel}
+          statusTone={finalTone}
           caption={caption}
           onCopied={() => show(ru ? 'Номер скопирован' : 'Number copied')}
         />
@@ -489,11 +540,12 @@ export function BoostOrderScreen({ order }: { order: Order }) {
         <OrderProgressCard
           delay={0.1}
           title={progressTitle}
-          badgeLabel={progressBadgeLabel}
-          badgeTone={statusTone}
+          badgeLabel={finalBadgeLabel}
+          badgeTone={finalTone}
+          barTone={barTone}
           complete={done}
           cancelled={cancelled}
-          headline={progressHeadline}
+          headline={finalHeadline}
           subtitle={progressSubtitle}
           note={progressNote}
           dangerIcon={
@@ -536,8 +588,15 @@ export function BoostOrderScreen({ order }: { order: Order }) {
                     state: 'done',
                   },
                   {
-                    label: ru ? 'В процессе' : 'In progress',
+                    label: isRefill
+                      ? ru
+                        ? 'В процессе (refill)'
+                        : 'In progress (refill)'
+                      : ru
+                        ? 'В процессе'
+                        : 'In progress',
                     state: done ? 'done' : waiting ? 'idle' : 'live',
+                    tone: barTone === 'live' ? 'primary' : barTone === 'success' ? 'success' : 'info',
                   },
                   {
                     label: ru ? 'Заказ завершён' : 'Order completed',
@@ -557,6 +616,28 @@ export function BoostOrderScreen({ order }: { order: Order }) {
         />
         )}
 
+
+        {errorNotice ? (
+          <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 p-4 backdrop-blur-sm sm:items-center">
+            <div className="w-full max-w-[420px] rounded-[24px] border border-border bg-card p-5 shadow-2xl">
+              <h3 className="font-display text-[19px] font-bold leading-tight">
+                {ru ? 'Не удалось выполнить заказ' : 'Order could not be completed'}
+              </h3>
+              <p className="mt-2 text-[13.5px] leading-[1.55] text-muted-foreground">
+                {ru
+                  ? 'Во время выполнения произошла ошибка. Возврат средств уже запущен автоматически.'
+                  : 'An error occurred during processing. A refund has already been started automatically.'}
+              </p>
+              <button
+                type="button"
+                onClick={() => void closeErrorNotice()}
+                className="pressable mt-4 w-full rounded-[16px] bg-info px-4 py-3 text-[14px] font-bold text-background"
+              >
+                {ru ? 'Понятно' : 'Got it'}
+              </button>
+            </div>
+          </div>
+        ) : null}
 
         {cancelled ? (
           <Reveal delay={0.15} className="flex flex-col gap-3">
