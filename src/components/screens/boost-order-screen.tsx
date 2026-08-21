@@ -133,11 +133,8 @@ export function BoostOrderScreen({ order }: { order: Order }) {
     return () => window.clearInterval(id)
   }, [done, waiting])
 
-  const est = estimateMs(volume)
-  const elapsed = Math.max(0, now - order.date)
-  const percent = done ? 1 : waiting ? 0 : Math.min(0.97, elapsed / est)
-  const delivered = Math.round(volume * percent)
-  const minutesLeft = done || waiting ? 0 : Math.max(1, Math.ceil((est - elapsed) / 60000))
+  /* No per-unit delivery feed exists, so we never derive a fake count here. */
+
 
   /* ── Refill ──────────────────────────────────────────────────────────── */
   const [refills, setRefills] = useState<number[]>([])
