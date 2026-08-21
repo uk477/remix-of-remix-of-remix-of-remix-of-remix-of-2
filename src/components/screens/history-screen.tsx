@@ -225,7 +225,7 @@ export function HistoryScreen() {
                     key={o.id}
                     order={o}
                     index={i}
-                    statusLabel={statusText(o.status, t)}
+                    statusLabel={statusText(o.status, t, ru)}
                     tagLabel={o.kind === 'account' ? t('tag_tw_accounts') : t('filter_promo')}
                     expiredLabel={t('warranty_expired')}
                     onOpen={() => void navigate({ to: '/order/$id', params: { id: o.id } })}
@@ -291,7 +291,7 @@ export function HistoryScreen() {
                             {r.kind === 'topup' ? (
                               <TopupContent
                                 row={r}
-                                statusLabel={statusText(r.status, t)}
+                                statusLabel={statusText(r.status, t, ru)}
                               />
                             ) : null}
                           </motion.div>
