@@ -45,7 +45,7 @@ export function OrderProgressCard({
   reason?: { label: string; text: string }
   steps: TimelineStep[]
   delay?: number
-  barTone?: 'live' | 'success' | 'info'
+  barTone?: OrderTone
 }) {
   return (
     <Reveal delay={delay} className="relative overflow-hidden rounded-[22px] px-5 pb-5 pt-4.5">

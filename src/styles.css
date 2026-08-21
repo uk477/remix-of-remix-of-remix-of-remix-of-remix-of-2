@@ -22,6 +22,8 @@
   --color-account-card-muted: var(--account-card-muted);
   --color-account-card-border: var(--account-card-border);
   --color-info: var(--info);
+  --color-emerald: var(--emerald);
+  --color-coral: var(--coral);
   --color-smart-violet: var(--smart-violet);
   --color-smart-pink: var(--smart-pink);
   --color-ring: var(--ring);
@@ -102,6 +104,8 @@
   --success-foreground: oklch(0.04 0 0);
   --warning: oklch(0.83 0.15 82);
   --info: oklch(0.671 0.149 237.3);
+  --emerald: oklch(0.74 0.17 163);
+  --coral: oklch(0.72 0.16 30);
   --smart-violet: oklch(0.65 0.24 292);
   --smart-pink: oklch(0.72 0.22 336);
   --border: oklch(0.3 0.01 74);

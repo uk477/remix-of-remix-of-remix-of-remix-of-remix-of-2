@@ -11,25 +11,38 @@ import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { GlyphCheck, GlyphCopy } from './icons'
 import { copyText } from '@/lib/clipboard'
 import { cn } from '@/lib/utils'
+import { STATUS_ACCENT_VAR } from '@/lib/order-status'
 
-export type OrderTone = 'neutral' | 'live' | 'success' | 'warning' | 'info' | 'danger'
+export type OrderTone =
+  | 'neutral'
+  | 'live'
+  | 'success'
+  | 'emerald'
+  | 'warning'
+  | 'info'
+  | 'danger'
+  | 'coral'
 
 const DOT: Record<OrderTone, string> = {
   neutral: 'bg-muted-foreground/60',
   live: 'bg-primary',
   success: 'bg-success',
+  emerald: 'bg-emerald',
   warning: 'bg-warning',
   info: 'bg-info',
   danger: 'bg-destructive',
+  coral: 'bg-coral',
 }
 
 const TEXT: Record<OrderTone, string> = {
   neutral: 'text-muted-foreground',
   live: 'text-primary',
   success: 'text-success',
+  emerald: 'text-emerald',
   warning: 'text-warning',
   info: 'text-info',
   danger: 'text-destructive',
+  coral: 'text-coral',
 }
 
 export const EASE = [0.22, 1, 0.36, 1] as const
@@ -119,13 +132,13 @@ export function ProgressBar({
 }: {
   /** 0..1 */
   value: number
-  tone?: 'live' | 'success' | 'info'
+  tone?: OrderTone
   className?: string
 }) {
   const reduce = useReducedMotion()
   const pct = Math.max(0, Math.min(1, value))
   const c =
-    tone === 'success' ? 'var(--success)' : tone === 'info' ? 'var(--info)' : 'var(--primary)'
+    STATUS_ACCENT_VAR[tone] ?? 'var(--primary)'
   return (
     <div
       role="progressbar"
@@ -299,10 +312,10 @@ export function IndeterminateBar({
   tone = 'live',
 }: {
   className?: string
-  tone?: 'live' | 'success' | 'info'
+  tone?: OrderTone
 }) {
   const c =
-    tone === 'success' ? 'var(--success)' : tone === 'info' ? 'var(--info)' : 'var(--primary)'
+    STATUS_ACCENT_VAR[tone] ?? 'var(--primary)'
   return (
     <div
       role="progressbar"

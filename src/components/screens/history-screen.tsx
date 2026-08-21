@@ -16,7 +16,8 @@ import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { money } from '@/lib/format'
 import { useI18n } from '@/lib/i18n'
-import { orderStatusLabel, orderStatusView, STATUS_BADGE_CLASS } from '@/lib/order-status'
+import { orderStatusAccent, orderStatusLabel } from '@/lib/order-status'
+import { useAuth } from '@/lib/auth'
 import { useNav } from '@/lib/nav'
 import { useStore } from '@/lib/store'
 import { isTestOrder, orderService } from '@/lib/order-service'
@@ -478,6 +479,7 @@ function OrderRow({
   onOpen: () => void
 }) {
   const { lang } = useI18n()
+  const { isAdmin } = useAuth()
   const cd = useCountdown(order.guaranteeUntil)
   const boost = boostVisual(order)
   const isCustom = orderService(order) === 'custom'
@@ -488,7 +490,8 @@ function OrderRow({
     : titleParts.qty
 
   const done = order.status === 'completed'
-  const progress = order.status === 'in_progress'
+  const live = order.status === 'in_progress' || order.status === 'refilling'
+  const accent = orderStatusAccent(order.status)
 
   const dateStr = `${new Date(order.date).toLocaleDateString(undefined, {
     day: '2-digit',
@@ -516,13 +519,8 @@ function OrderRow({
       <div className="sm:hidden">
         <span
           aria-hidden
-          className={`absolute inset-y-2 left-0 w-[3px] rounded-r-full ${
-            done
-              ? 'bg-success/70 shadow-[0_0_12px_rgba(0,229,160,0.35)]'
-              : progress
-                ? 'bg-primary/80 shadow-[0_0_12px_rgba(255,215,0,0.3)]'
-                : 'bg-warning/70'
-          }`}
+          className="absolute inset-y-2 left-0 w-[3px] rounded-r-full transition-colors duration-300"
+          style={{ background: accent.rail, boxShadow: accent.glow }}
         />
 
         <div className="flex items-start gap-3 pl-1.5">
@@ -540,9 +538,14 @@ function OrderRow({
             ) : boost ? (
               boost.render('size-11')
             ) : done ? (
-              <CheckCircle2 className="size-[20px] text-success" />
+              <CheckCircle2 className="size-[20px]" style={{ color: accent.color }} />
+            ) : live ? (
+              <Loader2
+                className="size-[20px] animate-spin"
+                style={{ color: accent.color }}
+              />
             ) : (
-              <Zap className="size-[20px] text-primary" />
+              <Zap className="size-[20px]" style={{ color: accent.color }} />
             )}
           </div>
 
@@ -569,7 +572,7 @@ function OrderRow({
               {!qtyLabel && order.qty && order.qty > 1 ? (
                 <span className="font-bold tabular-nums text-primary">×{order.qty}</span>
               ) : null}
-              {isTestOrder(order) ? (
+              {isAdmin && isTestOrder(order) ? (
                 <span className="rounded-md border border-warning/30 bg-warning/10 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-warning">
                   test
                 </span>
@@ -606,12 +609,12 @@ function OrderRow({
             <AgedMark className="size-[34px]" />
           ) : boost ? (
             boost.render('size-[32px]')
-          ) : progress ? (
-            <Loader2 className="size-[18px] animate-spin text-primary" />
+          ) : live ? (
+            <Loader2 className="size-[18px] animate-spin" style={{ color: accent.color }} />
           ) : done ? (
-            <CheckCircle2 className="size-[18px] text-success" />
+            <CheckCircle2 className="size-[18px]" style={{ color: accent.color }} />
           ) : (
-            <Zap className="size-[18px] text-primary" />
+            <Zap className="size-[18px]" style={{ color: accent.color }} />
           )}
         </div>
 
@@ -666,12 +669,18 @@ function OrderRow({
 }
 
 function StatusBadge({ label, status }: { label: string; status: OrderStatus }) {
-  const cls = STATUS_BADGE_CLASS[orderStatusView(status).tone]
+  const accent = orderStatusAccent(status)
+  const animated = status === 'in_progress' || status === 'refilling'
   return (
     <span
-      className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-[3px] text-[11px] font-semibold ring-1 ${cls}`}
+      className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-[3px] text-[11px] font-semibold ring-1 transition-colors duration-300 ${accent.badgeClass}`}
     >
-      <span className="size-1.5 rounded-full bg-current" />
+      <span className="relative flex size-1.5 items-center justify-center">
+        {animated ? (
+          <span className="absolute inline-flex size-1.5 animate-ping rounded-full bg-current opacity-60" />
+        ) : null}
+        <span className="relative size-1.5 rounded-full bg-current" />
+      </span>
       {label}
     </span>
   )

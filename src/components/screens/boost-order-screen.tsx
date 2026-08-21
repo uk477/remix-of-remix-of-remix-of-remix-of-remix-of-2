@@ -290,7 +290,7 @@ export function BoostOrderScreen({ order }: { order: Order }) {
 
 
   /* ── Status copy ─────────────────────────────────────────────────────── */
-  const statusTone: OrderTone = cancelled ? 'danger' : done ? 'success' : waiting ? 'neutral' : 'live'
+
   const statusLabel = cancelled
     ? ru
       ? 'Отменён'
@@ -367,9 +367,8 @@ export function BoostOrderScreen({ order }: { order: Order }) {
   const isFailed = adminStatus === 'failed'
   const override = isRefill || isRefund || isFailed
   const overrideView = orderStatusView(backendStatus)
-  const finalTone: OrderTone = override
-    ? (overrideView.tone === 'warning' ? 'warning' : overrideView.tone === 'live' ? 'live' : overrideView.tone)
-    : statusTone
+  /* Единственный источник цвета — фактический статус с backend. */
+  const finalTone: OrderTone = overrideView.tone
   const finalStatusLabel = override ? (ru ? overrideView.ru : overrideView.en) : statusLabel
   const finalBadgeLabel = override ? (ru ? overrideView.ru : overrideView.en) : progressBadgeLabel
   const finalHeadline = isRefill
@@ -385,7 +384,7 @@ export function BoostOrderScreen({ order }: { order: Order }) {
           ? 'Не удалось выполнить заказ'
           : 'Order failed'
         : progressHeadline
-  const barTone: 'live' | 'success' | 'info' = isRefill ? 'success' : isRefund ? 'info' : 'live'
+  const barTone: OrderTone = finalTone
 
   const serviceName = service?.name[lang] ?? order.title
   const UNITS: Record<string, [string, string]> = {
@@ -596,7 +595,7 @@ export function BoostOrderScreen({ order }: { order: Order }) {
                         ? 'В процессе'
                         : 'In progress',
                     state: done ? 'done' : waiting ? 'idle' : 'live',
-                    tone: barTone === 'live' ? 'primary' : barTone === 'success' ? 'success' : 'info',
+                    tone: finalTone,
                   },
                   {
                     label: ru ? 'Заказ завершён' : 'Order completed',

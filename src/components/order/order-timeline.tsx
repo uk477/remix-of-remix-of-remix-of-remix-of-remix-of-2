@@ -3,6 +3,7 @@
 import { motion, useReducedMotion } from 'framer-motion'
 import { EASE } from './primitives'
 import { cn } from '@/lib/utils'
+import { STATUS_ACCENT_VAR, type StatusTone } from '@/lib/order-status'
 import type { ReactNode } from 'react'
 
 export type TimelineStep = {
@@ -10,7 +11,7 @@ export type TimelineStep = {
   meta?: string
   state: 'done' | 'live' | 'idle' | 'danger'
   /** Цвет активной точки: gold по умолчанию, green для refill, blue для возврата. */
-  tone?: 'primary' | 'success' | 'info'
+  tone?: 'primary' | StatusTone
   /** Optional icon override for the node. */
   icon?: ReactNode
 }
@@ -21,7 +22,8 @@ export type TimelineStep = {
  * for cancelled / failed steps.
  */
 function liveColor(tone: TimelineStep['tone']) {
-  return tone === 'success' ? 'var(--success)' : tone === 'info' ? 'var(--info)' : 'var(--primary)'
+  if (!tone || tone === 'primary') return 'var(--primary)'
+  return STATUS_ACCENT_VAR[tone] ?? 'var(--primary)'
 }
 
 export function OrderTimeline({ steps }: { steps: TimelineStep[] }) {
