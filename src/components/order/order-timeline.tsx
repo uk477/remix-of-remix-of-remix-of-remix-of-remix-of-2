@@ -41,7 +41,9 @@ export function OrderTimeline({ steps }: { steps: TimelineStep[] }) {
           ) : null}
 
           <span className="relative z-10 flex size-[17px] shrink-0 items-center justify-center">
-            {s.state === 'done' ? (
+            {s.icon ? (
+              <span className="text-muted-foreground/70">{s.icon}</span>
+            ) : s.state === 'done' ? (
               <motion.svg
                 viewBox="0 0 24 24"
                 fill="none"
