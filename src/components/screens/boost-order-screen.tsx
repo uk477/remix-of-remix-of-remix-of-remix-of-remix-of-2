@@ -310,15 +310,21 @@ export function BoostOrderScreen({ order }: { order: Order }) {
           title={ru ? 'Выполнение заказа' : 'Delivery'}
           badgeLabel={statusLabel}
           badgeTone={statusTone}
-          delivered={delivered}
-          total={volume}
-          percent={percent}
-          percentLabel={
-            ru
-              ? `${Math.round(percent * 100)}% выполнено`
-              : `${Math.round(percent * 100)}% delivered`
+          complete={done}
+          headline={
+            done
+              ? ru
+                ? 'Заказ выполнен'
+                : 'Order completed'
+              : waiting
+                ? ru
+                  ? 'Заказ принят'
+                  : 'Order accepted'
+                : ru
+                  ? 'Заказ выполняется'
+                  : 'Order in progress'
           }
-          etaLabel={
+          note={
             done
               ? undefined
               : waiting
@@ -326,8 +332,8 @@ export function BoostOrderScreen({ order }: { order: Order }) {
                   ? 'Запуск в течение нескольких минут'
                   : 'Starting within a few minutes'
                 : ru
-                  ? `Осталось примерно ${minutesLeft} мин`
-                  : `About ${minutesLeft} min remaining`
+                  ? 'Показатели обновятся после завершения'
+                  : 'The numbers update once the order completes'
           }
           steps={[
             {
@@ -345,9 +351,12 @@ export function BoostOrderScreen({ order }: { order: Order }) {
                   ? ru
                     ? 'Скоро'
                     : 'Soon'
-                  : `${Math.round(percent * 100)}%`,
+                  : ru
+                    ? 'Идёт'
+                    : 'Running',
               state: done ? 'done' : waiting ? 'idle' : 'live',
             },
+
             {
               label: ru ? 'Заказ завершён' : 'Completed',
               meta: done
