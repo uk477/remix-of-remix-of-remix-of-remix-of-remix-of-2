@@ -313,10 +313,10 @@ export function BoostOrderScreen({ order }: { order: Order }) {
         />
 
         {/* Админ правит этот заказ прямо здесь, в карточке. */}
-        {isAdmin && refill.state?.orderId ? (
+        {isAdmin && refill.state?.dbOrderId ? (
           <OrderAdminOverride
-            key={refill.state.orderId}
-            orderId={refill.state.orderId}
+            key={refill.state.dbOrderId}
+            orderId={refill.state.dbOrderId}
             status={order.status}
             onStatusChange={() => void refill.reload()}
           />
