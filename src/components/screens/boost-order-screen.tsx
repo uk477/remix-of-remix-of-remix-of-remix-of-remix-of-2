@@ -104,7 +104,11 @@ export function BoostOrderScreen({ order }: { order: Order }) {
         const row = await loadXProfileFast(target).catch(() => null)
         if (alive) setProfile(row)
       } else if (extractTweetId(target)) {
-        const row = await loadXTweetFast(target).catch(() => null)
+        // Never leave the preview stuck on a skeleton if the API hangs.
+        const row = await Promise.race([
+          loadXTweetFast(target).catch(() => null),
+          new Promise<null>((r) => window.setTimeout(() => r(null), 6000)),
+        ])
         if (alive) {
           setTweet(row)
           setTweetMissing(!row)
