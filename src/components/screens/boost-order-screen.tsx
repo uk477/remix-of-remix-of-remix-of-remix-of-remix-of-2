@@ -348,11 +348,11 @@ export function BoostOrderScreen({ order }: { order: Order }) {
               state: 'done',
             },
             {
-              label: ru ? 'Обработка' : 'Processing',
+              label: ru ? 'В процессе' : 'In progress',
               state: done ? 'done' : waiting ? 'idle' : 'live',
             },
             {
-              label: ru ? 'Завершено' : 'Completed',
+              label: ru ? 'Заказ завершён' : 'Order completed',
               meta: done
                 ? order.completedAt
                   ? fullDate(order.completedAt, lang)
