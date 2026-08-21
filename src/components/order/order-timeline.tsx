@@ -3,11 +3,14 @@
 import { motion, useReducedMotion } from 'framer-motion'
 import { EASE } from './primitives'
 import { cn } from '@/lib/utils'
+import type { ReactNode } from 'react'
 
 export type TimelineStep = {
   label: string
   meta?: string
   state: 'done' | 'live' | 'idle' | 'danger'
+  /** Optional icon override for the node. */
+  icon?: ReactNode
 }
 
 /**
