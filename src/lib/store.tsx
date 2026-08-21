@@ -95,6 +95,7 @@ function mapOrderRow(o: OrderRow): Order {
     title: o.title,
     amount: Number(o.amount_usd),
     status: dbToOrderStatus(o.status as DBOrderStatus),
+    dbStatus: o.status as DBOrderStatus,
     refillable: !!m['refillable'],
     kind,
     paid: !!m['paid'],

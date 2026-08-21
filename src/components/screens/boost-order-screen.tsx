@@ -83,6 +83,7 @@ export function BoostOrderScreen({ order }: { order: Order }) {
   const orderId = projectOrderId(order.date)
   const [visibleStatus, setVisibleStatus] = useState(order.status)
   const [adminStatus, setAdminStatus] = useState<AdminOrderStatus>(() => {
+    if (order.dbStatus) return order.dbStatus
     if (order.status === 'cancelled') return 'declined'
     if (order.status === 'waiting') return 'pending'
     return order.status
@@ -90,13 +91,13 @@ export function BoostOrderScreen({ order }: { order: Order }) {
   useEffect(() => {
     setVisibleStatus(order.status)
     setAdminStatus(
-      order.status === 'cancelled'
+      order.dbStatus ?? (order.status === 'cancelled'
         ? 'declined'
         : order.status === 'waiting'
           ? 'pending'
-          : order.status,
+          : order.status),
     )
-  }, [order.status])
+  }, [order.dbStatus, order.status])
 
   const applyAdminStatus = (next: AdminOrderStatus) => {
     setAdminStatus(next)
