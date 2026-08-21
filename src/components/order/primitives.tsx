@@ -289,3 +289,42 @@ export { GlyphCheck }
 export function Skeleton({ className }: { className?: string }) {
   return <div className={cn('animate-pulse rounded-lg bg-foreground/[0.06]', className)} />
 }
+
+/* ── Indeterminate progress: no numbers, one slow travelling gold sheen ─── */
+export function IndeterminateBar({
+  className,
+  tone = 'live',
+}: {
+  className?: string
+  tone?: 'live' | 'success'
+}) {
+  const reduce = useReducedMotion()
+  const c = tone === 'success' ? 'var(--success)' : 'var(--primary)'
+  return (
+    <div
+      role="progressbar"
+      aria-valuetext="in progress"
+      className={cn('relative h-[7px] w-full overflow-hidden rounded-full', className)}
+      style={{ background: 'color-mix(in oklab, var(--foreground) 7%, transparent)' }}
+    >
+      <span
+        aria-hidden
+        className="absolute inset-0 rounded-full"
+        style={{ background: `color-mix(in oklab, ${c} 12%, transparent)` }}
+      />
+      {!reduce ? (
+        <motion.span
+          aria-hidden
+          initial={{ x: '-70%' }}
+          animate={{ x: '175%' }}
+          transition={{ duration: 2.8, repeat: Infinity, ease: 'easeInOut' }}
+          className="absolute inset-y-0 w-2/5 rounded-full"
+          style={{
+            background: `linear-gradient(90deg, transparent, color-mix(in oklab, ${c} 85%, transparent) 50%, transparent)`,
+            boxShadow: `0 0 14px -3px color-mix(in oklab, ${c} 80%, transparent)`,
+          }}
+        />
+      ) : null}
+    </div>
+  )
+}
