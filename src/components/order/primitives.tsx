@@ -290,7 +290,7 @@ export function Skeleton({ className }: { className?: string }) {
   return <div className={cn('animate-pulse rounded-lg bg-foreground/[0.06]', className)} />
 }
 
-/* ── Indeterminate progress: no numbers, one slow travelling gold sheen ─── */
+/* ── Indeterminate progress: no numbers, one smooth travelling gold sheen ─── */
 export function IndeterminateBar({
   className,
   tone = 'live',
@@ -304,24 +304,24 @@ export function IndeterminateBar({
     <div
       role="progressbar"
       aria-valuetext="in progress"
-      className={cn('relative h-[7px] w-full overflow-hidden rounded-full', className)}
+      className={cn('relative h-[9px] w-full overflow-hidden rounded-full', className)}
       style={{ background: 'color-mix(in oklab, var(--foreground) 7%, transparent)' }}
     >
       <span
         aria-hidden
         className="absolute inset-0 rounded-full"
-        style={{ background: `color-mix(in oklab, ${c} 12%, transparent)` }}
+        style={{ background: `color-mix(in oklab, ${c} 10%, transparent)` }}
       />
       {!reduce ? (
         <motion.span
           aria-hidden
-          initial={{ x: '-70%' }}
-          animate={{ x: '175%' }}
-          transition={{ duration: 2.8, repeat: Infinity, ease: 'easeInOut' }}
-          className="absolute inset-y-0 w-2/5 rounded-full"
+          initial={{ x: '-120%' }}
+          animate={{ x: '120%' }}
+          transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
+          className="absolute inset-y-0 w-[55%] rounded-full"
           style={{
-            background: `linear-gradient(90deg, transparent, color-mix(in oklab, ${c} 85%, transparent) 50%, transparent)`,
-            boxShadow: `0 0 14px -3px color-mix(in oklab, ${c} 80%, transparent)`,
+            background: `linear-gradient(90deg, transparent, color-mix(in oklab, ${c} 30%, transparent) 20%, color-mix(in oklab, ${c} 95%, white) 50%, color-mix(in oklab, ${c} 30%, transparent) 80%, transparent)`,
+            boxShadow: `0 0 18px -2px color-mix(in oklab, ${c} 60%, transparent)`,
           }}
         />
       ) : null}
