@@ -378,6 +378,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
             ? { start_followers: order.startFollowers }
             : {}),
           ...(order.completedAt ? { completed_at: order.completedAt } : {}),
+          ...(order.cancelReason ? { cancel_reason: order.cancelReason } : {}),
         },
       })
       .then(({ error }) => {
