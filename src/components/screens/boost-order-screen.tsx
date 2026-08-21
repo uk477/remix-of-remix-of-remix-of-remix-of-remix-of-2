@@ -399,7 +399,7 @@ export function BoostOrderScreen({ order }: { order: Order }) {
   )
 }
 
-/* ── Followers target: compact profile card ───────────────────────────── */
+/* ── Followers target: quoted-profile panel ───────────────────────────── */
 function ProfilePreview({
   profile,
   handle,
@@ -429,50 +429,55 @@ function ProfilePreview({
       : null
 
   return (
-    <OrderCard delay={delay} className="p-4">
-      <div className="flex items-center gap-3">
-        <span className="flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white/[0.06]">
-          {p?.avatar_url ? (
-            <img src={p.avatar_url} alt="" className="size-full object-cover" />
-          ) : (
-            <AurxMark className="size-[65%] opacity-90" />
-          )}
-        </span>
-        <span className="min-w-0 flex-1">
-          <span className="flex min-w-0 items-center gap-1">
-            <span className="truncate text-[15px] font-semibold leading-tight">
-              {p?.name || handle || '—'}
-            </span>
-            {tone ? <VerifiedBadge className={`size-[15px] shrink-0 ${tone}`} /> : null}
-          </span>
-          <span className="mt-0.5 block truncate text-[13px] leading-tight text-muted-foreground">
-            @{handle || 'username'}
-          </span>
-        </span>
-        <StatusBadge
-          tone={done ? 'success' : 'neutral'}
-          label={done ? (ru ? 'Доставлено' : 'Delivered') : ru ? 'Цель' : 'Target'}
-          icon={
-            done ? (
-              <Check className="size-3.5" strokeWidth={3} />
-            ) : (
-              <Clock3 className="size-3.5" strokeWidth={2.2} />
-            )
-          }
-        />
+    <Reveal delay={delay} className="px-1">
+      <div className="mb-2 px-0.5">
+        <Eyebrow>{ru ? 'Аккаунт' : 'Target account'}</Eyebrow>
       </div>
 
-      <div className="mt-3 flex items-center justify-between gap-3 rounded-xl bg-white/[0.04] px-3 py-2.5">
-        <span className="text-[13px] text-muted-foreground">
-          {ru ? 'Фолловеры' : 'Followers'}
-        </span>
-        <span className="tabular-nums text-[13.5px] font-semibold">
-          {nf(start)}
-          <span className="mx-1.5 text-muted-foreground">→</span>
-          <span className="text-primary">{nf(projected)}</span>
-        </span>
+      <div
+        className="rounded-[18px] p-4"
+        style={{
+          background: 'color-mix(in oklab, var(--foreground) 3%, transparent)',
+          boxShadow: 'inset 0 0 0 1px color-mix(in oklab, var(--foreground) 7%, transparent)',
+        }}
+      >
+        <div className="flex items-center gap-3">
+          <span className="flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-full bg-foreground/[0.06]">
+            {p?.avatar_url ? (
+              <img src={p.avatar_url} alt="" className="size-full object-cover" />
+            ) : (
+              <XMark className="size-[42%] text-foreground/70" />
+            )}
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="flex min-w-0 items-center gap-1">
+              <span className="truncate text-[15px] font-semibold leading-tight">
+                {p?.name || handle || '—'}
+              </span>
+              {tone ? <VerifiedBadge className={`size-[15px] shrink-0 ${tone}`} /> : null}
+            </span>
+            <span className="mt-0.5 block truncate text-[13px] leading-tight text-muted-foreground">
+              @{handle || 'username'}
+            </span>
+          </span>
+          <XMark className="size-[15px] shrink-0 text-foreground/45" />
+        </div>
+
+        <div
+          className="mt-3.5 flex items-baseline justify-between gap-3 pt-3"
+          style={{ borderTop: '1px solid color-mix(in oklab, var(--foreground) 7%, transparent)' }}
+        >
+          <span className="text-[13px] text-muted-foreground">
+            {ru ? 'Фолловеры' : 'Followers'}
+          </span>
+          <span className="text-[13.5px] font-semibold tabular-nums">
+            {nf(start)}
+            <span className="mx-1.5 text-muted-foreground/70">→</span>
+            <span className={done ? 'text-success' : 'text-primary'}>{nf(projected)}</span>
+          </span>
+        </div>
       </div>
-    </OrderCard>
+    </Reveal>
   )
 }
 
