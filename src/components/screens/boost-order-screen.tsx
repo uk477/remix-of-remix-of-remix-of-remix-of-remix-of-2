@@ -60,10 +60,6 @@ function nf(n: number) {
   return n.toLocaleString('en-US')
 }
 
-/** Rough delivery estimate — the backend has no per-unit feed yet. */
-function estimateMs(volume: number) {
-  return 12 * 60 * 1000 + (Math.max(volume, 0) / 1000) * 8 * 60 * 1000
-}
 
 export function BoostOrderScreen({ order }: { order: Order }) {
   const { lang, t } = useI18n()
