@@ -31,6 +31,7 @@ type StoreContextType = {
   setEditingCustomKey: (key: string | null) => void
   orders: Order[]
   addOrder: (order: Order) => void
+  syncOrderStatus: (id: string, status: DbOrderStatus) => void
   refillOrder: (id: string) => void
   topups: Topup[]
   addTopup: (topup: Topup) => void
@@ -384,6 +385,29 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       })
   }, [])
 
+  /**
+   * Apply a status that has already been committed by the backend. This keeps
+   * the shared order cache authoritative when realtime delivery is delayed or
+   * unavailable, so leaving and reopening the order cannot restore stale UI.
+   */
+  const syncOrderStatus = useCallback((id: string, dbStatus: DbOrderStatus) => {
+    const status = dbToOrderStatus(dbStatus)
+    setOrders((prev) =>
+      prev.map((order) =>
+        order.id === id
+          ? {
+              ...order,
+              status,
+              dbStatus,
+              ...(dbStatus === 'completed' && order.completedAt == null
+                ? { completedAt: Date.now() }
+                : {}),
+            }
+          : order,
+      ),
+    )
+  }, [])
+
   const refillOrder = useCallback((id: string) => {
     setOrders((prev) =>
       prev.map((o) =>
@@ -484,6 +508,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       setEditingCustomKey,
       orders,
       addOrder,
+      syncOrderStatus,
       refillOrder,
       topups,
       addTopup,
@@ -507,6 +532,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       setEditingCustomKey,
       orders,
       addOrder,
+      syncOrderStatus,
       refillOrder,
       topups,
       addTopup,
