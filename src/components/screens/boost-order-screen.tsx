@@ -17,6 +17,7 @@ import { OrderHeader } from '../order/order-header'
 import { OrderSummaryCard } from '../order/order-summary-card'
 import { SocialPostPreview } from '../order/social-post-preview'
 import { OrderProgressCard } from '../order/order-progress-card'
+import { dbStatusToOrderStatus, orderStatusView } from '@/lib/order-status'
 import {
   RecoveryStatusCard,
   RefundStatusCard,
@@ -336,6 +337,33 @@ export function BoostOrderScreen({ order }: { order: Order }) {
     order.cancelReason ??
     (ru ? 'Публикация недоступна' : 'Publication unavailable')
 
+  /* ── Единые цвета/тексты по фактическому статусу с backend ──────────── */
+  const backendStatus = dbStatusToOrderStatus(adminStatus)
+  const isRefill = adminStatus === 'refilling'
+  const isRefund = adminStatus === 'refunded'
+  const isFailed = adminStatus === 'failed'
+  const override = isRefill || isRefund || isFailed
+  const overrideView = orderStatusView(backendStatus)
+  const finalTone: OrderTone = override
+    ? (overrideView.tone === 'warning' ? 'warning' : overrideView.tone === 'live' ? 'live' : overrideView.tone)
+    : statusTone
+  const finalStatusLabel = override ? (ru ? overrideView.ru : overrideView.en) : statusLabel
+  const finalBadgeLabel = override ? (ru ? overrideView.ru : overrideView.en) : progressBadgeLabel
+  const finalHeadline = isRefill
+    ? ru
+      ? 'Восстанавливаем показатели'
+      : 'Restoring the numbers'
+    : isRefund
+      ? ru
+        ? 'Возврат средств'
+        : 'Refund in progress'
+      : isFailed
+        ? ru
+          ? 'Не удалось выполнить заказ'
+          : 'Order failed'
+        : progressHeadline
+  const barTone: 'live' | 'success' | 'info' = isRefill ? 'success' : isRefund ? 'info' : 'live'
+
   const serviceName = service?.name[lang] ?? order.title
   const UNITS: Record<string, [string, string]> = {
     followers: ['фолловеров', 'followers'],
@@ -382,8 +410,8 @@ export function BoostOrderScreen({ order }: { order: Order }) {
           amountLabel={`${nf(volume)} ${unitWord}`}
           orderId={orderId}
           orderLabel={ru ? 'Номер заказа' : 'Order number'}
-          statusLabel={statusLabel}
-          statusTone={statusTone}
+          statusLabel={finalStatusLabel}
+          statusTone={finalTone}
           caption={caption}
           onCopied={() => show(ru ? 'Номер скопирован' : 'Number copied')}
         />
@@ -489,11 +517,12 @@ export function BoostOrderScreen({ order }: { order: Order }) {
         <OrderProgressCard
           delay={0.1}
           title={progressTitle}
-          badgeLabel={progressBadgeLabel}
-          badgeTone={statusTone}
+          badgeLabel={finalBadgeLabel}
+          badgeTone={finalTone}
+          barTone={barTone}
           complete={done}
           cancelled={cancelled}
-          headline={progressHeadline}
+          headline={finalHeadline}
           subtitle={progressSubtitle}
           note={progressNote}
           dangerIcon={
