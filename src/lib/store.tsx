@@ -9,6 +9,11 @@ import {
 } from 'react'
 import { useLocalState } from './persistent-state'
 import type { CartItem, Order, OrderStatus, Topup, TopupStatus } from './types'
+import {
+  dbStatusToOrderStatus,
+  orderStatusToDbStatus,
+  type DbOrderStatus,
+} from './order-status'
 import { supabase } from '@/integrations/supabase/client'
 import { useAuth } from './auth'
 import { TEST_ORDERS_EVENT, loadTestOrders } from './demo-orders'
