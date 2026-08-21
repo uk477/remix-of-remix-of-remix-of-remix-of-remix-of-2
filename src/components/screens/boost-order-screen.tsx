@@ -98,6 +98,45 @@ export function BoostOrderScreen({ order }: { order: Order }) {
     else setVisibleStatus('waiting')
   }
 
+  /* ── Специальные потоки: восстановление (рефилл) и возврат средств ───── */
+  const [flow, setFlow] = useState<{ kind: 'recovery' | 'refund'; phase: FlowPhase } | null>(() =>
+    adminStatus === 'refilling'
+      ? { kind: 'recovery', phase: 'active' }
+      : adminStatus === 'refunded'
+        ? { kind: 'refund', phase: 'active' }
+        : null,
+  )
+  const prevAdminStatus = useRef(adminStatus)
+  useEffect(() => {
+    const prev = prevAdminStatus.current
+    prevAdminStatus.current = adminStatus
+    if (adminStatus === 'refilling') {
+      setFlow({ kind: 'recovery', phase: 'active' })
+      return
+    }
+    if (adminStatus === 'refunded') {
+      setFlow({ kind: 'refund', phase: 'active' })
+      return
+    }
+    if (adminStatus === 'failed' && (prev === 'refilling' || prev === 'refunded')) {
+      setFlow({ kind: prev === 'refilling' ? 'recovery' : 'refund', phase: 'error' })
+      return
+    }
+    // Успешное завершение потока показываем один раз, затем обычная карточка.
+    if (prev === 'refilling' && adminStatus === 'completed') {
+      setFlow({ kind: 'recovery', phase: 'success' })
+      const id = window.setTimeout(() => setFlow(null), 2800)
+      return () => window.clearTimeout(id)
+    }
+    if (prev === 'refunded' && (adminStatus === 'completed' || adminStatus === 'declined')) {
+      setFlow({ kind: 'refund', phase: 'success' })
+      const id = window.setTimeout(() => setFlow(null), 2800)
+      return () => window.clearTimeout(id)
+    }
+    setFlow(null)
+    return
+  }, [adminStatus])
+
   const done = visibleStatus === 'completed'
   const waiting = visibleStatus === 'waiting'
   const cancelled = visibleStatus === 'cancelled'
