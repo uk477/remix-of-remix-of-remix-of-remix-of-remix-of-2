@@ -201,9 +201,8 @@ export function BoostOrderScreen({ order }: { order: Order }) {
             ? `${left} доступны`
             : `${left} available`
 
-  const refillDescription = ru
-    ? `Доступно ${left} из ${REFILL_LIMIT} рефиллов. Если показатели просядут, восстановим списания бесплатно в течение 48 часов.`
-    : `${left} of ${REFILL_LIMIT} refills available. If the numbers drop, we restore them free of charge within 48 hours.`
+
+
 
   function doRefill() {
     if (refilling) return
