@@ -11,6 +11,7 @@ import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { GlyphCheck, GlyphCopy } from './icons'
 import { copyText } from '@/lib/clipboard'
 import { cn } from '@/lib/utils'
+import { STATUS_ACCENT_VAR } from '@/lib/order-status'
 
 export type OrderTone =
   | 'neutral'
@@ -131,13 +132,13 @@ export function ProgressBar({
 }: {
   /** 0..1 */
   value: number
-  tone?: 'live' | 'success' | 'info'
+  tone?: OrderTone
   className?: string
 }) {
   const reduce = useReducedMotion()
   const pct = Math.max(0, Math.min(1, value))
   const c =
-    tone === 'success' ? 'var(--success)' : tone === 'info' ? 'var(--info)' : 'var(--primary)'
+    STATUS_ACCENT_VAR[tone] ?? 'var(--primary)'
   return (
     <div
       role="progressbar"
@@ -311,10 +312,10 @@ export function IndeterminateBar({
   tone = 'live',
 }: {
   className?: string
-  tone?: 'live' | 'success' | 'info'
+  tone?: OrderTone
 }) {
   const c =
-    tone === 'success' ? 'var(--success)' : tone === 'info' ? 'var(--info)' : 'var(--primary)'
+    STATUS_ACCENT_VAR[tone] ?? 'var(--primary)'
   return (
     <div
       role="progressbar"

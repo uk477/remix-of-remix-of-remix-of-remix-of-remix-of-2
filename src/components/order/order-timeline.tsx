@@ -21,7 +21,7 @@ export type TimelineStep = {
  * for cancelled / failed steps.
  */
 function liveColor(tone: TimelineStep['tone']) {
-  return tone === 'success' ? 'var(--success)' : tone === 'info' ? 'var(--info)' : 'var(--primary)'
+  return STATUS_ACCENT_VAR[tone] ?? 'var(--primary)'
 }
 
 export function OrderTimeline({ steps }: { steps: TimelineStep[] }) {
