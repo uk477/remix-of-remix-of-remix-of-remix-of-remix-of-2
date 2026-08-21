@@ -624,40 +624,43 @@ function RefillShield() {
           animate={{ pathLength: 1 }}
           transition={{ duration: 0.9, ease: 'easeOut' }}
         />
-        <motion.g
-          style={{ originX: '50px', originY: '58px' }}
-          animate={{ rotate: 360 }}
-          transition={{ duration: 8, repeat: Infinity, ease: 'linear' }}
-        >
-          <path
-            d="M28 58a22 22 0 0 1 34-18.5"
-            fill="none"
+        <g transform="translate(50 58)">
+          <motion.g
+            style={{ transformBox: 'fill-box', transformOrigin: 'center' }}
+            animate={{ rotate: 360 }}
+            transition={{ duration: 9, repeat: Infinity, ease: 'linear' }}
+          >
+            <path
+              d="M-22 0a22 22 0 0 1 34-18.5"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="4.5"
+              strokeLinecap="round"
+            />
+            <path d="M13 -28 v11 h-11" fill="none" stroke="currentColor" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round" />
+            <path
+              d="M22 0a22 22 0 0 1-34 18.5"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="4.5"
+              strokeLinecap="round"
+            />
+            <path d="M-13 28 v-11 h11" fill="none" stroke="currentColor" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round" />
+          </motion.g>
+          <motion.g
             stroke="currentColor"
             strokeWidth="4.5"
             strokeLinecap="round"
-          />
-          <path d="M63 30 v11 h-11" fill="none" stroke="currentColor" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round" />
-          <path
-            d="M72 58a22 22 0 0 1-34 18.5"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="4.5"
-            strokeLinecap="round"
-          />
-          <path d="M37 86 v-11 h11" fill="none" stroke="currentColor" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round" />
-        </motion.g>
-        <motion.g
-          stroke="currentColor"
-          strokeWidth="4.5"
-          strokeLinecap="round"
-          initial={{ scale: 0, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ delay: 0.45, type: 'spring', stiffness: 320, damping: 16 }}
-          style={{ originX: '50px', originY: '58px' }}
-        >
-          <path d="M50 49 v18" />
-          <path d="M41 58 h18" />
-        </motion.g>
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: 0.45, type: 'spring', stiffness: 320, damping: 16 }}
+            style={{ transformBox: 'fill-box', transformOrigin: 'center' }}
+          >
+            <path d="M0 -9 v18" />
+            <path d="M-9 0 h18" />
+          </motion.g>
+        </g>
+
       </motion.svg>
     </div>
   )
