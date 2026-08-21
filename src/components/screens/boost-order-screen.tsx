@@ -276,7 +276,7 @@ export function BoostOrderScreen({ order }: { order: Order }) {
           orderLabel={ru ? 'Номер заказа' : 'Order number'}
           statusLabel={statusLabel}
           statusTone={statusTone}
-          statusIcon={done ? <Check className="size-3.5" strokeWidth={3} /> : undefined}
+          
           caption={caption}
           onCopied={() => show(ru ? 'Номер скопирован' : 'Number copied')}
         />
