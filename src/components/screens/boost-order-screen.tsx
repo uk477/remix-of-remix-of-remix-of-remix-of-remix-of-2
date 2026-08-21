@@ -85,6 +85,7 @@ export function BoostOrderScreen({ order }: { order: Order }) {
   const orderId = projectOrderId(order.date)
   const done = order.status === 'completed'
   const waiting = order.status === 'waiting'
+  const cancelled = order.status === 'cancelled'
 
   /* ── Target data ─────────────────────────────────────────────────────── */
   const [profile, setProfile] = useState<XProfileRow | null>(null)
