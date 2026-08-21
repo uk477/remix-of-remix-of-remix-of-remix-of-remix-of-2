@@ -424,6 +424,66 @@ export function BoostOrderScreen({ order }: { order: Order }) {
           />
         )}
 
+        {flow?.kind === 'recovery' ? (
+          <RecoveryStatusCard
+            delay={0.1}
+            phase={flow.phase}
+            ru={ru}
+            steps={[
+              { label: ru ? 'Заказ выполнен' : 'Order delivered', state: 'done' },
+              {
+                label: ru ? 'Рефилл запрошен' : 'Refill requested',
+                meta: refill.lastRefillAt ? fullDate(refill.lastRefillAt, lang) : undefined,
+                state: 'done',
+              },
+              {
+                label: ru ? 'Восстановление' : 'Recovery',
+                state: flow.phase === 'error' ? 'danger' : flow.phase === 'success' ? 'done' : 'live',
+              },
+              {
+                label: ru ? 'Проверка результата' : 'Result check',
+                meta:
+                  flow.phase === 'success'
+                    ? ru
+                      ? 'Готово'
+                      : 'Done'
+                    : ru
+                      ? 'Ожидает'
+                      : 'Pending',
+                state: flow.phase === 'success' ? 'done' : 'idle',
+              },
+            ]}
+          />
+        ) : flow?.kind === 'refund' ? (
+          <RefundStatusCard
+            delay={0.1}
+            phase={flow.phase}
+            ru={ru}
+            steps={[
+              {
+                label: ru ? 'Возврат оформлен' : 'Refund created',
+                meta: fullDate(order.date, lang),
+                state: 'done',
+              },
+              {
+                label: ru ? 'Перевод средств' : 'Transfer',
+                state: flow.phase === 'error' ? 'danger' : flow.phase === 'success' ? 'done' : 'live',
+              },
+              {
+                label: ru ? 'Средства зачислены' : 'Funds credited',
+                meta:
+                  flow.phase === 'success'
+                    ? ru
+                      ? 'Готово'
+                      : 'Done'
+                    : ru
+                      ? 'Ожидает'
+                      : 'Pending',
+                state: flow.phase === 'success' ? 'done' : 'idle',
+              },
+            ]}
+          />
+        ) : (
         <OrderProgressCard
           delay={0.1}
           title={progressTitle}
