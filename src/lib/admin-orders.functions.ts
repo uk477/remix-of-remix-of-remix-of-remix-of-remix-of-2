@@ -68,12 +68,12 @@ export const adminForceRefill = createServerFn({ method: 'POST' })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { orderId: string; note?: string }) => ({
     orderId: uuid(input?.orderId),
-    note: input?.note ? String(input.note).slice(0, 300) : null,
+    note: input?.note ? String(input.note).slice(0, 300) : undefined,
   }))
   .handler(async ({ data, context }) => {
     const { data: res, error } = await context.supabase.rpc('admin_force_refill', {
       _order_id: data.orderId,
-      _note: data.note,
+      _note: data.note ?? undefined,
     })
     if (error) throw new Error(error.message)
     return res as unknown as { refillId: string; refillNumber: number }
