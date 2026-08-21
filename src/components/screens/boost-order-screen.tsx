@@ -225,6 +225,41 @@ export function BoostOrderScreen({ order }: { order: Order }) {
         ? 'Выполняется'
         : 'In progress'
 
+  const progressBadgeLabel = done
+    ? ru
+      ? 'Выполнен'
+      : 'Completed'
+    : waiting
+      ? ru
+        ? 'Заказ оформлен'
+        : 'Placed'
+      : ru
+        ? 'В работе'
+        : 'In progress'
+
+  const progressTitle = ru ? 'Статус заказа' : 'Order status'
+  const progressHeadline = done
+    ? ru
+      ? 'Заказ выполнен'
+      : 'Order completed'
+    : waiting
+      ? ru
+        ? 'Заказ принят'
+        : 'Order accepted'
+      : ru
+        ? 'Продвижение запущено'
+        : 'Campaign started'
+
+  const progressNote = done
+    ? undefined
+    : waiting
+      ? ru
+        ? 'Запуск в течение нескольких минут'
+        : 'Starting within a few minutes'
+      : ru
+        ? 'Результат появится после завершения'
+        : 'Result will appear after completion'
+
   const serviceName = service?.name[lang] ?? order.title
   const UNITS: Record<string, [string, string]> = {
     followers: ['фолловеров', 'followers'],
@@ -300,34 +335,12 @@ export function BoostOrderScreen({ order }: { order: Order }) {
 
         <OrderProgressCard
           delay={0.1}
-          title={ru ? 'Выполнение заказа' : 'Delivery'}
-          badgeLabel={statusLabel}
+          title={progressTitle}
+          badgeLabel={progressBadgeLabel}
           badgeTone={statusTone}
           complete={done}
-          headline={
-            done
-              ? ru
-                ? 'Заказ выполнен'
-                : 'Order completed'
-              : waiting
-                ? ru
-                  ? 'Заказ принят'
-                  : 'Order accepted'
-                : ru
-                  ? 'Заказ выполняется'
-                  : 'Order in progress'
-          }
-          note={
-            done
-              ? undefined
-              : waiting
-                ? ru
-                  ? 'Запуск в течение нескольких минут'
-                  : 'Starting within a few minutes'
-                : ru
-                  ? 'Показатели обновятся после завершения'
-                  : 'The numbers update once the order completes'
-          }
+          headline={progressHeadline}
+          note={progressNote}
           steps={[
             {
               label: ru ? 'Заказ оформлен' : 'Order placed',
@@ -335,23 +348,11 @@ export function BoostOrderScreen({ order }: { order: Order }) {
               state: 'done',
             },
             {
-              label: ru ? 'Выполнение' : 'Delivery',
-              meta: done
-                ? ru
-                  ? 'Готово'
-                  : 'Done'
-                : waiting
-                  ? ru
-                    ? 'Скоро'
-                    : 'Soon'
-                  : ru
-                    ? 'Идёт'
-                    : 'Running',
+              label: ru ? 'Обработка' : 'Processing',
               state: done ? 'done' : waiting ? 'idle' : 'live',
             },
-
             {
-              label: ru ? 'Заказ завершён' : 'Completed',
+              label: ru ? 'Завершено' : 'Completed',
               meta: done
                 ? order.completedAt
                   ? fullDate(order.completedAt, lang)
@@ -359,8 +360,8 @@ export function BoostOrderScreen({ order }: { order: Order }) {
                     ? 'Готово'
                     : 'Done'
                 : ru
-                  ? 'Начнётся после выполнения'
-                  : 'After delivery',
+                  ? 'Ожидает'
+                  : 'Pending',
               state: done ? 'done' : 'idle',
             },
           ]}
