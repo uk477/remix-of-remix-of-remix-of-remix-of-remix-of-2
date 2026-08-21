@@ -476,35 +476,47 @@ export type Database = {
       }
       order_refills: {
         Row: {
+          admin_id: string | null
           client_token: string
           completed_at: string | null
           id: string
           order_id: string | null
           order_key: string
+          prev_status: string | null
           provider_order_id: string | null
+          refill_number: number | null
           requested_at: string
+          source: string
           status: string
           user_id: string
         }
         Insert: {
+          admin_id?: string | null
           client_token: string
           completed_at?: string | null
           id?: string
           order_id?: string | null
           order_key: string
+          prev_status?: string | null
           provider_order_id?: string | null
+          refill_number?: number | null
           requested_at?: string
+          source?: string
           status?: string
           user_id: string
         }
         Update: {
+          admin_id?: string | null
           client_token?: string
           completed_at?: string | null
           id?: string
           order_id?: string | null
           order_key?: string
+          prev_status?: string | null
           provider_order_id?: string | null
+          refill_number?: number | null
           requested_at?: string
+          source?: string
           status?: string
           user_id?: string
         }
@@ -1155,6 +1167,11 @@ export type Database = {
         }
         Returns: number
       }
+      admin_force_refill: {
+        Args: { _note?: string; _order_id: string }
+        Returns: Json
+      }
+      admin_order_refills: { Args: { _order_id: string }; Returns: Json }
       admin_set_maintenance: {
         Args: {
           _enabled: boolean
@@ -1174,6 +1191,28 @@ export type Database = {
         SetofOptions: {
           from: "*"
           to: "maintenance_state"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      admin_set_order_status: {
+        Args: { _order_id: string; _status: string }
+        Returns: {
+          admin_note: string | null
+          amount_usd: number
+          created_at: string
+          id: string
+          meta: Json
+          product_id: string | null
+          qty: number
+          status: Database["public"]["Enums"]["order_status"]
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "orders"
           isOneToOne: true
           isSetofReturn: false
         }
@@ -1292,6 +1331,8 @@ export type Database = {
         | "completed"
         | "declined"
         | "refunded"
+        | "failed"
+        | "refilling"
       supplier_status: "new" | "reviewing" | "approved" | "declined"
       topup_status: "pending" | "success" | "declined" | "expired"
     }
@@ -1429,6 +1470,8 @@ export const Constants = {
         "completed",
         "declined",
         "refunded",
+        "failed",
+        "refilling",
       ],
       supplier_status: ["new", "reviewing", "approved", "declined"],
       topup_status: ["pending", "success", "declined", "expired"],
