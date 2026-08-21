@@ -290,7 +290,7 @@ export function BoostOrderScreen({ order }: { order: Order }) {
 
 
   /* ── Status copy ─────────────────────────────────────────────────────── */
-  const statusTone: OrderTone = cancelled ? 'danger' : done ? 'success' : waiting ? 'neutral' : 'live'
+
   const statusLabel = cancelled
     ? ru
       ? 'Отменён'
