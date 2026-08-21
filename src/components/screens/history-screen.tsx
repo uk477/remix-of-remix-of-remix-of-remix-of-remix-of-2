@@ -68,22 +68,20 @@ function timeOnly(ts: number) {
   })
 }
 
-function statusText(status: OrderStatus | TopupStatus, t: (k: string) => string) {
+function statusText(
+  status: OrderStatus | TopupStatus,
+  t: (k: string) => string,
+  ru: boolean,
+): string {
   switch (status) {
-    case 'waiting':
-      return t('status_waiting')
-    case 'in_progress':
-      return t('status_in_progress')
-    case 'completed':
-      return t('status_completed')
-    case 'cancelled':
-      return t('status_cancelled')
     case 'success':
       return t('topup_success')
     case 'pending':
       return t('topup_pending')
     case 'declined':
       return t('topup_declined')
+    default:
+      return orderStatusLabel(status, ru)
   }
 }
 
