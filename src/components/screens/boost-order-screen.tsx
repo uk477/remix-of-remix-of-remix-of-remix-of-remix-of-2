@@ -485,28 +485,21 @@ export function BoostOrderScreen({ order }: { order: Order }) {
                 title={ru ? 'Рефилл-гарантия' : 'Refill guarantee'}
                 used={used}
                 total={REFILL_LIMIT}
-                availableLabel={
-                  ru ? `${left} доступны` : `${left} available`
-                }
+                badgeLabel={refillBadgeLabel}
                 countLabel={
-                  ru ? `Осталось ${left} из ${REFILL_LIMIT}` : `${left} of ${REFILL_LIMIT} left`
+                  ru ? `Использовано ${used} из ${REFILL_LIMIT}` : `${used} of ${REFILL_LIMIT} used`
                 }
                 description={
                   ru
                     ? 'Бесплатно восстановим списанные показатели.'
                     : 'We restore lost metrics free of charge.'
                 }
-                untilValue={
-                  windowEnd != null
-                    ? fullDate(windowEnd, lang)
-                    : ru
-                      ? '48 ч после завершения'
-                      : '48 h after completion'
-                }
+                statusValue={refillStatusValue}
                 state={refillState}
                 buttonLabel={refillButtonLabel}
                 onRequest={() => setAskRefill(true)}
               />
+
 
             ) : null}
 
