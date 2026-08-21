@@ -697,6 +697,30 @@ export function OrdersSection() {
                     </div>
                   </header>
 
+                  {!isLocalOrder(edit.id) && (
+                    <OrderAdminOverride
+                      key={edit.id}
+                      orderId={edit.id}
+                      status={edit.status}
+                      onStatusChange={(next) => {
+                        setEdit((prev) =>
+                          prev && prev.id === edit.id
+                            ? { ...prev, status: next as OrderStatus }
+                            : prev,
+                        )
+                        setRows((prev) =>
+                          prev
+                            ? prev.map((r) =>
+                                r.id === edit.id ? { ...r, status: next as OrderStatus } : r,
+                              )
+                            : prev,
+                        )
+                      }}
+                    />
+                  )}
+
+
+
                   {/* ── Flow control. At hand-over it disappears entirely:
                       from there the only action left is issuing the account. ── */}
                   {!deliveryUnlocked && (
