@@ -591,6 +591,107 @@ function ProfilePreview({
 }
 
 /* ── Refill confirmation sheet ────────────────────────────────────────── */
+function RefillShield() {
+  return (
+    <div className="relative mx-auto flex size-[132px] items-center justify-center">
+      {/* soft radial glow */}
+      <motion.div
+        aria-hidden
+        className="absolute inset-0 rounded-full"
+        style={{
+          background:
+            'radial-gradient(circle, color-mix(in oklab, var(--success) 34%, transparent) 0%, transparent 66%)',
+          filter: 'blur(14px)',
+        }}
+        animate={{ opacity: [0.55, 0.95, 0.55], scale: [0.94, 1.06, 0.94] }}
+        transition={{ duration: 3.2, repeat: Infinity, ease: 'easeInOut' }}
+      />
+      <motion.svg
+        viewBox="0 0 100 112"
+        className="relative size-[104px] text-success"
+        initial={{ scale: 0.82, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ type: 'spring', stiffness: 260, damping: 20 }}
+        style={{ filter: 'drop-shadow(0 0 14px color-mix(in oklab, var(--success) 45%, transparent))' }}
+      >
+        <motion.path
+          d="M50 4 L92 20 V56 C92 82 74 99 50 108 C26 99 8 82 8 56 V20 Z"
+          fill="color-mix(in oklab, var(--success) 9%, transparent)"
+          stroke="currentColor"
+          strokeWidth="4"
+          strokeLinejoin="round"
+          initial={{ pathLength: 0 }}
+          animate={{ pathLength: 1 }}
+          transition={{ duration: 0.9, ease: 'easeOut' }}
+        />
+        <motion.g
+          style={{ originX: '50px', originY: '58px' }}
+          animate={{ rotate: 360 }}
+          transition={{ duration: 8, repeat: Infinity, ease: 'linear' }}
+        >
+          <path
+            d="M28 58a22 22 0 0 1 34-18.5"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="4.5"
+            strokeLinecap="round"
+          />
+          <path d="M63 30 v11 h-11" fill="none" stroke="currentColor" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round" />
+          <path
+            d="M72 58a22 22 0 0 1-34 18.5"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="4.5"
+            strokeLinecap="round"
+          />
+          <path d="M37 86 v-11 h11" fill="none" stroke="currentColor" strokeWidth="4.5" strokeLinecap="round" strokeLinejoin="round" />
+        </motion.g>
+        <motion.g
+          stroke="currentColor"
+          strokeWidth="4.5"
+          strokeLinecap="round"
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ delay: 0.45, type: 'spring', stiffness: 320, damping: 16 }}
+          style={{ originX: '50px', originY: '58px' }}
+        >
+          <path d="M50 49 v18" />
+          <path d="M41 58 h18" />
+        </motion.g>
+      </motion.svg>
+    </div>
+  )
+}
+
+function RefillRow({
+  icon,
+  label,
+  value,
+  valueClass = '',
+  delay,
+}: {
+  icon: React.ReactNode
+  label: string
+  value: string
+  valueClass?: string
+  delay: number
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay, duration: 0.34, ease: [0.22, 1, 0.36, 1] }}
+      className="flex items-center gap-3 px-4 py-3.5"
+    >
+      <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-success/10 text-success ring-1 ring-inset ring-success/25">
+        {icon}
+      </span>
+      <span className="flex-1 text-[14px] text-muted-foreground">{label}</span>
+      <span className={`text-[14px] font-semibold tabular-nums ${valueClass}`}>{value}</span>
+    </motion.div>
+  )
+}
+
 function RefillSheet({
   ru,
   used,
@@ -609,70 +710,117 @@ function RefillSheet({
       exit={{ opacity: 0 }}
       transition={{ duration: 0.22 }}
       onClick={onClose}
-      className="fixed inset-0 z-50 flex items-end justify-center bg-black/65 backdrop-blur-[6px]"
+      className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 backdrop-blur-[8px]"
     >
       <motion.div
-        initial={{ y: 40, opacity: 0 }}
+        initial={{ y: 48, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        exit={{ y: 40, opacity: 0 }}
+        exit={{ y: 48, opacity: 0 }}
         transition={{ type: 'spring', stiffness: 420, damping: 38 }}
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-[520px] rounded-t-[24px] border-t border-white/[0.07] bg-card px-5 pb-[max(2rem,env(safe-area-inset-bottom))] pt-3"
+        className="relative w-full max-w-[520px] rounded-t-[28px] border-t border-white/[0.07] bg-card px-5 pb-[max(2rem,env(safe-area-inset-bottom))] pt-3"
       >
-        <div className="mx-auto mb-5 h-1 w-9 rounded-full bg-white/15" />
+        <div className="mx-auto mb-2 h-1 w-9 rounded-full bg-white/15" />
 
-        <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0">
-            <h3 className="text-[17px] font-semibold leading-tight tracking-tight">
-              {ru ? 'Запросить рефилл' : 'Request a refill'}
-            </h3>
-            <p className="mt-1.5 text-[13px] leading-[1.5] text-muted-foreground">
-              {ru
-                ? 'Дозакажем недостающие единицы и вернём заказ в работу.'
-                : 'We top up the missing units and put the order back in progress.'}
-            </p>
-          </div>
-          <button
-            onClick={onClose}
-            aria-label="Close"
-            className="-mr-1 flex size-11 shrink-0 items-center justify-center rounded-full text-muted-foreground active:text-foreground"
-          >
-            <X className="size-[18px]" />
-          </button>
+        <button
+          onClick={onClose}
+          aria-label="Close"
+          className="absolute right-4 top-4 flex size-10 items-center justify-center rounded-full bg-white/[0.06] text-muted-foreground ring-1 ring-inset ring-white/[0.08] transition active:scale-95 active:text-foreground"
+        >
+          <X className="size-[18px]" />
+        </button>
+
+        <div className="pt-4">
+          <RefillShield />
         </div>
 
-        <dl className="mt-4 space-y-2.5 border-t border-white/[0.06] pt-4 text-[13px]">
-          <div className="flex items-center justify-between gap-3">
-            <dt className="text-muted-foreground">{ru ? 'Использовано' : 'Used'}</dt>
-            <dd className="tabular-nums font-medium">
-              {used} <span className="text-muted-foreground">/ {REFILL_LIMIT}</span>
-            </dd>
-          </div>
-          <div className="flex items-center justify-between gap-3">
-            <dt className="text-muted-foreground">{ru ? 'Окно гарантии' : 'Guarantee window'}</dt>
-            <dd className="font-medium">{ru ? '48 часов' : '48 hours'}</dd>
-          </div>
-          <div className="flex items-center justify-between gap-3">
-            <dt className="text-muted-foreground">{ru ? 'Стоимость' : 'Price'}</dt>
-            <dd className="font-medium text-success">{ru ? 'Бесплатно' : 'Free'}</dd>
-          </div>
-        </dl>
+        <motion.h3
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.12, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+          className="mt-5 text-center text-[26px] font-bold leading-tight tracking-tight"
+        >
+          {ru ? 'Подтвердить рефилл' : 'Confirm refill'}
+        </motion.h3>
+        <motion.p
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+          className="mx-auto mt-2.5 max-w-[300px] text-center text-[14.5px] leading-[1.5] text-muted-foreground"
+        >
+          {ru
+            ? 'Восстановим недостающие показатели и вернём заказ в работу.'
+            : 'We restore the missing metrics and put the order back in progress.'}
+        </motion.p>
 
-        <div className="mt-5 grid grid-cols-[1fr_1.4fr] gap-2.5">
-          <button
-            onClick={onClose}
-            className="h-12 rounded-xl bg-white/[0.05] text-[14px] font-medium text-muted-foreground ring-1 ring-inset ring-white/[0.07] active:scale-[0.98]"
-          >
-            {ru ? 'Отмена' : 'Cancel'}
-          </button>
-          <button
-            onClick={onConfirm}
-            className="h-12 rounded-xl bg-primary text-[14px] font-semibold tracking-tight text-primary-foreground shadow-[inset_0_1px_0_color-mix(in_oklab,white_28%,transparent)] transition-transform active:scale-[0.98]"
-          >
-            {ru ? 'Подтвердить' : 'Confirm refill'}
-          </button>
-        </div>
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.26, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+          className="mt-6 divide-y divide-white/[0.06] overflow-hidden rounded-2xl bg-white/[0.03] ring-1 ring-inset ring-white/[0.07]"
+        >
+          <RefillRow
+            delay={0.32}
+            icon={
+              <svg viewBox="0 0 24 24" fill="none" className="size-[18px]">
+                <path d="M4 7.5A2.5 2.5 0 0 1 6.5 5h11A2.5 2.5 0 0 1 20 7.5v0A1.5 1.5 0 0 1 18.5 9h-13A1.5 1.5 0 0 1 4 7.5Z" stroke="currentColor" strokeWidth="1.7" />
+                <path d="M5.5 9.5h13V17a2 2 0 0 1-2 2h-9a2 2 0 0 1-2-2V9.5Z" stroke="currentColor" strokeWidth="1.7" />
+                <path d="M10 13.5h4" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+              </svg>
+            }
+            label={ru ? 'Будет использован' : 'Will be used'}
+            value={
+              ru
+                ? `${Math.min(used + 1, REFILL_LIMIT)} из ${REFILL_LIMIT} рефиллов`
+                : `${Math.min(used + 1, REFILL_LIMIT)} of ${REFILL_LIMIT} refills`
+            }
+          />
+          <RefillRow
+            delay={0.38}
+            icon={
+              <svg viewBox="0 0 24 24" fill="none" className="size-[18px]">
+                <path d="M12.6 3.5H19a1.5 1.5 0 0 1 1.5 1.5v6.4a2 2 0 0 1-.six 0 2 2 0 0 1-.57 1.4l-6.5 6.5a2 2 0 0 1-2.83 0l-5.3-5.3a2 2 0 0 1 0-2.83l6.5-6.5a2 2 0 0 1 1.4-.57Z" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" />
+                <circle cx="16.2" cy="7.8" r="1.4" fill="currentColor" />
+              </svg>
+            }
+            label={ru ? 'Стоимость' : 'Price'}
+            value={ru ? 'Бесплатно' : 'Free'}
+            valueClass="text-success"
+          />
+        </motion.div>
+
+        <motion.button
+          initial={{ opacity: 0, y: 14 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.34, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+          whileTap={{ scale: 0.975 }}
+          onClick={onConfirm}
+          className="mt-6 flex h-[58px] w-full items-center justify-center gap-2.5 rounded-2xl text-[17px] font-semibold tracking-tight text-black"
+          style={{
+            background: 'linear-gradient(180deg, color-mix(in oklab, var(--success) 88%, white 12%), var(--success))',
+            boxShadow:
+              'inset 0 1px 0 color-mix(in oklab, white 35%, transparent), 0 10px 30px -12px color-mix(in oklab, var(--success) 70%, transparent)',
+          }}
+        >
+          <svg viewBox="0 0 24 24" fill="none" className="size-[21px]">
+            <path d="M12 3 20 6v5.5c0 4.7-3.3 8.2-8 9.5-4.7-1.3-8-4.8-8-9.5V6l8-3Z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
+            <path d="m8.8 12.1 2.2 2.2 4.2-4.4" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          {ru ? 'Подтвердить' : 'Confirm'}
+        </motion.button>
+
+        <motion.button
+          initial={{ opacity: 0, y: 14 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+          whileTap={{ scale: 0.975 }}
+          onClick={onClose}
+          className="mt-3 h-[54px] w-full rounded-2xl bg-white/[0.02] text-[16px] font-medium text-muted-foreground ring-1 ring-inset ring-white/[0.08] transition-colors active:text-foreground"
+        >
+          {ru ? 'Отмена' : 'Cancel'}
+        </motion.button>
       </motion.div>
     </motion.div>
   )
 }
+
