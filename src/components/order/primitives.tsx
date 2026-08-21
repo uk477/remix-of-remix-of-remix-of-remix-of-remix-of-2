@@ -12,24 +12,36 @@ import { GlyphCheck, GlyphCopy } from './icons'
 import { copyText } from '@/lib/clipboard'
 import { cn } from '@/lib/utils'
 
-export type OrderTone = 'neutral' | 'live' | 'success' | 'warning' | 'info' | 'danger'
+export type OrderTone =
+  | 'neutral'
+  | 'live'
+  | 'success'
+  | 'emerald'
+  | 'warning'
+  | 'info'
+  | 'danger'
+  | 'coral'
 
 const DOT: Record<OrderTone, string> = {
   neutral: 'bg-muted-foreground/60',
   live: 'bg-primary',
   success: 'bg-success',
+  emerald: 'bg-emerald',
   warning: 'bg-warning',
   info: 'bg-info',
   danger: 'bg-destructive',
+  coral: 'bg-coral',
 }
 
 const TEXT: Record<OrderTone, string> = {
   neutral: 'text-muted-foreground',
   live: 'text-primary',
   success: 'text-success',
+  emerald: 'text-emerald',
   warning: 'text-warning',
   info: 'text-info',
   danger: 'text-destructive',
+  coral: 'text-coral',
 }
 
 export const EASE = [0.22, 1, 0.36, 1] as const
