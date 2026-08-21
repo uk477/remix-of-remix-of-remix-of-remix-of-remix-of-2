@@ -140,8 +140,11 @@ export function BoostOrderScreen({ order }: { order: Order }) {
   const [justSent, setJustSent] = useState(false)
   useEffect(() => setRefills(readRefills(order.id)), [order.id])
 
-  const windowEnd = order.date + REFILL_WINDOW_MS
-  const inWindow = now < windowEnd
+  // Гарантия отсчитывается от завершения заказа. Пока заказ не завершён,
+  // окно ещё не стартовало — значит истечь оно не может.
+  const windowStart = done ? (order.completedAt ?? order.date) : null
+  const windowEnd = windowStart != null ? windowStart + REFILL_WINDOW_MS : null
+  const inWindow = windowEnd == null || now < windowEnd
   const used = refills.length
   const left = REFILL_LIMIT - used
   const canRefill = Boolean(order.refillable) && inWindow && left > 0
@@ -460,8 +463,22 @@ export function BoostOrderScreen({ order }: { order: Order }) {
                 title={ru ? 'Гарантия рефилла' : 'Refill guarantee'}
                 countLabel={`${used} / ${REFILL_LIMIT}`}
                 description={refillDescription}
-                untilLabel={ru ? 'Гарантия действует до' : 'Guarantee valid until'}
-                untilValue={fullDate(windowEnd, lang)}
+                untilLabel={
+                  windowEnd != null
+                    ? ru
+                      ? 'Гарантия действует до'
+                      : 'Guarantee valid until'
+                    : ru
+                      ? 'Гарантия действует'
+                      : 'Guarantee window'
+                }
+                untilValue={
+                  windowEnd != null
+                    ? fullDate(windowEnd, lang)
+                    : ru
+                      ? '48 ч после завершения'
+                      : '48 h after completion'
+                }
                 state={refillState}
                 buttonLabel={refillButtonLabel}
                 onRequest={() => setAskRefill(true)}
