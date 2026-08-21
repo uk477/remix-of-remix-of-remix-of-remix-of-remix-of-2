@@ -62,7 +62,7 @@ export function BoostOrderScreen({ order }: { order: Order }) {
   const { lang, t } = useI18n()
   const ru = lang === 'ru'
   const navigate = useNavigate()
-  const { refillOrder } = useStore()
+  const { refillOrder, syncOrderStatus } = useStore()
   const { isAdmin } = useAuth()
   const { show } = useToast()
 
@@ -100,6 +100,10 @@ export function BoostOrderScreen({ order }: { order: Order }) {
   }, [order.dbStatus, order.status])
 
   const applyAdminStatus = (next: AdminOrderStatus) => {
+    // The callback is invoked only after admin_set_order_status succeeds.
+    // Mirror that persisted value into the shared store so route navigation
+    // cannot resurrect the stale pre-mutation order object.
+    syncOrderStatus(order.id, next)
     setAdminStatus(next)
     if (next === 'completed' || next === 'refunded') setVisibleStatus('completed')
     else if (next === 'declined' || next === 'failed') setVisibleStatus('cancelled')
