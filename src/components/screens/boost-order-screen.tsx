@@ -565,8 +565,15 @@ export function BoostOrderScreen({ order }: { order: Order }) {
                     state: 'done',
                   },
                   {
-                    label: ru ? 'В процессе' : 'In progress',
+                    label: isRefill
+                      ? ru
+                        ? 'В процессе (refill)'
+                        : 'In progress (refill)'
+                      : ru
+                        ? 'В процессе'
+                        : 'In progress',
                     state: done ? 'done' : waiting ? 'idle' : 'live',
+                    tone: barTone === 'live' ? 'primary' : barTone === 'success' ? 'success' : 'info',
                   },
                   {
                     label: ru ? 'Заказ завершён' : 'Order completed',
