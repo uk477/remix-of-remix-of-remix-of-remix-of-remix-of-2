@@ -1,7 +1,7 @@
 'use client'
 
 import { motion, useReducedMotion } from 'framer-motion'
-import { Check } from 'lucide-react'
+import { EASE } from './primitives'
 import { cn } from '@/lib/utils'
 
 export type TimelineStep = {
@@ -10,57 +10,90 @@ export type TimelineStep = {
   state: 'done' | 'live' | 'idle'
 }
 
+/**
+ * Hairline rail with drawn markers — a tick that strokes itself in, a live
+ * node that breathes, and a hollow marker for what is still ahead.
+ */
 export function OrderTimeline({ steps }: { steps: TimelineStep[] }) {
   const reduce = useReducedMotion()
   return (
-    <ol className="relative flex flex-col gap-3">
+    <ol className="relative flex flex-col gap-3.5">
       {steps.map((s, i) => (
         <li key={s.label} className="relative flex items-center gap-3">
           {i < steps.length - 1 ? (
             <span
               aria-hidden
-              className={cn(
-                'absolute left-[9px] top-[22px] h-[calc(100%-10px)] w-px',
-                s.state === 'done' ? 'bg-success/35' : 'bg-white/[0.08]',
-              )}
+              className="absolute left-[8px] top-[19px] w-px"
+              style={{
+                height: 'calc(100% - 6px)',
+                background:
+                  s.state === 'done'
+                    ? 'linear-gradient(180deg, color-mix(in oklab, var(--success) 42%, transparent), color-mix(in oklab, var(--foreground) 8%, transparent))'
+                    : 'color-mix(in oklab, var(--foreground) 8%, transparent)',
+              }}
             />
           ) : null}
 
-          <span className="relative z-10 flex size-[18px] shrink-0 items-center justify-center">
+          <span className="relative z-10 flex size-[17px] shrink-0 items-center justify-center">
             {s.state === 'done' ? (
-              <span className="flex size-[18px] items-center justify-center rounded-full bg-success/15">
-                <Check className="size-3 shrink-0 text-success" strokeWidth={3} />
-              </span>
+              <motion.svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={3}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="size-[13px] text-success"
+              >
+                <motion.path
+                  d="m5 12.5 4.6 4.5L19 7"
+                  initial={reduce ? false : { pathLength: 0 }}
+                  animate={{ pathLength: 1 }}
+                  transition={{ duration: 0.45, ease: EASE, delay: 0.25 + i * 0.08 }}
+                />
+              </motion.svg>
             ) : s.state === 'live' ? (
               <>
                 {!reduce && (
                   <motion.span
                     aria-hidden
-                    animate={{ scale: [1, 1.8], opacity: [0.45, 0] }}
-                    transition={{ duration: 2, repeat: Infinity, ease: 'easeOut' }}
-                    className="absolute size-[10px] rounded-full bg-primary"
+                    animate={{ scale: [1, 2.2], opacity: [0.4, 0] }}
+                    transition={{ duration: 2.2, repeat: Infinity, ease: 'easeOut' }}
+                    className="absolute size-[9px] rounded-full bg-primary"
                   />
                 )}
-                <span className="relative size-[10px] rounded-full bg-primary shadow-[0_0_10px_-1px_color-mix(in_oklab,var(--primary)_80%,transparent)]" />
+                <span
+                  className="relative size-[9px] rounded-full bg-primary"
+                  style={{
+                    boxShadow: '0 0 10px -1px color-mix(in oklab, var(--primary) 80%, transparent)',
+                  }}
+                />
               </>
             ) : (
-              <span className="size-[10px] rounded-full border border-white/15 bg-transparent" />
+              <span
+                className="size-[9px] rounded-full"
+                style={{
+                  boxShadow: 'inset 0 0 0 1px color-mix(in oklab, var(--foreground) 16%, transparent)',
+                }}
+              />
             )}
           </span>
 
-          <span className="min-w-0 flex-1">
-            <span
-              className={cn(
-                'block truncate text-[14px] font-medium leading-tight',
-                s.state === 'idle' ? 'text-muted-foreground' : 'text-foreground',
-              )}
-            >
-              {s.label}
-            </span>
+          <span
+            className={cn(
+              'min-w-0 flex-1 truncate text-[13.5px] leading-tight',
+              s.state === 'idle'
+                ? 'text-muted-foreground/70'
+                : s.state === 'live'
+                  ? 'font-semibold text-foreground'
+                  : 'font-medium text-foreground/85',
+            )}
+          >
+            {s.label}
           </span>
 
           {s.meta ? (
-            <span className="shrink-0 tabular-nums text-[12px] text-muted-foreground">
+            <span className="shrink-0 text-[12px] tabular-nums text-muted-foreground/80">
               {s.meta}
             </span>
           ) : null}
