@@ -1,8 +1,13 @@
 'use client'
 
 import type { ReactNode } from 'react'
-import { OrderCard, CopyOrderButton, StatusBadge, type OrderTone } from './primitives'
+import { CopyValue, Eyebrow, Reveal, StatusText, type OrderTone } from './primitives'
 
+/**
+ * Hero block — intentionally has no card frame. It sits directly on the page
+ * background and is separated by a hairline, so the eye starts here instead of
+ * on the first of several identical boxes.
+ */
 export function OrderSummaryCard({
   mark,
   service,
@@ -10,7 +15,6 @@ export function OrderSummaryCard({
   orderId,
   statusLabel,
   statusTone,
-  statusIcon,
   caption,
   orderLabel,
   onCopied,
@@ -21,37 +25,49 @@ export function OrderSummaryCard({
   orderId: string
   statusLabel: string
   statusTone: OrderTone
-  statusIcon?: ReactNode
   caption: string
   orderLabel: string
   onCopied?: () => void
 }) {
   return (
-    <OrderCard className="p-4">
-      <div className="flex items-start gap-3">
-        <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-white/[0.05] ring-1 ring-inset ring-white/[0.07]">
+    <Reveal className="px-1 pt-1">
+      <div className="flex items-start gap-3.5">
+        <span
+          className="relative flex size-12 shrink-0 items-center justify-center rounded-[15px] text-foreground"
+          style={{
+            background:
+              'linear-gradient(150deg, color-mix(in oklab, var(--foreground) 11%, transparent), color-mix(in oklab, var(--foreground) 3%, transparent))',
+            boxShadow:
+              'inset 0 1px 0 color-mix(in oklab, white 14%, transparent), inset 0 0 0 1px color-mix(in oklab, white 6%, transparent)',
+          }}
+        >
           {mark}
         </span>
 
-        <div className="min-w-0 flex-1">
-          <p className="truncate text-[17px] font-bold leading-tight tracking-tight">{service}</p>
-          <p className="mt-1 text-[14px] leading-tight text-muted-foreground">{amountLabel}</p>
+        <div className="min-w-0 flex-1 pt-0.5">
+          <div className="flex items-start gap-3">
+            <h2 className="min-w-0 flex-1 font-display text-[20px] font-bold leading-[1.2] tracking-[-0.02em] text-balance">
+              {service}
+            </h2>
+            <span className="shrink-0 pt-1">
+              <StatusText tone={statusTone} label={statusLabel} pulse={statusTone === 'live'} />
+            </span>
+          </div>
+          <p className="mt-1.5 text-[14px] leading-tight text-muted-foreground">{amountLabel}</p>
         </div>
-
-        <StatusBadge
-          tone={statusTone}
-          label={statusLabel}
-          icon={statusIcon}
-          pulse={statusTone === 'live'}
-        />
       </div>
 
-      <p className="mt-3 text-[13px] leading-[1.5] text-muted-foreground">{caption}</p>
+      <p className="mt-3.5 max-w-[42ch] text-[13.5px] leading-[1.55] text-muted-foreground">
+        {caption}
+      </p>
 
-      <div className="mt-3 flex items-center justify-between gap-3 border-t border-white/[0.06] pt-3">
-        <span className="text-[13px] text-muted-foreground">{orderLabel}</span>
-        <CopyOrderButton value={orderId} onCopied={onCopied} />
+      <div
+        className="mt-4 flex items-center justify-between gap-3 pt-3.5"
+        style={{ borderTop: '1px solid color-mix(in oklab, var(--foreground) 8%, transparent)' }}
+      >
+        <Eyebrow>{orderLabel}</Eyebrow>
+        <CopyValue value={orderId} onCopied={onCopied} />
       </div>
-    </OrderCard>
+    </Reveal>
   )
 }

@@ -1,114 +1,115 @@
 'use client'
 
-/* Reusable building blocks for the order detail screen. */
+/* Building blocks for the order detail screen.
+ *
+ * Deliberately NOT a uniform card kit: each surface variant has its own
+ * treatment (flat hero / hairline panel / raised deck / dashed ticket) so the
+ * page reads as a designed hierarchy rather than a stack of identical boxes. */
 
 import { motion, useReducedMotion } from 'framer-motion'
-import { Check, Copy } from 'lucide-react'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { GlyphCheck, GlyphCopy } from './icons'
 import { copyText } from '@/lib/clipboard'
 import { cn } from '@/lib/utils'
 
 export type OrderTone = 'neutral' | 'live' | 'success' | 'warning' | 'danger'
 
-const TONE: Record<OrderTone, { text: string; bg: string; ring: string; dot: string }> = {
-  neutral: {
-    text: 'text-muted-foreground',
-    bg: 'bg-foreground/[0.05]',
-    ring: 'ring-foreground/[0.08]',
-    dot: 'bg-muted-foreground/70',
-  },
-  live: {
-    text: 'text-primary',
-    bg: 'bg-primary/10',
-    ring: 'ring-primary/20',
-    dot: 'bg-primary',
-  },
-  success: {
-    text: 'text-success',
-    bg: 'bg-success/10',
-    ring: 'ring-success/20',
-    dot: 'bg-success',
-  },
-  warning: {
-    text: 'text-warning',
-    bg: 'bg-warning/10',
-    ring: 'ring-warning/20',
-    dot: 'bg-warning',
-  },
-  danger: {
-    text: 'text-destructive',
-    bg: 'bg-destructive/10',
-    ring: 'ring-destructive/20',
-    dot: 'bg-destructive',
-  },
+const DOT: Record<OrderTone, string> = {
+  neutral: 'bg-muted-foreground/60',
+  live: 'bg-primary',
+  success: 'bg-success',
+  warning: 'bg-warning',
+  danger: 'bg-destructive',
 }
 
-/* ── Card shell: one radius, one border, one shadow across the screen ──── */
-export function OrderCard({
-  className,
+const TEXT: Record<OrderTone, string> = {
+  neutral: 'text-muted-foreground',
+  live: 'text-primary',
+  success: 'text-success',
+  warning: 'text-warning',
+  danger: 'text-destructive',
+}
+
+export const EASE = [0.22, 1, 0.36, 1] as const
+
+/* ── Reveal wrapper — the only shared motion, not a shared look ────────── */
+export function Reveal({
+  as: Tag = 'section',
   delay = 0,
+  className,
   children,
 }: {
-  className?: string
+  as?: 'section' | 'div' | 'header'
   delay?: number
+  className?: string
   children: ReactNode
 }) {
   const reduce = useReducedMotion()
+  const M = motion[Tag] as typeof motion.section
   return (
-    <motion.section
-      initial={reduce ? false : { opacity: 0, y: 8 }}
+    <M
+      initial={reduce ? false : { opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+      transition={{ delay, duration: 0.5, ease: EASE }}
+      className={className}
+    >
+      {children}
+    </M>
+  )
+}
+
+/* ── Section label: tiny caps eyebrow instead of yet another badge ─────── */
+export function Eyebrow({ children, className }: { children: ReactNode; className?: string }) {
+  return (
+    <span
       className={cn(
-        'rounded-[20px] border border-white/[0.07] bg-card/90 shadow-[0_18px_40px_-32px_rgba(0,0,0,0.9)]',
+        'text-[10.5px] font-semibold uppercase tracking-[0.16em] text-muted-foreground/75',
         className,
       )}
     >
       {children}
-    </motion.section>
+    </span>
   )
 }
 
-/* ── Status badge: colour + icon/text, never colour alone ──────────────── */
-export function StatusBadge({
+/* ── Status: colour + word, no capsule ─────────────────────────────────── */
+export function StatusText({
   tone = 'neutral',
   label,
-  icon,
   pulse,
   className,
 }: {
   tone?: OrderTone
   label: string
-  icon?: ReactNode
   pulse?: boolean
   className?: string
 }) {
   const reduce = useReducedMotion()
-  const t = TONE[tone]
   return (
     <span
       className={cn(
-        'inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-[12px] font-semibold leading-none ring-1 ring-inset',
-        t.bg,
-        t.ring,
-        t.text,
+        'inline-flex shrink-0 items-center gap-1.5 text-[12.5px] font-semibold tracking-tight',
+        TEXT[tone],
         className,
       )}
     >
-      {icon ?? (
-        <motion.span
-          aria-hidden
-          animate={pulse && !reduce ? { opacity: [1, 0.25, 1] } : {}}
-          transition={{ duration: 1.9, repeat: Infinity, ease: 'easeInOut' }}
-          className={cn('size-1.5 rounded-full', t.dot)}
-        />
-      )}
+      <span className="relative flex size-1.5 shrink-0 items-center justify-center">
+        {pulse && !reduce ? (
+          <motion.span
+            aria-hidden
+            animate={{ scale: [1, 2.6], opacity: [0.5, 0] }}
+            transition={{ duration: 2.2, repeat: Infinity, ease: 'easeOut' }}
+            className={cn('absolute size-1.5 rounded-full', DOT[tone])}
+          />
+        ) : null}
+        <span className={cn('size-1.5 rounded-full', DOT[tone])} />
+      </span>
       {label}
     </span>
   )
 }
 
-/* ── Progress bar: animated fill, soft edge glow ───────────────────────── */
+/* ── Progress: eased fill, travelling sheen, glowing leading edge ──────── */
 export function ProgressBar({
   value,
   tone = 'live',
@@ -121,31 +122,54 @@ export function ProgressBar({
 }) {
   const reduce = useReducedMotion()
   const pct = Math.max(0, Math.min(1, value))
+  const c = tone === 'success' ? 'var(--success)' : 'var(--primary)'
   return (
     <div
       role="progressbar"
       aria-valuemin={0}
       aria-valuemax={100}
       aria-valuenow={Math.round(pct * 100)}
-      className={cn('relative h-2.5 w-full overflow-hidden rounded-full bg-white/[0.06]', className)}
+      className={cn('relative h-[7px] w-full overflow-hidden rounded-full', className)}
+      style={{ background: 'color-mix(in oklab, var(--foreground) 7%, transparent)' }}
     >
       <motion.div
         initial={reduce ? false : { width: 0 }}
         animate={{ width: `${pct * 100}%` }}
-        transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
-        className={cn(
-          'relative h-full rounded-full',
-          tone === 'success'
-            ? 'bg-linear-to-r from-success/70 to-success'
-            : 'bg-linear-to-r from-primary/65 to-primary',
-        )}
+        transition={{ duration: 1.1, ease: EASE, delay: 0.15 }}
+        className="relative h-full overflow-hidden rounded-full"
         style={{
-          boxShadow:
-            tone === 'success'
-              ? '0 0 14px -3px color-mix(in oklab, var(--success) 75%, transparent)'
-              : '0 0 14px -3px color-mix(in oklab, var(--primary) 75%, transparent)',
+          background: `linear-gradient(90deg, color-mix(in oklab, ${c} 45%, transparent) 0%, ${c} 78%, color-mix(in oklab, ${c} 92%, white) 100%)`,
+          boxShadow: `0 0 12px -2px color-mix(in oklab, ${c} 70%, transparent), inset 0 1px 0 color-mix(in oklab, white 22%, transparent)`,
         }}
-      />
+      >
+        {!reduce && pct > 0.02 && pct < 1 ? (
+          <motion.span
+            aria-hidden
+            initial={{ x: '-120%' }}
+            animate={{ x: '160%' }}
+            transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut', repeatDelay: 0.6 }}
+            className="absolute inset-y-0 w-1/3"
+            style={{
+              background:
+                'linear-gradient(90deg, transparent, color-mix(in oklab, white 42%, transparent), transparent)',
+            }}
+          />
+        ) : null}
+      </motion.div>
+
+      {!reduce && pct > 0.02 && pct < 1 ? (
+        <motion.span
+          aria-hidden
+          initial={{ left: '0%' }}
+          animate={{ left: `${pct * 100}%`, opacity: [0.55, 1, 0.55] }}
+          transition={{
+            left: { duration: 1.1, ease: EASE, delay: 0.15 },
+            opacity: { duration: 1.8, repeat: Infinity, ease: 'easeInOut' },
+          }}
+          className="pointer-events-none absolute top-1/2 size-[13px] -translate-x-1/2 -translate-y-1/2 rounded-full"
+          style={{ background: `radial-gradient(circle, ${c} 0%, transparent 68%)` }}
+        />
+      ) : null}
     </div>
   )
 }
@@ -155,18 +179,20 @@ export function AnimatedNumber({ value, className }: { value: number; className?
   const reduce = useReducedMotion()
   const [shown, setShown] = useState(reduce ? value : 0)
   const raf = useRef<number | null>(null)
+  const shownRef = useRef(shown)
+  shownRef.current = shown
 
   useEffect(() => {
     if (reduce) {
       setShown(value)
       return
     }
-    const from = shown
+    const from = shownRef.current
     const start = performance.now()
-    const dur = 800
+    const dur = 1100
     const tick = (now: number) => {
       const p = Math.min(1, (now - start) / dur)
-      const eased = 1 - Math.pow(1 - p, 3)
+      const eased = 1 - Math.pow(1 - p, 4)
       setShown(Math.round(from + (value - from) * eased))
       if (p < 1) raf.current = requestAnimationFrame(tick)
     }
@@ -174,14 +200,13 @@ export function AnimatedNumber({ value, className }: { value: number; className?
     return () => {
       if (raf.current) cancelAnimationFrame(raf.current)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value, reduce])
 
   return <span className={cn('tabular-nums', className)}>{shown.toLocaleString('en-US')}</span>
 }
 
-/* ── Copy order number ─────────────────────────────────────────────────── */
-export function CopyOrderButton({
+/* ── Copy: bare value + glyph that morphs into a drawn check ───────────── */
+export function CopyValue({
   value,
   label,
   onCopied,
@@ -203,38 +228,64 @@ export function CopyOrderButton({
   )
 
   return (
-    <motion.button
+    <button
       type="button"
-      whileTap={{ scale: 0.98 }}
       onClick={() => {
         void copyText(value).then((ok) => {
           if (!ok) return
           setCopied(true)
           onCopied?.()
           if (timer.current) window.clearTimeout(timer.current)
-          timer.current = window.setTimeout(() => setCopied(false), 1800)
+          timer.current = window.setTimeout(() => setCopied(false), 1900)
         })
       }}
       aria-label={label ?? value}
       className={cn(
-        'inline-flex min-h-[36px] items-center gap-2 rounded-xl bg-white/[0.05] px-2.5 py-1.5 ring-1 ring-inset ring-white/[0.07] transition-colors hover:bg-white/[0.08]',
+        'group inline-flex min-h-[32px] items-center gap-2 text-[13.5px] font-medium tracking-tight transition-opacity active:opacity-60',
         className,
       )}
     >
-      <span className="tabular-nums text-[13px] font-semibold tracking-tight text-foreground">
-        <span className="text-muted-foreground">#</span>
-        {value}
+      <span className="font-mono tabular-nums text-foreground">{value}</span>
+      <span className="relative flex size-[15px] items-center justify-center">
+        <motion.span
+          animate={{ opacity: copied ? 0 : 1, scale: copied ? 0.7 : 1 }}
+          transition={{ duration: 0.18 }}
+          className="absolute inset-0 text-muted-foreground"
+        >
+          <GlyphCopy className="size-[15px]" />
+        </motion.span>
+        <motion.span
+          initial={false}
+          animate={{ opacity: copied ? 1 : 0, scale: copied ? 1 : 0.6 }}
+          transition={{ type: 'spring', stiffness: 520, damping: 26 }}
+          className="absolute inset-0 text-success"
+        >
+          <motion.svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2.6}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="size-[15px]"
+          >
+            <motion.path
+              d="m5 12.5 4.6 4.5L19 7"
+              initial={false}
+              animate={{ pathLength: copied ? 1 : 0 }}
+              transition={{ duration: 0.32, ease: EASE }}
+            />
+          </motion.svg>
+        </motion.span>
       </span>
-      {copied ? (
-        <Check className="size-3.5 text-success" strokeWidth={2.6} />
-      ) : (
-        <Copy className="size-3.5 text-muted-foreground" strokeWidth={2.2} />
-      )}
-    </motion.button>
+    </button>
   )
 }
 
+/* Keep the drawn-check glyph reachable for other states. */
+export { GlyphCheck }
+
 /* ── Skeleton ──────────────────────────────────────────────────────────── */
 export function Skeleton({ className }: { className?: string }) {
-  return <div className={cn('animate-pulse rounded-lg bg-white/[0.06]', className)} />
+  return <div className={cn('animate-pulse rounded-lg bg-foreground/[0.06]', className)} />
 }

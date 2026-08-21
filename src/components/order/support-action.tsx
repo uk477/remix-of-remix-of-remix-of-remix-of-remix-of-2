@@ -1,8 +1,9 @@
 'use client'
 
-import { motion } from 'framer-motion'
-import { LifeBuoy, ChevronRight } from 'lucide-react'
+import { motion, useReducedMotion } from 'framer-motion'
+import { GlyphChevronRight, GlyphSupport } from './icons'
 
+/** Plain row, not a card — the page ends on a quiet action, not another box. */
 export function SupportAction({
   label,
   hint,
@@ -12,25 +13,31 @@ export function SupportAction({
   hint?: string
   onClick: () => void
 }) {
+  const reduce = useReducedMotion()
   return (
     <motion.button
       type="button"
-      whileTap={{ scale: 0.98 }}
+      whileTap={{ scale: 0.99 }}
       onClick={onClick}
-      className="flex min-h-[52px] w-full items-center gap-3 rounded-[20px] border border-white/[0.07] bg-card/60 px-4 py-3 text-left transition-colors hover:bg-card"
+      className="group mx-1 flex w-[calc(100%-0.5rem)] items-center gap-3 rounded-[14px] px-1 py-3 text-left transition-colors"
     >
-      <span className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-white/[0.05]">
-        <LifeBuoy className="size-[18px] text-muted-foreground" strokeWidth={2} />
-      </span>
+      <GlyphSupport className="size-[19px] shrink-0 text-muted-foreground transition-colors group-hover:text-foreground" />
       <span className="min-w-0 flex-1">
-        <span className="block truncate text-[14px] font-medium">{label}</span>
+        <span className="block text-[14px] font-medium leading-tight">{label}</span>
         {hint ? (
-          <span className="mt-0.5 block text-[12px] leading-[1.4] text-muted-foreground">
+          <span className="mt-0.5 block text-[12.5px] leading-[1.4] text-muted-foreground">
             {hint}
           </span>
         ) : null}
       </span>
-      <ChevronRight className="size-4 shrink-0 text-muted-foreground" />
+      <motion.span
+        aria-hidden
+        initial={false}
+        whileHover={reduce ? undefined : { x: 2 }}
+        className="text-muted-foreground/70"
+      >
+        <GlyphChevronRight className="size-[15px]" />
+      </motion.span>
     </motion.button>
   )
 }
