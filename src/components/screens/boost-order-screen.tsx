@@ -225,6 +225,41 @@ export function BoostOrderScreen({ order }: { order: Order }) {
         ? 'Выполняется'
         : 'In progress'
 
+  const progressBadgeLabel = done
+    ? ru
+      ? 'Выполнен'
+      : 'Completed'
+    : waiting
+      ? ru
+        ? 'Заказ оформлен'
+        : 'Placed'
+      : ru
+        ? 'В работе'
+        : 'In progress'
+
+  const progressTitle = ru ? 'Статус заказа' : 'Order status'
+  const progressHeadline = done
+    ? ru
+      ? 'Заказ выполнен'
+      : 'Order completed'
+    : waiting
+      ? ru
+        ? 'Заказ принят'
+        : 'Order accepted'
+      : ru
+        ? 'Продвижение запущено'
+        : 'Campaign started'
+
+  const progressNote = done
+    ? undefined
+    : waiting
+      ? ru
+        ? 'Запуск в течение нескольких минут'
+        : 'Starting within a few minutes'
+      : ru
+        ? 'Результат появится после завершения'
+        : 'Result will appear after completion'
+
   const serviceName = service?.name[lang] ?? order.title
   const UNITS: Record<string, [string, string]> = {
     followers: ['фолловеров', 'followers'],
