@@ -213,45 +213,63 @@ export function BoostOrderScreen({ order }: { order: Order }) {
   }
 
   /* ── Status copy ─────────────────────────────────────────────────────── */
-  const statusTone: OrderTone = done ? 'success' : waiting ? 'neutral' : 'live'
-  const statusLabel = done
+  const statusTone: OrderTone = cancelled ? 'danger' : done ? 'success' : waiting ? 'neutral' : 'live'
+  const statusLabel = cancelled
     ? ru
-      ? 'Завершён'
-      : 'Completed'
-    : waiting
+      ? 'Отменён'
+      : 'Cancelled'
+    : done
       ? ru
-        ? 'Заказ оформлен'
-        : 'Placed'
-      : ru
-        ? 'В процессе'
-        : 'In progress'
+        ? 'Завершён'
+        : 'Completed'
+      : waiting
+        ? ru
+          ? 'Заказ оформлен'
+          : 'Placed'
+        : ru
+          ? 'В процессе'
+          : 'In progress'
 
-  const progressBadgeLabel = done
+  const progressBadgeLabel = cancelled
     ? ru
-      ? 'Завершён'
-      : 'Completed'
-    : waiting
+      ? 'Отменён'
+      : 'Cancelled'
+    : done
       ? ru
-        ? 'Заказ оформлен'
-        : 'Placed'
-      : ru
-        ? 'В работе'
-        : 'In progress'
+        ? 'Завершён'
+        : 'Completed'
+      : waiting
+        ? ru
+          ? 'Заказ оформлен'
+          : 'Placed'
+        : ru
+          ? 'В работе'
+          : 'In progress'
 
   const progressTitle = ru ? 'Статус заказа' : 'Order status'
-  const progressHeadline = done
+  const progressHeadline = cancelled
     ? ru
-      ? 'Заказ завершён'
-      : 'Order completed'
-    : waiting
+      ? 'Заказ отменён'
+      : 'Order cancelled'
+    : done
       ? ru
-        ? 'Заказ принят'
-        : 'Order accepted'
-      : ru
-        ? 'Продвижение запущено'
-        : 'Campaign started'
+        ? 'Заказ завершён'
+        : 'Order completed'
+      : waiting
+        ? ru
+          ? 'Заказ принят'
+          : 'Order accepted'
+        : ru
+          ? 'Продвижение запущено'
+          : 'Campaign started'
 
-  const progressNote = done
+  const progressSubtitle = cancelled
+    ? ru
+      ? 'Мы не смогли выполнить этот заказ'
+      : 'We were unable to complete this order'
+    : undefined
+
+  const progressNote = done || cancelled
     ? undefined
     : waiting
       ? ru
@@ -260,6 +278,10 @@ export function BoostOrderScreen({ order }: { order: Order }) {
       : ru
         ? 'Результат появится после завершения'
         : 'Result will appear after completion'
+
+  const cancelReason =
+    order.cancelReason ??
+    (ru ? 'Публикация недоступна' : 'Publication unavailable')
 
   const serviceName = service?.name[lang] ?? order.title
   const UNITS: Record<string, [string, string]> = {
@@ -271,17 +293,21 @@ export function BoostOrderScreen({ order }: { order: Order }) {
     comments: ['комментариев', 'comments'],
   }
   const unitWord = (UNITS[category] ?? ['ед.', 'units'])[ru ? 0 : 1]
-  const caption = done
+  const caption = cancelled
     ? ru
-      ? 'Заказ полностью выполнен и закрыт.'
-      : 'The order is fully delivered and closed.'
-    : waiting
+      ? 'Заказ отменён, средства возвращены на баланс.'
+      : 'Order cancelled and funds returned to your balance.'
+    : done
       ? ru
-        ? 'Заказ принят и скоро будет запущен.'
-        : 'The order is accepted and starts shortly.'
-      : ru
-        ? 'Заказ запущен, показатели растут в реальном времени.'
-        : 'The order is running and the numbers are growing live.'
+        ? 'Заказ полностью выполнен и закрыт.'
+        : 'The order is fully delivered and closed.'
+      : waiting
+        ? ru
+          ? 'Заказ принят и скоро будет запущен.'
+          : 'The order is accepted and starts shortly.'
+        : ru
+          ? 'Заказ запущен, показатели растут в реальном времени.'
+          : 'The order is running and the numbers are growing live.'
 
   return (
     <div className="min-h-full">
