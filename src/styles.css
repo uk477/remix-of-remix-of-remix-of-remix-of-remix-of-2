@@ -1158,7 +1158,7 @@ a,
     transform: translateX(0);
   }
   100% {
-    transform: translateX(var(--flow-distance, 100px));
+    transform: translateX(100%);
   }
 }
 @keyframes flow-dot {
