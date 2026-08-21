@@ -1,6 +1,6 @@
 'use client'
 
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
+import { motion, useReducedMotion } from 'framer-motion'
 import { useEffect, useState } from 'react'
 import { Reveal } from './primitives'
 import { cn } from '@/lib/utils'
@@ -16,18 +16,20 @@ import { cn } from '@/lib/utils'
  *  error    — запрос не прошёл, можно повторить
  */
 export type RefillState =
-  | 'pending'
-  | 'available'
   | 'loading'
-  | 'sent'
-  | 'exhausted'
-  | 'expired'
+  | 'not_completed'
+  | 'submitting'
+  | 'accepted'
+  | 'cooldown'
+  | 'available'
+  | 'limit_exhausted'
+  | 'guarantee_expired'
   | 'error'
 
 type Tone = 'success' | 'muted' | 'danger'
 
 function toneOf(state: RefillState): Tone {
-  if (state === 'available' || state === 'loading' || state === 'sent') return 'success'
+  if (state === 'available' || state === 'submitting' || state === 'accepted') return 'success'
   if (state === 'error') return 'danger'
   return 'muted'
 }
@@ -189,7 +191,7 @@ export function RefillGuaranteeCard({
   const [sweep, setSweep] = useState(0)
 
   useEffect(() => {
-    if (state === 'sent') setSweep((s) => s + 1)
+    if (state === 'accepted') setSweep((s) => s + 1)
   }, [state])
 
   const accent = TONE_VAR[tone]
@@ -250,24 +252,25 @@ export function RefillGuaranteeCard({
       <motion.button
         type="button"
         disabled={!interactive}
-        aria-busy={state === 'loading'}
+        aria-busy={state === 'submitting'}
         onClick={press}
         whileTap={interactive ? { scale: 0.98 } : undefined}
         whileHover={interactive && !reduce ? { y: -1 } : undefined}
         transition={{ type: 'spring', stiffness: 520, damping: 32 }}
         className={cn(
           'relative mt-4 flex h-[52px] w-full items-center overflow-hidden rounded-[14px] px-4 text-[14.5px] font-semibold tracking-tight',
+          state === 'cooldown' && 'tabular-nums',
           interactive
             ? 'cursor-pointer text-foreground'
             : 'cursor-not-allowed text-muted-foreground/75',
-          state === 'sent' && 'text-success',
+          state === 'accepted' && 'text-success',
           state === 'error' && 'text-destructive',
         )}
         style={{
           background: 'color-mix(in oklab, var(--foreground) 3%, transparent)',
           boxShadow: `inset 0 0 0 1px color-mix(in oklab, ${
-            state === 'sent' || state === 'error' ? accent : 'var(--foreground)'
-          } ${state === 'sent' || state === 'error' ? '26%' : '10%'}, transparent)`,
+            state === 'accepted' || state === 'error' ? accent : 'var(--foreground)'
+          } ${state === 'accepted' || state === 'error' ? '26%' : '10%'}, transparent)`,
         }}
       >
         {/* press / success sweep — только для активных состояний */}
@@ -315,40 +318,38 @@ export function RefillGuaranteeCard({
         ) : null}
 
         <span className="relative flex min-w-0 flex-1 items-center justify-center gap-2">
-          <AnimatePresence mode="wait" initial={false}>
-            <motion.span
-              key={state}
-              initial={{ opacity: 0, y: 4 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -4 }}
-              transition={{ duration: 0.22 }}
-              className="flex min-w-0 items-center gap-2 truncate"
-            >
-              {state === 'loading' ? (
-                <motion.span
-                  className="block size-[15px] shrink-0 rounded-full border-[1.8px] border-success/30 border-t-success"
-                  animate={reduce ? undefined : { rotate: 360 }}
-                  transition={{ duration: 0.9, repeat: Infinity, ease: 'linear' }}
+          <motion.span
+            key={state}
+            initial={{ opacity: 0, y: 4 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.22 }}
+            className="flex min-w-0 items-center gap-2"
+          >
+            {state === 'submitting' ? (
+              <motion.span
+                className="block size-[15px] shrink-0 rounded-full border-[1.8px] border-success/30 border-t-success"
+                animate={reduce ? undefined : { rotate: 360 }}
+                transition={{ duration: 0.9, repeat: Infinity, ease: 'linear' }}
+              />
+            ) : null}
+            {state === 'accepted' ? (
+              <svg viewBox="0 0 20 20" className="size-[16px] shrink-0" fill="none">
+                <motion.path
+                  d="m4.5 10.4 3.6 3.6 7.4-7.8"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  initial={reduce ? false : { pathLength: 0 }}
+                  animate={{ pathLength: 1 }}
+                  transition={{ duration: 0.4, ease: 'easeOut' }}
                 />
-              ) : null}
-              {state === 'sent' ? (
-                <svg viewBox="0 0 20 20" className="size-[16px] shrink-0" fill="none">
-                  <motion.path
-                    d="m4.5 10.4 3.6 3.6 7.4-7.8"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    initial={reduce ? false : { pathLength: 0 }}
-                    animate={{ pathLength: 1 }}
-                    transition={{ duration: 0.4, ease: 'easeOut' }}
-                  />
-                </svg>
-              ) : null}
-              <span className="truncate">{buttonLabel}</span>
-            </motion.span>
-          </AnimatePresence>
+              </svg>
+            ) : null}
+            <span className="truncate">{buttonLabel}</span>
+          </motion.span>
         </span>
+
 
         {/* правый арроу-блок появляется только когда есть действие */}
         {live ? (
