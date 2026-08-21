@@ -50,6 +50,7 @@ import {
   Toggle,
 } from './primitives'
 import { useToast } from '../toast'
+import { OrderAdminOverride } from './order-admin-override'
 import { useUserLookup, userDisplay, userSearchHaystack } from './use-user-lookup'
 import { loadTestOrders, updateTestOrder } from '@/lib/demo-orders'
 import type { Order } from '@/lib/types'
@@ -112,7 +113,10 @@ const orderLabel = (s: OrderStatus) =>
     completed: 'Готов',
     declined: 'Отклонён',
     refunded: 'Возврат',
-  })[s]
+    failed: 'Ошибка',
+    refilling: 'Рефилл',
+  })[s] ?? s
+
 
 // Forward pipeline the admin walks an order through, left → right.
 const PIPELINE: OrderStatus[] = ['pending', 'in_progress', 'waiting', 'completed']
@@ -696,6 +700,30 @@ export function OrdersSection() {
                       <span className="text-[11px] text-muted-foreground">{edit.qty} шт.</span>
                     </div>
                   </header>
+
+                  {!isLocalOrder(edit.id) && (
+                    <OrderAdminOverride
+                      key={edit.id}
+                      orderId={edit.id}
+                      status={edit.status}
+                      onStatusChange={(next: string) => {
+                        setEdit((prev) =>
+                          prev && prev.id === edit.id
+                            ? { ...prev, status: next as OrderStatus }
+                            : prev,
+                        )
+                        setRows((prev) =>
+                          prev
+                            ? prev.map((r) =>
+                                r.id === edit.id ? { ...r, status: next as OrderStatus } : r,
+                              )
+                            : prev,
+                        )
+                      }}
+                    />
+                  )}
+
+
 
                   {/* ── Flow control. At hand-over it disappears entirely:
                       from there the only action left is issuing the account. ── */}
