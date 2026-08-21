@@ -116,6 +116,7 @@ function mapOrderRow(o: OrderRow): Order {
     startFollowers:
       typeof m['start_followers'] === 'number' ? (m['start_followers'] as number) : undefined,
     completedAt: (m['completed_at'] as number | undefined) ?? undefined,
+    cancelReason: (m['cancel_reason'] as string | undefined) ?? undefined,
   }
 }
 
