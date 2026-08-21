@@ -215,19 +215,19 @@ export function BoostOrderScreen({ order }: { order: Order }) {
   const statusTone: OrderTone = done ? 'success' : waiting ? 'neutral' : 'live'
   const statusLabel = done
     ? ru
-      ? 'Выполнен'
+      ? 'Завершён'
       : 'Completed'
     : waiting
       ? ru
         ? 'Заказ оформлен'
         : 'Placed'
       : ru
-        ? 'Выполняется'
+        ? 'В процессе'
         : 'In progress'
 
   const progressBadgeLabel = done
     ? ru
-      ? 'Выполнен'
+      ? 'Завершён'
       : 'Completed'
     : waiting
       ? ru
@@ -240,7 +240,7 @@ export function BoostOrderScreen({ order }: { order: Order }) {
   const progressTitle = ru ? 'Статус заказа' : 'Order status'
   const progressHeadline = done
     ? ru
-      ? 'Заказ выполнен'
+      ? 'Заказ завершён'
       : 'Order completed'
     : waiting
       ? ru
@@ -348,11 +348,11 @@ export function BoostOrderScreen({ order }: { order: Order }) {
               state: 'done',
             },
             {
-              label: ru ? 'Обработка' : 'Processing',
+              label: ru ? 'В процессе' : 'In progress',
               state: done ? 'done' : waiting ? 'idle' : 'live',
             },
             {
-              label: ru ? 'Завершено' : 'Completed',
+              label: ru ? 'Заказ завершён' : 'Order completed',
               meta: done
                 ? order.completedAt
                   ? fullDate(order.completedAt, lang)
