@@ -479,6 +479,7 @@ function OrderRow({
   onOpen: () => void
 }) {
   const { lang } = useI18n()
+  const { isAdmin } = useAuth()
   const cd = useCountdown(order.guaranteeUntil)
   const boost = boostVisual(order)
   const isCustom = orderService(order) === 'custom'
