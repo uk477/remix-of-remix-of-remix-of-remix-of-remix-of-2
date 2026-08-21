@@ -24,28 +24,14 @@ import { GlyphRefund, GlyphX, XMark } from '../order/icons'
 import { SERVICES } from '@/lib/data'
 import { useI18n } from '@/lib/i18n'
 import { projectOrderId } from '@/lib/order-id'
+import { useRefill } from '@/lib/use-refill'
 import { useStore } from '@/lib/store'
 import { loadXTweetFast, extractTweetId, type XTweet } from '@/lib/x-tweet'
 import { loadXProfileFast, normalizeXHandle } from '@/lib/x-profile'
 import type { XProfileRow } from '@/lib/x-profile.functions'
 import type { Order } from '@/lib/types'
 
-const REFILL_WINDOW_MS = 48 * 60 * 60 * 1000
 const REFILL_LIMIT = 4
-
-function refillKey(id: string) {
-  return `aurx.refills.${id}`
-}
-
-function readRefills(id: string): number[] {
-  try {
-    const raw = localStorage.getItem(refillKey(id))
-    const arr = raw ? (JSON.parse(raw) as number[]) : []
-    return Array.isArray(arr) ? arr.filter((n) => typeof n === 'number') : []
-  } catch {
-    return []
-  }
-}
 
 function fullDate(ts: number, lang: string) {
   return new Date(ts).toLocaleString(lang === 'ru' ? 'ru-RU' : 'en-US', {
@@ -133,97 +119,71 @@ export function BoostOrderScreen({ order }: { order: Order }) {
   /* No per-unit delivery feed exists, so we never derive a fake count here. */
 
 
-  /* ── Refill ──────────────────────────────────────────────────────────── */
-  const [refills, setRefills] = useState<number[]>([])
+  /* ── Refill: состояние живёт на сервере, строго для ЭТОГО заказа ─────── */
   const [askRefill, setAskRefill] = useState(false)
-  const [refilling, setRefilling] = useState(false)
-  const [justSent, setJustSent] = useState(false)
-  const [refillError, setRefillError] = useState(false)
-  useEffect(() => setRefills(readRefills(order.id)), [order.id])
+  const refill = useRefill(order.id)
+  const refillState = refill.phase as RefillState
+  const used = refill.used
+  const left = refill.remaining
+  const windowEnd = refill.guaranteeEndsAt
 
-  // Гарантия отсчитывается от завершения заказа. Пока заказ не завершён,
-  // окно ещё не стартовало — значит истечь оно не может.
-  const windowStart = done ? (order.completedAt ?? order.date) : null
-  const windowEnd = windowStart != null ? windowStart + REFILL_WINDOW_MS : null
-  const expired = windowEnd != null && now >= windowEnd
-  const used = refills.length
-  const left = Math.max(0, REFILL_LIMIT - used)
-
-  // Единая state machine — ровно одно состояние в каждый момент времени.
-  const refillState: RefillState = refilling
-    ? 'loading'
-    : justSent
-      ? 'sent'
-      : refillError
-        ? 'error'
-        : left <= 0
-          ? 'exhausted'
-          : expired
-            ? 'expired'
-            : !done
-              ? 'pending'
-              : 'available'
-
-  const refillButtonLabel = {
-    loading: ru ? 'Отправляем…' : 'Submitting…',
-    sent: ru ? 'Рефилл запрошен' : 'Refill requested',
-    error: ru ? 'Повторить запрос' : 'Try again',
-    exhausted: ru ? 'Лимит исчерпан' : 'Limit reached',
-    expired: ru ? 'Срок гарантии истёк' : 'Guarantee expired',
-    pending: ru ? 'Доступно после завершения' : 'Available after completion',
-    available: ru ? 'Сделать рефилл' : 'Request refill',
-  }[refillState]
+  const refillButtonLabel =
+    refillState === 'cooldown'
+      ? refill.countdown
+      : {
+          loading: ru ? 'Загрузка…' : 'Loading…',
+          submitting: ru ? 'Отправляем…' : 'Submitting…',
+          accepted: ru ? 'Рефилл запрошен' : 'Refill requested',
+          error: ru ? 'Повторить запрос' : 'Try again',
+          limit_exhausted: ru ? 'Лимит исчерпан' : 'Limit reached',
+          guarantee_expired: ru ? 'Гарантия завершена' : 'Guarantee ended',
+          not_completed: ru ? 'Доступно после завершения' : 'Available after completion',
+          available: ru ? 'Запросить рефилл' : 'Request refill',
+          cooldown: refill.countdown,
+        }[refillState]
 
   const refillStatusValue = {
-    loading: ru ? 'Запрос обрабатывается' : 'Processing request',
-    sent: ru ? 'Запрос принят' : 'Request accepted',
+    loading: ru ? 'Проверяем статус' : 'Checking status',
+    submitting: ru ? 'Запрос обрабатывается' : 'Processing request',
+    accepted: ru ? 'Запрос принят' : 'Request accepted',
     error: ru ? 'Не удалось отправить' : 'Request failed',
-    exhausted: ru ? 'Все рефиллы использованы' : 'All refills used',
-    expired: ru ? 'Гарантия завершена' : 'Guarantee ended',
-    pending: ru ? 'Активируется после завершения' : 'Starts after completion',
+    limit_exhausted: ru ? 'Все рефиллы использованы' : 'All refills used',
+    guarantee_expired: ru ? 'Гарантия завершена' : 'Guarantee ended',
+    not_completed: ru ? 'Активируется после завершения' : 'Starts after completion',
+    cooldown: ru ? 'Следующий рефилл через' : 'Next refill in',
     available: windowEnd != null ? fullDate(windowEnd, lang) : ru ? '48 ч после завершения' : '48 h after completion',
   }[refillState]
 
   const refillBadgeLabel =
-    left <= 0
-      ? ru
-        ? 'Исчерпано'
-        : 'Used up'
-      : refillState === 'expired'
+    refillState === 'loading'
+      ? '—'
+      : left <= 0
         ? ru
-          ? 'Истекло'
-          : 'Expired'
-        : refillState === 'pending'
+          ? 'Исчерпано'
+          : 'Used up'
+        : refillState === 'guarantee_expired'
           ? ru
-            ? 'Скоро'
-            : 'Soon'
-          : ru
-            ? `${left} доступны`
-            : `${left} available`
+            ? 'Истекло'
+            : 'Expired'
+          : refillState === 'not_completed'
+            ? ru
+              ? 'Скоро'
+              : 'Soon'
+            : ru
+              ? `${left} доступны`
+              : `${left} available`
 
-
-
-
-  function doRefill() {
-    if (refilling) return
-    const next = [...refills, Date.now()]
+  async function doRefill() {
     setAskRefill(false)
-    setRefillError(false)
-    setRefilling(true)
-    window.setTimeout(() => {
-      setRefills(next)
-      try {
-        localStorage.setItem(refillKey(order.id), JSON.stringify(next))
-      } catch {
-        /* ignore */
-      }
+    const ok = await refill.request()
+    if (ok) {
       refillOrder(order.id)
-      setRefilling(false)
-      setJustSent(true)
       show(ru ? 'Рефилл отправлен в обработку' : 'Refill submitted')
-      window.setTimeout(() => setJustSent(false), 4000)
-    }, 900)
+    } else if (ok === false) {
+      show(ru ? 'Не удалось отправить рефилл' : 'Refill request failed')
+    }
   }
+
 
 
   /* ── Status copy ─────────────────────────────────────────────────────── */
@@ -483,10 +443,10 @@ export function BoostOrderScreen({ order }: { order: Order }) {
                 delay={0.15}
                 title={ru ? 'Рефилл-гарантия' : 'Refill guarantee'}
                 used={used}
-                total={REFILL_LIMIT}
+                total={refill.max}
                 badgeLabel={refillBadgeLabel}
                 countLabel={
-                  ru ? `Использовано ${used} из ${REFILL_LIMIT}` : `${used} of ${REFILL_LIMIT} used`
+                  ru ? `Использовано ${used} из ${refill.max}` : `${used} of ${refill.max} used`
                 }
                 description={
                   ru

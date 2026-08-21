@@ -474,6 +474,50 @@ export type Database = {
         }
         Relationships: []
       }
+      order_refills: {
+        Row: {
+          client_token: string
+          completed_at: string | null
+          id: string
+          order_id: string | null
+          order_key: string
+          provider_order_id: string | null
+          requested_at: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          client_token: string
+          completed_at?: string | null
+          id?: string
+          order_id?: string | null
+          order_key: string
+          provider_order_id?: string | null
+          requested_at?: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          client_token?: string
+          completed_at?: string | null
+          id?: string
+          order_id?: string | null
+          order_key?: string
+          provider_order_id?: string | null
+          requested_at?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_refills_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       orders: {
         Row: {
           admin_note: string | null
@@ -1204,6 +1248,40 @@ export type Database = {
         Returns: Json
       }
       redeem_promo: { Args: { _code: string }; Returns: Json }
+      refill_resolve_order: {
+        Args: { _order_key: string; _user_id: string }
+        Returns: {
+          admin_note: string | null
+          amount_usd: number
+          created_at: string
+          id: string
+          meta: Json
+          product_id: string | null
+          qty: number
+          status: Database["public"]["Enums"]["order_status"]
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "orders"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      refill_state: {
+        Args: { _fallback_completed_at?: string; _order_key: string }
+        Returns: Json
+      }
+      request_refill: {
+        Args: {
+          _client_token: string
+          _fallback_completed_at?: string
+          _order_key: string
+        }
+        Returns: Json
+      }
     }
     Enums: {
       app_role: "admin" | "user"
