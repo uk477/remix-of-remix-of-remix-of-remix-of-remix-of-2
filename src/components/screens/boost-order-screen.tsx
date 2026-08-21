@@ -433,7 +433,9 @@ export function BoostOrderScreen({ order }: { order: Order }) {
               { label: ru ? 'Заказ выполнен' : 'Order delivered', state: 'done' },
               {
                 label: ru ? 'Рефилл запрошен' : 'Refill requested',
-                meta: refill.lastRefillAt ? fullDate(refill.lastRefillAt, lang) : undefined,
+                meta: refill.state?.lastRefillAt
+                  ? fullDate(new Date(refill.state.lastRefillAt).getTime(), lang)
+                  : undefined,
                 state: 'done',
               },
               {
