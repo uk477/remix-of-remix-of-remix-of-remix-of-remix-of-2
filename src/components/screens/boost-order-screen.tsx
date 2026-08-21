@@ -21,6 +21,8 @@ import { RefillGuaranteeCard, type RefillState } from '../order/refill-guarantee
 import { SupportAction } from '../order/support-action'
 import { Eyebrow, Reveal, type OrderTone } from '../order/primitives'
 import { GlyphRefund, GlyphX, XMark } from '../order/icons'
+import { OrderAdminOverride } from '../admin/order-admin-override'
+import { useAuth } from '@/lib/auth'
 import { SERVICES } from '@/lib/data'
 import { useI18n } from '@/lib/i18n'
 import { projectOrderId } from '@/lib/order-id'
@@ -52,6 +54,7 @@ export function BoostOrderScreen({ order }: { order: Order }) {
   const ru = lang === 'ru'
   const navigate = useNavigate()
   const { refillOrder } = useStore()
+  const { isAdmin } = useAuth()
   const { show } = useToast()
 
   const service = useMemo(
@@ -308,6 +311,17 @@ export function BoostOrderScreen({ order }: { order: Order }) {
           caption={caption}
           onCopied={() => show(ru ? 'Номер скопирован' : 'Number copied')}
         />
+
+        {/* Админ правит этот заказ прямо здесь, в карточке. */}
+        {isAdmin && refill.state?.orderId ? (
+          <OrderAdminOverride
+            key={refill.state.orderId}
+            orderId={refill.state.orderId}
+            status={order.status}
+            onStatusChange={() => void refill.reload()}
+          />
+        ) : null}
+
 
 
         {isFollowers ? (
