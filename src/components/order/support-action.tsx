@@ -25,7 +25,9 @@ export function SupportAction({
       <span className="min-w-0 flex-1">
         <span className="block truncate text-[14px] font-medium">{label}</span>
         {hint ? (
-          <span className="mt-0.5 block truncate text-[12px] text-muted-foreground">{hint}</span>
+          <span className="mt-0.5 block text-[12px] leading-[1.4] text-muted-foreground">
+            {hint}
+          </span>
         ) : null}
       </span>
       <ChevronRight className="size-4 shrink-0 text-muted-foreground" />
