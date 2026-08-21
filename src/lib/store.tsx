@@ -95,6 +95,7 @@ function mapOrderRow(o: OrderRow): Order {
     title: o.title,
     amount: Number(o.amount_usd),
     status: dbToOrderStatus(o.status as DBOrderStatus),
+    dbStatus: o.status as DBOrderStatus,
     refillable: !!m['refillable'],
     kind,
     paid: !!m['paid'],
@@ -132,11 +133,12 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     return () => window.removeEventListener(TEST_ORDERS_EVENT, sync)
   }, [])
   // A test purchase can exist both locally and as its persisted DB twin (linked
-  // by meta.local_id). Show it once — the local copy wins, it is the freshest.
+  // by meta.local_id). Once the DB row exists it is authoritative, especially
+  // for admin status changes and refill eligibility after a reload.
   const orders = useMemo(() => {
     const seen = new Set<string>()
     const out: Order[] = []
-    for (const o of [...testOrders, ...ordersRaw]) {
+    for (const o of [...ordersRaw, ...testOrders]) {
       const key = o.id || `${o.title}|${o.date}|${o.amount}`
       if (seen.has(key)) continue
       seen.add(key)

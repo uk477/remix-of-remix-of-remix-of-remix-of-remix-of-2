@@ -123,6 +123,8 @@ export type Order = {
   title: string
   amount: number
   status: OrderStatus
+  /** Exact persisted backend status; keeps admin controls lossless across reloads. */
+  dbStatus?: import('./order-status').DbOrderStatus
   refillable: boolean
   kind: 'boost' | 'account'
   // whether this order was already paid with real money / balance

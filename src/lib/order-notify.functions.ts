@@ -1,21 +1,17 @@
 import { createServerFn } from '@tanstack/react-start'
 import { requireSupabaseAuth } from '@/integrations/supabase/auth-middleware'
-import { normalizeLang, sendTelegramMessage, type Lang } from './telegram-notify.server'
+import { normalizeLang, sendTelegramMessage } from './telegram-notify.server'
+import { orderReadyMessage } from './order-notify.shared'
 
-// ─── Localized "order ready" copy ──────────────────────────────────────
-const ORDER_READY: Record<Lang, (title: string) => string> = {
-  en: (t) => `AURX\n\nYour order is ready for delivery! \n«${t}»\nOpen the bot to receive your accounts.`,
-  ru: (t) => `AURX\n\nВаш заказ готов к выдаче! \n«${t}»\nОткройте бот, чтобы забрать данные.`,
-  uk: (t) => `AURX\n\nВаше замовлення готове до видачі! \n«${t}»\nВідкрийте бота, щоб забрати дані.`,
-  ar: (t) => `AURX\n\nطلبك جاهز للتسليم! \n«${t}»\nافتح البوت لاستلام حساباتك.`,
-  zh: (t) => `AURX\n\n您的订单已准备就绪!\n「${t}」\n打开机器人即可领取账号。`,
-  es: (t) => `AURX\n\n¡Tu pedido está listo! \n«${t}»\nAbre el bot para recibir tus cuentas.`,
-  tr: (t) => `AURX\n\nSiparişin teslime hazır! \n«${t}»\nHesaplarını almak için botu aç.`,
-  pt: (t) => `AURX\n\nSeu pedido está pronto! \n«${t}»\nAbra o bot para receber suas contas.`,
-  fr: (t) => `AURX\n\nVotre commande est prête ! \n«${t}»\nOuvrez le bot pour récupérer vos comptes.`,
-}
-
-type OrderStatus = 'pending' | 'in_progress' | 'waiting' | 'completed' | 'declined' | 'refunded'
+type OrderStatus =
+  | 'pending'
+  | 'in_progress'
+  | 'waiting'
+  | 'completed'
+  | 'declined'
+  | 'refunded'
+  | 'failed'
+  | 'refilling'
 
 /**
  * Admin saves an order (status + note). When the status transitions to
@@ -44,6 +40,8 @@ export const adminSaveOrder = createServerFn({ method: 'POST' })
         'completed',
         'declined',
         'refunded',
+        'failed',
+        'refilling',
       ]
       if (!allowed.includes(input.status)) throw new Error('invalid status')
       // Delivery payload: admin-picked fields/values per account.
@@ -80,7 +78,7 @@ export const adminSaveOrder = createServerFn({ method: 'POST' })
     if (roleErr) throw new Error(roleErr.message)
     if (!isAdmin) throw new Error('Forbidden')
 
-    // Read the current row to detect the status transition.
+    // Read the current row to detect the status transition and notification target.
     const { data: row, error: readErr } = await supabase
       .from('orders')
       .select('status, user_id, title, meta')
@@ -91,21 +89,22 @@ export const adminSaveOrder = createServerFn({ method: 'POST' })
 
     const prevStatus = row.status as OrderStatus | null
 
-    const patch: {
-      status: OrderStatus
-      admin_note: string | null
-      meta?: Record<string, unknown>
-    } = {
-      status: data.status,
+    // Every admin status change goes through the same atomic database operation.
+    // This is also where completed_at is created once and preserved thereafter.
+    const { data: updatedOrder, error: statusErr } = await supabase.rpc('admin_set_order_status', {
+      _order_id: data.orderId,
+      _status: data.status,
+    })
+    if (statusErr) throw new Error(statusErr.message)
+
+    const persisted = updatedOrder as unknown as { meta?: Record<string, unknown> | null }
+    const patch: { admin_note: string | null; meta?: Record<string, unknown> } = {
       admin_note: data.adminNote,
     }
     // Delivery payload and buyer-visible stage both live in meta — the same
     // place the buyer's order page reads them from.
     if (data.accounts || data.progressStep !== null) {
-      const meta = ((row as { meta?: Record<string, unknown> | null }).meta ?? {}) as Record<
-        string,
-        unknown
-      >
+      const meta = (persisted.meta ?? {}) as Record<string, unknown>
       patch.meta = {
         ...meta,
         ...(data.accounts ? { accounts: data.accounts } : {}),
@@ -132,7 +131,7 @@ export const adminSaveOrder = createServerFn({ method: 'POST' })
       const chatId = (profile as { telegram_id?: string | null } | null)?.telegram_id ?? null
       if (chatId) {
         const lang = normalizeLang((profile as { language?: string | null } | null)?.language ?? null)
-        const text = ORDER_READY[lang](String(row.title ?? ''))
+        const text = orderReadyMessage(lang, String(row.title ?? ''))
         const r = await sendTelegramMessage(String(chatId), text)
         notified = r.ok
       }
@@ -169,6 +168,6 @@ export const notifyTestOrderReady = createServerFn({ method: 'POST' })
     if (!chatId) return { ok: true, notified: false }
 
     const lang = normalizeLang((profile as { language?: string | null } | null)?.language ?? null)
-    const r = await sendTelegramMessage(String(chatId), ORDER_READY[lang](data.title))
+    const r = await sendTelegramMessage(String(chatId), orderReadyMessage(lang, data.title))
     return { ok: true, notified: r.ok }
   })

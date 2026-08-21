@@ -141,6 +141,8 @@ export function OrderAdminOverride({
     try {
       const res = await forceRefillFn({ data: { orderId } })
       show(`Рефилл #${res.refillNumber} запущен (admin)`)
+      setTarget('refilling')
+      onStatusChange?.('refilling')
       await load()
     } catch (e) {
       show('Ошибка: ' + (e instanceof Error ? e.message : 'не удалось'))

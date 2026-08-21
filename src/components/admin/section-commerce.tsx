@@ -96,7 +96,15 @@ const isLocalOrder = (id: string) => id.startsWith('test-') || id.startsWith('de
 // ORDERS
 // ═══════════════════════════════════════════════════════════════════════════
 
-type OrderStatus = 'pending' | 'in_progress' | 'waiting' | 'completed' | 'declined' | 'refunded'
+type OrderStatus =
+  | 'pending'
+  | 'in_progress'
+  | 'waiting'
+  | 'completed'
+  | 'declined'
+  | 'refunded'
+  | 'failed'
+  | 'refilling'
 const ORDER_STATUSES: OrderStatus[] = [
   'pending',
   'in_progress',
@@ -104,6 +112,8 @@ const ORDER_STATUSES: OrderStatus[] = [
   'completed',
   'declined',
   'refunded',
+  'failed',
+  'refilling',
 ]
 const orderLabel = (s: OrderStatus) =>
   ({
@@ -218,13 +228,28 @@ export function OrdersSection() {
     // есть настоящая строка (meta.local_id). Админ-оверрайд работает только
     // по реальному UUID, поэтому держим карту local id → db id.
     const dbMap: Record<string, string> = {}
+    const persistedByLocal = new Map<string, OrderRow>()
     const persisted = ((data as OrderRow[]) ?? []).filter((order) => {
       const localId = (order.meta as { local_id?: string } | null)?.local_id
-      if (localId) dbMap[localId] = order.id
+      if (localId) {
+        dbMap[localId] = order.id
+        persistedByLocal.set(localId, order)
+      }
       return !localId || !localIds.has(localId)
     })
+    const syncedLocal = local.map((order) => {
+      const dbOrder = persistedByLocal.get(order.id)
+      return dbOrder
+        ? {
+            ...order,
+            status: dbOrder.status,
+            admin_note: dbOrder.admin_note,
+            meta: dbOrder.meta,
+          }
+        : order
+    })
     setDbIdByLocal(dbMap)
-    setRows([...local, ...persisted])
+    setRows([...syncedLocal, ...persisted])
   }, [show])
   useEffect(() => {
     load()
