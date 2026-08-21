@@ -184,7 +184,9 @@ export function SocialPostPreview({
         ) : null}
       </div>
 
-      <div
+      <motion.div
+        whileTap={{ scale: 0.988 }}
+        transition={{ type: 'spring', stiffness: 420, damping: 32 }}
         className="rounded-[18px] p-4"
         style={{
           background: 'color-mix(in oklab, var(--foreground) 3%, transparent)',
@@ -192,7 +194,8 @@ export function SocialPostPreview({
         }}
       >
         {body}
-      </div>
+      </motion.div>
+
     </Reveal>
   )
 }
