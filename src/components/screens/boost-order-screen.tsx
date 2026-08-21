@@ -8,7 +8,7 @@
 
 import { AnimatePresence, motion } from 'framer-motion'
 import { RotateCcw, X } from 'lucide-react'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { BOOST_MARKS, RegionMark, type BoostMarkId } from '../boost-icons'
 import { VerifiedBadge } from '../icons/verified-badge'
@@ -17,6 +17,11 @@ import { OrderHeader } from '../order/order-header'
 import { OrderSummaryCard } from '../order/order-summary-card'
 import { SocialPostPreview } from '../order/social-post-preview'
 import { OrderProgressCard } from '../order/order-progress-card'
+import {
+  RecoveryStatusCard,
+  RefundStatusCard,
+  type FlowPhase,
+} from '../order/order-flow-cards'
 import { RefillGuaranteeCard, type RefillState } from '../order/refill-guarantee-card'
 import { SupportAction } from '../order/support-action'
 import { Eyebrow, Reveal, type OrderTone } from '../order/primitives'
@@ -97,6 +102,45 @@ export function BoostOrderScreen({ order }: { order: Order }) {
     else if (next === 'in_progress' || next === 'refilling') setVisibleStatus('in_progress')
     else setVisibleStatus('waiting')
   }
+
+  /* ── Специальные потоки: восстановление (рефилл) и возврат средств ───── */
+  const [flow, setFlow] = useState<{ kind: 'recovery' | 'refund'; phase: FlowPhase } | null>(() =>
+    adminStatus === 'refilling'
+      ? { kind: 'recovery', phase: 'active' }
+      : adminStatus === 'refunded'
+        ? { kind: 'refund', phase: 'active' }
+        : null,
+  )
+  const prevAdminStatus = useRef(adminStatus)
+  useEffect(() => {
+    const prev = prevAdminStatus.current
+    prevAdminStatus.current = adminStatus
+    if (adminStatus === 'refilling') {
+      setFlow({ kind: 'recovery', phase: 'active' })
+      return
+    }
+    if (adminStatus === 'refunded') {
+      setFlow({ kind: 'refund', phase: 'active' })
+      return
+    }
+    if (adminStatus === 'failed' && (prev === 'refilling' || prev === 'refunded')) {
+      setFlow({ kind: prev === 'refilling' ? 'recovery' : 'refund', phase: 'error' })
+      return
+    }
+    // Успешное завершение потока показываем один раз, затем обычная карточка.
+    if (prev === 'refilling' && adminStatus === 'completed') {
+      setFlow({ kind: 'recovery', phase: 'success' })
+      const id = window.setTimeout(() => setFlow(null), 2800)
+      return () => window.clearTimeout(id)
+    }
+    if (prev === 'refunded' && (adminStatus === 'completed' || adminStatus === 'declined')) {
+      setFlow({ kind: 'refund', phase: 'success' })
+      const id = window.setTimeout(() => setFlow(null), 2800)
+      return () => window.clearTimeout(id)
+    }
+    setFlow(null)
+    return
+  }, [adminStatus])
 
   const done = visibleStatus === 'completed'
   const waiting = visibleStatus === 'waiting'
@@ -380,6 +424,68 @@ export function BoostOrderScreen({ order }: { order: Order }) {
           />
         )}
 
+        {flow?.kind === 'recovery' ? (
+          <RecoveryStatusCard
+            delay={0.1}
+            phase={flow.phase}
+            ru={ru}
+            steps={[
+              { label: ru ? 'Заказ выполнен' : 'Order delivered', state: 'done' },
+              {
+                label: ru ? 'Рефилл запрошен' : 'Refill requested',
+                meta: refill.state?.lastRefillAt
+                  ? fullDate(new Date(refill.state.lastRefillAt).getTime(), lang)
+                  : undefined,
+                state: 'done',
+              },
+              {
+                label: ru ? 'Восстановление' : 'Recovery',
+                state: flow.phase === 'error' ? 'danger' : flow.phase === 'success' ? 'done' : 'live',
+              },
+              {
+                label: ru ? 'Проверка результата' : 'Result check',
+                meta:
+                  flow.phase === 'success'
+                    ? ru
+                      ? 'Готово'
+                      : 'Done'
+                    : ru
+                      ? 'Ожидает'
+                      : 'Pending',
+                state: flow.phase === 'success' ? 'done' : 'idle',
+              },
+            ]}
+          />
+        ) : flow?.kind === 'refund' ? (
+          <RefundStatusCard
+            delay={0.1}
+            phase={flow.phase}
+            ru={ru}
+            steps={[
+              {
+                label: ru ? 'Возврат оформлен' : 'Refund created',
+                meta: fullDate(order.date, lang),
+                state: 'done',
+              },
+              {
+                label: ru ? 'Перевод средств' : 'Transfer',
+                state: flow.phase === 'error' ? 'danger' : flow.phase === 'success' ? 'done' : 'live',
+              },
+              {
+                label: ru ? 'Средства зачислены' : 'Funds credited',
+                meta:
+                  flow.phase === 'success'
+                    ? ru
+                      ? 'Готово'
+                      : 'Done'
+                    : ru
+                      ? 'Ожидает'
+                      : 'Pending',
+                state: flow.phase === 'success' ? 'done' : 'idle',
+              },
+            ]}
+          />
+        ) : (
         <OrderProgressCard
           delay={0.1}
           title={progressTitle}
@@ -449,6 +555,8 @@ export function BoostOrderScreen({ order }: { order: Order }) {
                 ]
           }
         />
+        )}
+
 
         {cancelled ? (
           <Reveal delay={0.15} className="flex flex-col gap-3">
