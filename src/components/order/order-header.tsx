@@ -1,13 +1,14 @@
 'use client'
 
-import { ChevronLeft } from 'lucide-react'
+import { motion } from 'framer-motion'
 import { useEffect, useRef, useState } from 'react'
+import { GlyphBack } from './icons'
 import { cn } from '@/lib/utils'
 
 /**
- * Compact sticky header for the order screen.
- * The app scrolls inside <main>, so "scrolled" is detected with a sentinel
- * instead of window scroll.
+ * Compact sticky header. The title only fades in once the hero scrolls under
+ * it, so the top of the page stays quiet on arrival.
+ * The app scrolls inside <main>, so "stuck" is detected with a sentinel.
  */
 export function OrderHeader({
   title,
@@ -33,29 +34,49 @@ export function OrderHeader({
     <>
       <div ref={sentinel} aria-hidden className="h-px w-full" />
       <header
-        className={cn(
-          'sticky top-0 z-40 transition-colors duration-300',
-          stuck
-            ? 'border-b border-white/[0.07] bg-background/80 backdrop-blur-xl'
-            : 'border-b border-transparent',
-        )}
-        style={{ paddingTop: 'env(safe-area-inset-top)' }}
+        className={cn('sticky top-0 z-40 transition-[background-color] duration-300')}
+        style={{
+          paddingTop: 'env(safe-area-inset-top)',
+          backgroundColor: stuck
+            ? 'color-mix(in oklab, var(--background) 82%, transparent)'
+            : 'transparent',
+          backdropFilter: stuck ? 'blur(18px) saturate(140%)' : undefined,
+        }}
       >
-        <div className="mx-auto flex h-[52px] w-full max-w-[520px] items-center gap-2 px-2">
-          <button
+        <div className="mx-auto flex h-[52px] w-full max-w-[520px] items-center gap-2 px-3">
+          <motion.button
             type="button"
+            whileTap={{ scale: 0.94 }}
             onClick={onBack}
             data-screen-back=""
-            className="-ml-0.5 flex h-11 min-w-11 items-center gap-0.5 rounded-xl px-2 text-[15px] font-medium text-foreground transition-transform active:scale-[0.97]"
+            aria-label={backLabel}
+            className="-ml-2 flex size-11 shrink-0 items-center justify-center rounded-full text-foreground/85 transition-colors hover:text-foreground"
           >
-            <ChevronLeft className="size-[22px] shrink-0 text-primary" strokeWidth={2.2} />
-            <span className="text-[15px] text-primary">{backLabel}</span>
-          </button>
-          <h1 className="flex-1 truncate text-center text-[16px] font-semibold tracking-tight">
+            <GlyphBack className="size-[19px]" />
+          </motion.button>
+
+          <motion.h1
+            initial={false}
+            animate={{ opacity: stuck ? 1 : 0, y: stuck ? 0 : 4 }}
+            transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+            className="flex-1 truncate text-center text-[15px] font-semibold tracking-tight"
+          >
             {title}
-          </h1>
-          <span aria-hidden className="h-11 min-w-11" />
+          </motion.h1>
+
+          <span aria-hidden className="size-11 shrink-0" />
         </div>
+
+        <motion.span
+          aria-hidden
+          initial={false}
+          animate={{ opacity: stuck ? 1 : 0 }}
+          className="block h-px w-full"
+          style={{
+            background:
+              'linear-gradient(90deg, transparent, color-mix(in oklab, var(--foreground) 12%, transparent) 20%, color-mix(in oklab, var(--foreground) 12%, transparent) 80%, transparent)',
+          }}
+        />
       </header>
     </>
   )
