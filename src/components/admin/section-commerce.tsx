@@ -113,7 +113,10 @@ const orderLabel = (s: OrderStatus) =>
     completed: 'Готов',
     declined: 'Отклонён',
     refunded: 'Возврат',
-  })[s]
+    failed: 'Ошибка',
+    refilling: 'Рефилл',
+  })[s] ?? s
+
 
 // Forward pipeline the admin walks an order through, left → right.
 const PIPELINE: OrderStatus[] = ['pending', 'in_progress', 'waiting', 'completed']
