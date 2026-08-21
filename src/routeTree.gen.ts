@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TopupRouteImport } from './routes/topup'
 import { Route as ToolsRouteImport } from './routes/tools'
+import { Route as TestCancelledRouteImport } from './routes/test-cancelled'
 import { Route as SupportRouteImport } from './routes/support'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as ServicesRouteImport } from './routes/services'
@@ -39,6 +40,11 @@ const TopupRoute = TopupRouteImport.update({
 const ToolsRoute = ToolsRouteImport.update({
   id: '/tools',
   path: '/tools',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TestCancelledRoute = TestCancelledRouteImport.update({
+  id: '/test-cancelled',
+  path: '/test-cancelled',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SupportRoute = SupportRouteImport.update({
@@ -151,6 +157,7 @@ export interface FileRoutesByFullPath {
   '/services': typeof ServicesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/support': typeof SupportRoute
+  '/test-cancelled': typeof TestCancelledRoute
   '/tools': typeof ToolsRouteWithChildren
   '/topup': typeof TopupRoute
   '/order/$id': typeof OrderIdRoute
@@ -174,6 +181,7 @@ export interface FileRoutesByTo {
   '/services': typeof ServicesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/support': typeof SupportRoute
+  '/test-cancelled': typeof TestCancelledRoute
   '/topup': typeof TopupRoute
   '/order/$id': typeof OrderIdRoute
   '/tools/mail': typeof ToolsMailRoute
@@ -197,6 +205,7 @@ export interface FileRoutesById {
   '/services': typeof ServicesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/support': typeof SupportRoute
+  '/test-cancelled': typeof TestCancelledRoute
   '/tools': typeof ToolsRouteWithChildren
   '/topup': typeof TopupRoute
   '/order/$id': typeof OrderIdRoute
@@ -222,6 +231,7 @@ export interface FileRouteTypes {
     | '/services'
     | '/sitemap.xml'
     | '/support'
+    | '/test-cancelled'
     | '/tools'
     | '/topup'
     | '/order/$id'
@@ -245,6 +255,7 @@ export interface FileRouteTypes {
     | '/services'
     | '/sitemap.xml'
     | '/support'
+    | '/test-cancelled'
     | '/topup'
     | '/order/$id'
     | '/tools/mail'
@@ -267,6 +278,7 @@ export interface FileRouteTypes {
     | '/services'
     | '/sitemap.xml'
     | '/support'
+    | '/test-cancelled'
     | '/tools'
     | '/topup'
     | '/order/$id'
@@ -291,6 +303,7 @@ export interface RootRouteChildren {
   ServicesRoute: typeof ServicesRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SupportRoute: typeof SupportRoute
+  TestCancelledRoute: typeof TestCancelledRoute
   ToolsRoute: typeof ToolsRouteWithChildren
   TopupRoute: typeof TopupRoute
   OrderIdRoute: typeof OrderIdRoute
@@ -313,6 +326,13 @@ declare module '@tanstack/react-router' {
       path: '/tools'
       fullPath: '/tools'
       preLoaderRoute: typeof ToolsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/test-cancelled': {
+      id: '/test-cancelled'
+      path: '/test-cancelled'
+      fullPath: '/test-cancelled'
+      preLoaderRoute: typeof TestCancelledRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/support': {
@@ -478,6 +498,7 @@ const rootRouteChildren: RootRouteChildren = {
   ServicesRoute: ServicesRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   SupportRoute: SupportRoute,
+  TestCancelledRoute: TestCancelledRoute,
   ToolsRoute: ToolsRouteWithChildren,
   TopupRoute: TopupRoute,
   OrderIdRoute: OrderIdRoute,
