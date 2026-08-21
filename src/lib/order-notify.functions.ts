@@ -3,7 +3,15 @@ import { requireSupabaseAuth } from '@/integrations/supabase/auth-middleware'
 import { normalizeLang, sendTelegramMessage } from './telegram-notify.server'
 import { orderReadyMessage } from './order-notify.shared'
 
-type OrderStatus = 'pending' | 'in_progress' | 'waiting' | 'completed' | 'declined' | 'refunded'
+type OrderStatus =
+  | 'pending'
+  | 'in_progress'
+  | 'waiting'
+  | 'completed'
+  | 'declined'
+  | 'refunded'
+  | 'failed'
+  | 'refilling'
 
 /**
  * Admin saves an order (status + note). When the status transitions to
@@ -32,6 +40,8 @@ export const adminSaveOrder = createServerFn({ method: 'POST' })
         'completed',
         'declined',
         'refunded',
+        'failed',
+        'refilling',
       ]
       if (!allowed.includes(input.status)) throw new Error('invalid status')
       // Delivery payload: admin-picked fields/values per account.
