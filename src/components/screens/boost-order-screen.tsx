@@ -144,7 +144,7 @@ export function BoostOrderScreen({ order }: { order: Order }) {
   const inWindow = now < windowEnd
   const used = refills.length
   const left = REFILL_LIMIT - used
-  const canRefill = Boolean(order.refillable) && done && inWindow && left > 0
+  const canRefill = Boolean(order.refillable) && inWindow && left > 0
 
   const refillState: RefillState = refilling
     ? 'loading'
@@ -152,9 +152,7 @@ export function BoostOrderScreen({ order }: { order: Order }) {
       ? 'sent'
       : canRefill
         ? 'available'
-        : !order.refillable || left <= 0 || !inWindow
-          ? 'unavailable'
-          : 'locked'
+        : 'unavailable'
 
   const refillButtonLabel =
     refillState === 'loading'
@@ -167,31 +165,23 @@ export function BoostOrderScreen({ order }: { order: Order }) {
           : 'Refill submitted'
         : refillState === 'available'
           ? ru
-            ? 'Запросить рефилл'
+            ? 'Сделать рефилл'
             : 'Request refill'
-          : refillState === 'locked'
+          : !order.refillable
             ? ru
-              ? 'Доступно после завершения'
-              : 'Available once completed'
-            : !order.refillable
+              ? 'Не предусмотрен'
+              : 'Not included'
+            : left <= 0
               ? ru
-                ? 'Не предусмотрен'
-                : 'Not included'
-              : left <= 0
-                ? ru
-                  ? 'Лимит исчерпан'
-                  : 'Limit reached'
-                : ru
-                  ? 'Срок гарантии истёк'
-                  : 'Guarantee expired'
+                ? 'Лимит исчерпан'
+                : 'Limit reached'
+              : ru
+                ? 'Срок гарантии истёк'
+                : 'Guarantee expired'
 
-  const refillDescription = done
-    ? ru
-      ? 'Если показатели просядут, восстановим списания бесплатно в течение 48 часов после завершения.'
-      : 'If the numbers drop, we restore them free of charge within 48 hours of completion.'
-    : ru
-      ? 'Рефилл станет доступен после завершения заказа и будет действовать 48 часов.'
-      : 'Refill unlocks once the order completes and stays valid for 48 hours.'
+  const refillDescription = ru
+    ? `Доступно ${left} из ${REFILL_LIMIT} рефиллов. Если показатели просядут, восстановим списания бесплатно в течение 48 часов.`
+    : `${left} of ${REFILL_LIMIT} refills available. If the numbers drop, we restore them free of charge within 48 hours.`
 
   function doRefill() {
     const next = [...refills, Date.now()]
