@@ -312,6 +312,17 @@ export function BoostOrderScreen({ order }: { order: Order }) {
           onCopied={() => show(ru ? 'Номер скопирован' : 'Number copied')}
         />
 
+        {/* Админ правит этот заказ прямо здесь, в карточке. */}
+        {isAdmin && refill.state?.orderId ? (
+          <OrderAdminOverride
+            key={refill.state.orderId}
+            orderId={refill.state.orderId}
+            status={order.status}
+            onStatusChange={() => void refill.reload()}
+          />
+        ) : null}
+
+
 
         {isFollowers ? (
           <ProfilePreview
