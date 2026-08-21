@@ -1151,3 +1151,67 @@ a,
   animation: gold-sweep 1.8s cubic-bezier(0.45, 0, 0.55, 1) infinite;
   will-change: transform;
 }
+
+/* ── Order flow states: recovery (refill) & refund ─────────────────────── */
+@keyframes flow-packet {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(var(--flow-distance, 100px));
+  }
+}
+@keyframes flow-dot {
+  0%,
+  62%,
+  100% {
+    opacity: 0.22;
+    transform: scale(1);
+    box-shadow: none;
+  }
+  18% {
+    opacity: 1;
+    transform: scale(1.35);
+    box-shadow: 0 0 10px color-mix(in oklab, var(--success) 75%, transparent);
+  }
+}
+@keyframes flow-arc {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+@keyframes flow-wallet-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 color-mix(in oklab, var(--info) 0%, transparent);
+  }
+  55% {
+    box-shadow: 0 0 22px 2px color-mix(in oklab, var(--info) 45%, transparent);
+  }
+}
+.animate-flow-packet {
+  animation: flow-packet 2.6s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+  will-change: transform;
+}
+.animate-flow-dot {
+  animation: flow-dot 2.4s linear infinite;
+  will-change: transform, opacity;
+}
+.animate-flow-arc {
+  animation: flow-arc 3.6s linear infinite;
+  will-change: transform;
+}
+.animate-flow-wallet {
+  animation: flow-wallet-pulse 2.6s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-flow-packet,
+  .animate-flow-dot,
+  .animate-flow-arc,
+  .animate-flow-wallet {
+    animation: none;
+  }
+}
