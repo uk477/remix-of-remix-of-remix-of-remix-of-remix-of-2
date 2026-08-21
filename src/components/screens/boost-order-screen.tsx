@@ -366,53 +366,125 @@ export function BoostOrderScreen({ order }: { order: Order }) {
           badgeLabel={progressBadgeLabel}
           badgeTone={statusTone}
           complete={done}
+          cancelled={cancelled}
           headline={progressHeadline}
+          subtitle={progressSubtitle}
           note={progressNote}
-          steps={[
-            {
-              label: ru ? 'Заказ оформлен' : 'Order placed',
-              meta: fullDate(order.date, lang),
-              state: 'done',
-            },
-            {
-              label: ru ? 'В процессе' : 'In progress',
-              state: done ? 'done' : waiting ? 'idle' : 'live',
-            },
-            {
-              label: ru ? 'Заказ завершён' : 'Order completed',
-              meta: done
-                ? order.completedAt
-                  ? fullDate(order.completedAt, lang)
-                  : ru
-                    ? 'Готово'
-                    : 'Done'
-                : ru
-                  ? 'Ожидает'
-                  : 'Pending',
-              state: done ? 'done' : 'idle',
-            },
-          ]}
+          dangerIcon={
+            cancelled ? (
+              <span className="flex size-12 items-center justify-center rounded-full bg-destructive/[0.08] ring-1 ring-inset ring-destructive/30">
+                <GlyphX className="size-5 text-destructive" />
+              </span>
+            ) : undefined
+          }
+          reason={
+            cancelled
+              ? {
+                  label: ru ? 'Причина' : 'Reason',
+                  text: cancelReason,
+                }
+              : undefined
+          }
+          steps={
+            cancelled
+              ? [
+                  {
+                    label: ru ? 'Заказ оформлен' : 'Order placed',
+                    meta: fullDate(order.date, lang),
+                    state: 'done',
+                  },
+                  {
+                    label: ru ? 'Заказ отменён' : 'Order cancelled',
+                    state: 'danger',
+                  },
+                  {
+                    label: ru ? 'Средства возвращены на баланс' : 'Funds returned to balance',
+                    state: 'idle',
+                    icon: <GlyphRefund className="size-[13px]" />,
+                  },
+                ]
+              : [
+                  {
+                    label: ru ? 'Заказ оформлен' : 'Order placed',
+                    meta: fullDate(order.date, lang),
+                    state: 'done',
+                  },
+                  {
+                    label: ru ? 'В процессе' : 'In progress',
+                    state: done ? 'done' : waiting ? 'idle' : 'live',
+                  },
+                  {
+                    label: ru ? 'Заказ завершён' : 'Order completed',
+                    meta: done
+                      ? order.completedAt
+                        ? fullDate(order.completedAt, lang)
+                        : ru
+                          ? 'Готово'
+                          : 'Done'
+                      : ru
+                        ? 'Ожидает'
+                        : 'Pending',
+                    state: done ? 'done' : 'idle',
+                  },
+                ]
+          }
         />
 
-        {order.refillable ? (
-        <RefillGuaranteeCard
-          delay={0.15}
-          title={ru ? 'Гарантия рефилла' : 'Refill guarantee'}
-          countLabel={ru ? `${left} из ${REFILL_LIMIT}` : `${left} of ${REFILL_LIMIT}`}
-          description={refillDescription}
-          untilLabel={ru ? 'Гарантия действует до' : 'Guarantee valid until'}
-          untilValue={fullDate(windowEnd, lang)}
-          state={refillState}
-          buttonLabel={refillButtonLabel}
-          onRequest={() => setAskRefill(true)}
-        />
-        ) : null}
+        {cancelled ? (
+          <Reveal delay={0.15} className="flex flex-col gap-3">
+            <button
+              onClick={() => void navigate({ to: '/catalog' })}
+              className="group relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-[18px] bg-transparent px-4 py-3.5 font-semibold text-destructive transition-transform duration-200 active:scale-[0.98]"
+              style={{
+                boxShadow: 'inset 0 0 0 1px color-mix(in oklab, var(--destructive) 35%, transparent)',
+              }}
+              type="button"
+            >
+              <span className="relative z-10 flex items-center gap-2">
+                <RotateCcw className="size-4" />
+                {ru ? 'Повторить заказ' : 'Repeat order'}
+              </span>
+              <span
+                aria-hidden
+                className="absolute inset-0 -z-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                style={{
+                  background:
+                    'color-mix(in oklab, var(--destructive) 6%, transparent)',
+                }}
+              />
+            </button>
 
-        <SupportAction
-          label={ru ? 'Нужна помощь?' : 'Need help?'}
-          hint={ru ? 'Проблема с заказом — напишите в поддержку' : 'Something wrong? Contact support'}
-          onClick={() => void navigate({ to: '/support' })}
-        />
+            <button
+              onClick={() => void navigate({ to: '/support' })}
+              className="text-center text-[13px] font-medium text-muted-foreground transition-colors hover:text-foreground"
+              type="button"
+            >
+              {ru ? 'Связаться с поддержкой' : 'Contact support'}
+            </button>
+          </Reveal>
+        ) : (
+          <>
+            {order.refillable ? (
+              <RefillGuaranteeCard
+                delay={0.15}
+                title={ru ? 'Гарантия рефилла' : 'Refill guarantee'}
+                countLabel={ru ? `${left} из ${REFILL_LIMIT}` : `${left} of ${REFILL_LIMIT}`}
+                description={refillDescription}
+                untilLabel={ru ? 'Гарантия действует до' : 'Guarantee valid until'}
+                untilValue={fullDate(windowEnd, lang)}
+                state={refillState}
+                buttonLabel={refillButtonLabel}
+                onRequest={() => setAskRefill(true)}
+              />
+            ) : null}
+
+            <SupportAction
+              label={ru ? 'Нужна помощь?' : 'Need help?'}
+              hint={ru ? 'Проблема с заказом — напишите в поддержку' : 'Something wrong? Contact support'}
+              onClick={() => void navigate({ to: '/support' })}
+            />
+          </>
+        )}
       </div>
 
       <AnimatePresence>
