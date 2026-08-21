@@ -31,14 +31,26 @@ import { useToast } from '../toast'
 import { GhostButton, PrimaryButton } from './primitives'
 
 const STATUS_LABEL: Record<AdminOrderStatus, string> = {
-  pending: 'Ожидает',
+  pending: 'Заказ оформлен',
   in_progress: 'В работе',
-  waiting: 'Ожидание',
+  waiting: 'Заказ оформлен',
   completed: 'Завершён',
   declined: 'Отменён',
   failed: 'Ошибка',
-  refilling: 'Рефилл',
-  refunded: 'Возврат',
+  refilling: 'В процессе (refill)',
+  refunded: 'Возврат средств',
+}
+
+/** Цвет статуса — единый для всего приложения. */
+const STATUS_CHIP: Record<AdminOrderStatus, string> = {
+  pending: 'border-muted-foreground/40 bg-muted-foreground/15 text-foreground',
+  waiting: 'border-muted-foreground/40 bg-muted-foreground/15 text-foreground',
+  in_progress: 'border-warning/60 bg-warning/15 text-warning',
+  refilling: 'border-success/60 bg-success/15 text-success',
+  refunded: 'border-info/60 bg-info/15 text-info',
+  failed: 'border-destructive/60 bg-destructive/15 text-destructive',
+  declined: 'border-destructive/60 bg-destructive/15 text-destructive',
+  completed: 'border-success/60 bg-success/15 text-success',
 }
 
 const fmt = (iso: string | null) =>
@@ -197,7 +209,7 @@ export function OrderAdminOverride({
                 className={[
                   'pressable rounded-full border px-3 py-1.5 text-[11.5px] font-semibold transition-colors',
                   target === s
-                    ? 'border-primary/60 bg-primary/15 text-primary'
+                    ? STATUS_CHIP[s]
                     : 'border-border bg-secondary/30 text-muted-foreground hover:text-foreground',
                 ].join(' ')}
               >
