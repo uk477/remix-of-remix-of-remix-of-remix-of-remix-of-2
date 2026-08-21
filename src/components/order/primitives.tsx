@@ -298,7 +298,6 @@ export function IndeterminateBar({
   className?: string
   tone?: 'live' | 'success'
 }) {
-  const reduce = useReducedMotion()
   const c = tone === 'success' ? 'var(--success)' : 'var(--primary)'
   return (
     <div
@@ -312,19 +311,15 @@ export function IndeterminateBar({
         className="absolute inset-0 rounded-full"
         style={{ background: `color-mix(in oklab, ${c} 10%, transparent)` }}
       />
-      {!reduce ? (
-        <motion.span
-          aria-hidden
-          initial={{ x: '-120%' }}
-          animate={{ x: '120%' }}
-          transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
-          className="absolute inset-y-0 w-[55%] rounded-full"
-          style={{
-            background: `linear-gradient(90deg, transparent, color-mix(in oklab, ${c} 30%, transparent) 20%, color-mix(in oklab, ${c} 95%, white) 50%, color-mix(in oklab, ${c} 30%, transparent) 80%, transparent)`,
-            boxShadow: `0 0 18px -2px color-mix(in oklab, ${c} 60%, transparent)`,
-          }}
-        />
-      ) : null}
+      <span
+        aria-hidden
+        className="animate-gold-sweep absolute inset-y-0 left-0 w-[45%] rounded-full"
+        style={{
+          background: `linear-gradient(90deg, transparent, color-mix(in oklab, ${c} 35%, transparent) 25%, ${c} 50%, color-mix(in oklab, ${c} 35%, transparent) 75%, transparent)`,
+          boxShadow: `0 0 18px -2px color-mix(in oklab, ${c} 60%, transparent)`,
+        }}
+      />
     </div>
   )
 }
+
