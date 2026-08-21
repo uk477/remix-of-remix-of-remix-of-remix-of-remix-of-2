@@ -74,14 +74,28 @@ export function BoostOrderScreen({ order }: { order: Order }) {
   const volume = order.qty ?? 0
   const orderId = projectOrderId(order.date)
   const [visibleStatus, setVisibleStatus] = useState(order.status)
-  useEffect(() => setVisibleStatus(order.status), [order.status])
+  const [adminStatus, setAdminStatus] = useState<AdminOrderStatus>(() => {
+    if (order.status === 'cancelled') return 'declined'
+    if (order.status === 'waiting') return 'pending'
+    return order.status
+  })
+  useEffect(() => {
+    setVisibleStatus(order.status)
+    setAdminStatus(
+      order.status === 'cancelled'
+        ? 'declined'
+        : order.status === 'waiting'
+          ? 'pending'
+          : order.status,
+    )
+  }, [order.status])
 
   const applyAdminStatus = (next: AdminOrderStatus) => {
+    setAdminStatus(next)
     if (next === 'completed' || next === 'refunded') setVisibleStatus('completed')
     else if (next === 'declined' || next === 'failed') setVisibleStatus('cancelled')
     else if (next === 'in_progress' || next === 'refilling') setVisibleStatus('in_progress')
     else setVisibleStatus('waiting')
-    void refill.reload()
   }
 
   const done = visibleStatus === 'completed'
@@ -329,7 +343,7 @@ export function BoostOrderScreen({ order }: { order: Order }) {
           <OrderAdminOverride
             key={refill.state.dbOrderId}
             orderId={refill.state.dbOrderId}
-            status={visibleStatus}
+            status={adminStatus}
             onStatusChange={applyAdminStatus}
           />
         ) : null}
