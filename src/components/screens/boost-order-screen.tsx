@@ -779,7 +779,7 @@ function RefillSheet({
             delay={0.38}
             icon={
               <svg viewBox="0 0 24 24" fill="none" className="size-[18px]">
-                <path d="M12.6 3.5H19a1.5 1.5 0 0 1 1.5 1.5v6.4a2 2 0 0 1-.six 0 2 2 0 0 1-.57 1.4l-6.5 6.5a2 2 0 0 1-2.83 0l-5.3-5.3a2 2 0 0 1 0-2.83l6.5-6.5a2 2 0 0 1 1.4-.57Z" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" />
+                <path d="M12.6 3.5H19a1.5 1.5 0 0 1 1.5 1.5v6.4a2 2 0 0 1-.59 1.41l-6.5 6.5a2 2 0 0 1-2.83 0l-5.3-5.3a2 2 0 0 1 0-2.83l6.5-6.5a2 2 0 0 1 1.41-.59Z" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" />
                 <circle cx="16.2" cy="7.8" r="1.4" fill="currentColor" />
               </svg>
             }
