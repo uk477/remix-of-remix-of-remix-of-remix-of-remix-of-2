@@ -54,6 +54,7 @@ export function BoostOrderScreen({ order }: { order: Order }) {
   const ru = lang === 'ru'
   const navigate = useNavigate()
   const { refillOrder } = useStore()
+  const { isAdmin } = useAuth()
   const { show } = useToast()
 
   const service = useMemo(
