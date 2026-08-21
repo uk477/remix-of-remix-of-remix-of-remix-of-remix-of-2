@@ -15,12 +15,15 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useServerFn } from '@tanstack/react-start'
-import { Loader2, RefreshCw, ShieldAlert, Zap } from 'lucide-react'
+import { Loader2, RefreshCw, ShieldAlert, Undo2, Zap } from 'lucide-react'
 import {
   adminForceRefill,
   adminOrderRefills,
+  adminRefundOrder,
   adminSetOrderStatus,
+  getOrderRefundState,
   type AdminRefillOverview,
+  type RefundState,
 } from '@/lib/admin-orders.functions'
 import { ADMIN_ORDER_STATUSES, type AdminOrderStatus } from '@/lib/admin-orders.shared'
 import { formatCountdown } from '@/lib/use-refill'
@@ -55,6 +58,8 @@ export function OrderAdminOverride({
   const setStatusFn = useServerFn(adminSetOrderStatus)
   const forceRefillFn = useServerFn(adminForceRefill)
   const overviewFn = useServerFn(adminOrderRefills)
+  const refundFn = useServerFn(adminRefundOrder)
+  const refundStateFn = useServerFn(getOrderRefundState)
 
   const [target, setTarget] = useState<AdminOrderStatus>(
     (ADMIN_ORDER_STATUSES as readonly string[]).includes(status)
@@ -64,6 +69,9 @@ export function OrderAdminOverride({
   const [saving, setSaving] = useState(false)
   const [refilling, setRefilling] = useState(false)
   const [data, setData] = useState<AdminRefillOverview | null>(null)
+  const [refund, setRefund] = useState<RefundState | null>(null)
+  const [refunding, setRefunding] = useState(false)
+  const [askRefund, setAskRefund] = useState(false)
   const [tick, setTick] = useState(0)
   const skew = useRef(0)
 
@@ -75,7 +83,12 @@ export function OrderAdminOverride({
     } catch {
       setData(null)
     }
-  }, [overviewFn, orderId])
+    try {
+      setRefund(await refundStateFn({ data: { orderId } }))
+    } catch {
+      setRefund(null)
+    }
+  }, [overviewFn, refundStateFn, orderId])
 
   useEffect(() => {
     void load()
@@ -121,6 +134,27 @@ export function OrderAdminOverride({
       show('Ошибка: ' + (e instanceof Error ? e.message : 'не удалось'))
     } finally {
       setRefilling(false)
+    }
+  }
+
+  const doRefund = async () => {
+    if (refunding) return
+    setRefunding(true)
+    setAskRefund(false)
+    try {
+      const res = await refundFn({ data: { orderId } })
+      show(
+        res.alreadyRefunded
+          ? 'Возврат по этому заказу уже был выполнен'
+          : `Возврат оформлен: $${Number(res.amount).toFixed(2)}`,
+      )
+      onStatusChange?.('refunded')
+      setTarget('refunded')
+      await load()
+    } catch (e) {
+      show('Ошибка возврата: ' + (e instanceof Error ? e.message : 'не удалось'))
+    } finally {
+      setRefunding(false)
     }
   }
 
@@ -200,6 +234,43 @@ export function OrderAdminOverride({
               Force refill
             </button>
           </div>
+        </div>
+
+        {/* Возврат средств */}
+        <div className="rounded-[18px] border border-info/30 bg-info/[0.06] p-3.5">
+          <div className="flex items-center justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-[12.5px] font-semibold">Возврат средств</p>
+              <p className="mt-0.5 text-[11px] text-muted-foreground">
+                {refund?.refunded
+                  ? `Уже возвращено ($${Number(refund.amount ?? 0).toFixed(2)}, источник: ${
+                      refund.refundSource === 'admin' ? 'админ' : 'авто при ошибке'
+                    })`
+                  : 'Вернёт сумму заказа на баланс и переведёт заказ в статус «Возврат средств».'}
+              </p>
+            </div>
+            <button
+              onClick={() => setAskRefund(true)}
+              disabled={refunding || !!refund?.refunded}
+              className="pressable flex shrink-0 items-center gap-1.5 rounded-xl bg-info px-3.5 py-2.5 text-[12px] font-bold text-background disabled:opacity-50"
+            >
+              {refunding ? (
+                <Loader2 className="size-3.5 animate-spin" />
+              ) : (
+                <Undo2 className="size-3.5" strokeWidth={2.6} />
+              )}
+              Оформить возврат
+            </button>
+          </div>
+
+          {askRefund ? (
+            <div className="mt-3 flex items-center gap-2">
+              <PrimaryButton onClick={doRefund} disabled={refunding}>
+                Подтвердить возврат
+              </PrimaryButton>
+              <GhostButton onClick={() => setAskRefund(false)}>Отмена</GhostButton>
+            </div>
+          ) : null}
         </div>
 
         {/* Клиентские счётчики */}
