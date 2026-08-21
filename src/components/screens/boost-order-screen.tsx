@@ -463,8 +463,22 @@ export function BoostOrderScreen({ order }: { order: Order }) {
                 title={ru ? 'Гарантия рефилла' : 'Refill guarantee'}
                 countLabel={`${used} / ${REFILL_LIMIT}`}
                 description={refillDescription}
-                untilLabel={ru ? 'Гарантия действует до' : 'Guarantee valid until'}
-                untilValue={fullDate(windowEnd, lang)}
+                untilLabel={
+                  windowEnd != null
+                    ? ru
+                      ? 'Гарантия действует до'
+                      : 'Guarantee valid until'
+                    : ru
+                      ? 'Гарантия действует'
+                      : 'Guarantee window'
+                }
+                untilValue={
+                  windowEnd != null
+                    ? fullDate(windowEnd, lang)
+                    : ru
+                      ? '48 ч после завершения'
+                      : '48 h after completion'
+                }
                 state={refillState}
                 buttonLabel={refillButtonLabel}
                 onRequest={() => setAskRefill(true)}
