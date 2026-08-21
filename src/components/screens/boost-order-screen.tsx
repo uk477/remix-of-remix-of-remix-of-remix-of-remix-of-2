@@ -796,19 +796,30 @@ function RefillSheet({
           initial={{ opacity: 0, y: 14 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.34, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-          whileTap={{ scale: 0.975 }}
+          whileHover={{
+            y: -2,
+            boxShadow:
+              'inset 0 1px 0 color-mix(in oklab, white 40%, transparent), 0 16px 40px -12px color-mix(in oklab, var(--success) 85%, transparent)',
+          }}
+          whileTap={{ scale: 0.975, y: 0 }}
           onClick={onConfirm}
-          className="mt-6 flex h-[58px] w-full items-center justify-center gap-2.5 rounded-2xl text-[17px] font-semibold tracking-tight text-black"
+          className="group mt-6 flex h-[58px] w-full items-center justify-center gap-2.5 rounded-2xl text-[17px] font-semibold tracking-tight text-black"
           style={{
             background: 'linear-gradient(180deg, color-mix(in oklab, var(--success) 88%, white 12%), var(--success))',
             boxShadow:
               'inset 0 1px 0 color-mix(in oklab, white 35%, transparent), 0 10px 30px -12px color-mix(in oklab, var(--success) 70%, transparent)',
           }}
         >
-          <svg viewBox="0 0 24 24" fill="none" className="size-[21px]">
+          <motion.svg
+            viewBox="0 0 24 24"
+            fill="none"
+            className="size-[21px]"
+            initial={false}
+            whileHover={{ scale: 1.06 }}
+          >
             <path d="M12 3 20 6v5.5c0 4.7-3.3 8.2-8 9.5-4.7-1.3-8-4.8-8-9.5V6l8-3Z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
             <path d="m8.8 12.1 2.2 2.2 4.2-4.4" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
+          </motion.svg>
           {ru ? 'Подтвердить' : 'Confirm'}
         </motion.button>
 
@@ -818,10 +829,11 @@ function RefillSheet({
           transition={{ delay: 0.4, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
           whileTap={{ scale: 0.975 }}
           onClick={onClose}
-          className="mt-3 h-[54px] w-full rounded-2xl bg-white/[0.02] text-[16px] font-medium text-muted-foreground ring-1 ring-inset ring-white/[0.08] transition-colors active:text-foreground"
+          className="mt-3 h-[54px] w-full rounded-2xl bg-white/[0.02] text-[16px] font-medium text-muted-foreground ring-1 ring-inset ring-white/[0.08] transition-all duration-200 hover:bg-destructive/10 hover:text-destructive hover:ring-destructive/40 hover:shadow-[0_10px_30px_-14px_color-mix(in_oklab,var(--destructive)_80%,transparent)] active:text-destructive"
         >
           {ru ? 'Отмена' : 'Cancel'}
         </motion.button>
+
       </motion.div>
     </motion.div>
   )
