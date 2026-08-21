@@ -16,6 +16,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { money } from '@/lib/format'
 import { useI18n } from '@/lib/i18n'
+import { orderStatusLabel, orderStatusView, STATUS_BADGE_CLASS } from '@/lib/order-status'
 import { useNav } from '@/lib/nav'
 import { useStore } from '@/lib/store'
 import { isTestOrder, orderService } from '@/lib/order-service'
@@ -86,7 +87,8 @@ function statusText(
 }
 
 export function HistoryScreen() {
-  const { t } = useI18n()
+  const { t, lang } = useI18n()
+  const ru = lang === 'ru'
   const { back, param } = useNav()
   const navigate = useNavigate()
   const { orders, topups } = useStore()
@@ -664,14 +666,7 @@ function OrderRow({
 }
 
 function StatusBadge({ label, status }: { label: string; status: OrderStatus }) {
-  const cls =
-    status === 'completed'
-      ? 'bg-success/12 text-success ring-success/20'
-      : status === 'in_progress'
-        ? 'bg-primary/12 text-primary ring-primary/20'
-        : status === 'cancelled'
-          ? 'bg-destructive/12 text-destructive ring-destructive/20'
-          : 'bg-warning/12 text-warning ring-warning/20'
+  const cls = STATUS_BADGE_CLASS[orderStatusView(status).tone]
   return (
     <span
       className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-[3px] text-[11px] font-semibold ring-1 ${cls}`}
