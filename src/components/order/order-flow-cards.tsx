@@ -356,15 +356,16 @@ export function RefundStatusCard({
             {phase === 'active' ? (
               <span
                 aria-hidden
-                className="animate-flow-packet absolute left-0 top-1/2 block h-[14px] w-[14px] -translate-y-1/2 rounded-[5px]"
-                style={
-                  {
+                className="animate-flow-packet absolute inset-x-0 top-1/2 block h-0"
+              >
+                <span
+                  className="absolute left-0 top-0 block size-[14px] -translate-x-1/2 -translate-y-1/2 rounded-[5px]"
+                  style={{
                     background: color,
                     boxShadow: `0 0 18px 2px color-mix(in oklab, ${color} 60%, transparent)`,
-                    ['--flow-distance' as string]: 'calc(100% + 100vw * 0)',
-                  } as React.CSSProperties
-                }
-              />
+                  }}
+                />
+              </span>
             ) : null}
           </div>
 
