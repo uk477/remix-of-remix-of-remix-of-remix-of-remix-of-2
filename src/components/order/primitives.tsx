@@ -119,12 +119,13 @@ export function ProgressBar({
 }: {
   /** 0..1 */
   value: number
-  tone?: 'live' | 'success'
+  tone?: 'live' | 'success' | 'info'
   className?: string
 }) {
   const reduce = useReducedMotion()
   const pct = Math.max(0, Math.min(1, value))
-  const c = tone === 'success' ? 'var(--success)' : 'var(--primary)'
+  const c =
+    tone === 'success' ? 'var(--success)' : tone === 'info' ? 'var(--info)' : 'var(--primary)'
   return (
     <div
       role="progressbar"
