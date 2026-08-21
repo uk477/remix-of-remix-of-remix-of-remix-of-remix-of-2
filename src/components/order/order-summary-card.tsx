@@ -45,13 +45,15 @@ export function OrderSummaryCard({
         </span>
 
         <div className="min-w-0 flex-1 pt-0.5">
-          <div className="flex items-baseline gap-3">
-            <h2 className="min-w-0 flex-1 truncate font-display text-[21px] font-bold leading-tight tracking-[-0.02em]">
+          <div className="flex items-start gap-3">
+            <h2 className="min-w-0 flex-1 font-display text-[20px] font-bold leading-[1.2] tracking-[-0.02em] text-balance">
               {service}
             </h2>
-            <StatusText tone={statusTone} label={statusLabel} pulse={statusTone === 'live'} />
+            <span className="shrink-0 pt-1">
+              <StatusText tone={statusTone} label={statusLabel} pulse={statusTone === 'live'} />
+            </span>
           </div>
-          <p className="mt-1 text-[14px] leading-tight text-muted-foreground">{amountLabel}</p>
+          <p className="mt-1.5 text-[14px] leading-tight text-muted-foreground">{amountLabel}</p>
         </div>
       </div>
 
