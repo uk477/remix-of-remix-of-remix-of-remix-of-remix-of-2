@@ -458,7 +458,7 @@ export function BoostOrderScreen({ order }: { order: Order }) {
               <RefillGuaranteeCard
                 delay={0.15}
                 title={ru ? 'Гарантия рефилла' : 'Refill guarantee'}
-                countLabel={ru ? `${left} из ${REFILL_LIMIT}` : `${left} of ${REFILL_LIMIT}`}
+                countLabel={`${used} / ${REFILL_LIMIT}`}
                 description={refillDescription}
                 untilLabel={ru ? 'Гарантия действует до' : 'Guarantee valid until'}
                 untilValue={fullDate(windowEnd, lang)}
