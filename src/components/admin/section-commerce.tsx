@@ -184,6 +184,7 @@ export function OrdersSection() {
   const [q, setQ] = useState('')
   const [edit, setEdit] = useState<OrderRow | null>(null)
   const [localOrders, setLocalOrders] = useState<Record<string, Order>>({})
+  const [dbIdByLocal, setDbIdByLocal] = useState<Record<string, string>>({})
 
   const load = useCallback(async () => {
     setRows(null)
@@ -213,10 +214,16 @@ export function OrdersSection() {
       created_at: new Date(o.date).toISOString(),
     }))
     const localIds = new Set(local.map((order) => order.id))
+    // Тестовый заказ в списке показывается локальной копией, но в БД у него
+    // есть настоящая строка (meta.local_id). Админ-оверрайд работает только
+    // по реальному UUID, поэтому держим карту local id → db id.
+    const dbMap: Record<string, string> = {}
     const persisted = ((data as OrderRow[]) ?? []).filter((order) => {
       const localId = (order.meta as { local_id?: string } | null)?.local_id
+      if (localId) dbMap[localId] = order.id
       return !localId || !localIds.has(localId)
     })
+    setDbIdByLocal(dbMap)
     setRows([...local, ...persisted])
   }, [show])
   useEffect(() => {
@@ -657,6 +664,7 @@ export function OrdersSection() {
               // Credentials can only be composed once the order reaches the
               // hand-over stage — before that there is nothing to hand over.
               const deliveryUnlocked = cur >= total - 1
+              const overrideId = isLocalOrder(edit.id) ? dbIdByLocal[edit.id] : edit.id
               // Handover done → the pipeline is frozen. Rolling back is an
               // explicit, deliberate action, not a stray tap on a step row.
               const flowLocked = cur >= total
@@ -701,10 +709,10 @@ export function OrdersSection() {
                     </div>
                   </header>
 
-                  {!isLocalOrder(edit.id) && (
+                  {overrideId ? (
                     <OrderAdminOverride
-                      key={edit.id}
-                      orderId={edit.id}
+                      key={overrideId}
+                      orderId={overrideId}
                       status={edit.status}
                       onStatusChange={(next: string) => {
                         setEdit((prev) =>
@@ -721,9 +729,12 @@ export function OrdersSection() {
                         )
                       }}
                     />
+                  ) : (
+                    <p className="rounded-[18px] border border-border bg-secondary/20 px-4 py-3 text-[11.5px] leading-relaxed text-muted-foreground">
+                      Admin override недоступен: заказ существует только локально в этом браузере
+                      и не сохранён в базе.
+                    </p>
                   )}
-
-
 
                   {/* ── Flow control. At hand-over it disappears entirely:
                       from there the only action left is issuing the account. ── */}
