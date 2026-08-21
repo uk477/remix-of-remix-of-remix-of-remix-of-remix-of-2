@@ -151,10 +151,16 @@ export function BoostOrderScreen({ order }: { order: Order }) {
   /* ── Refill: состояние живёт на сервере, строго для ЭТОГО заказа ─────── */
   const [askRefill, setAskRefill] = useState(false)
   const refill = useRefill(order.id)
+  const refillReload = refill.reload
+  // Статус заказа изменился (в т.ч. через админ-панель) — гарантия пересчитывается с сервера.
+  useEffect(() => {
+    void refillReload()
+  }, [visibleStatus, refillReload])
   const refillState = refill.phase as RefillState
   const used = refill.used
   const left = refill.remaining
   const windowEnd = refill.guaranteeEndsAt
+
 
   const refillButtonLabel =
     refillState === 'cooldown'
