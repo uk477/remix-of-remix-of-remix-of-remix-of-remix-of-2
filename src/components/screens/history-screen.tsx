@@ -671,7 +671,9 @@ function StatusBadge({ label, status }: { label: string; status: OrderStatus }) 
       ? 'bg-success/12 text-success ring-success/20'
       : status === 'in_progress'
         ? 'bg-primary/12 text-primary ring-primary/20'
-        : 'bg-warning/12 text-warning ring-warning/20'
+        : status === 'cancelled'
+          ? 'bg-destructive/12 text-destructive ring-destructive/20'
+          : 'bg-warning/12 text-warning ring-warning/20'
   return (
     <span
       className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-[3px] text-[11px] font-semibold ring-1 ${cls}`}
