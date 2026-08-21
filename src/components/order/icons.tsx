@@ -156,6 +156,15 @@ export function GlyphRefill(p: P) {
   )
 }
 
+export function GlyphRefund(p: P) {
+  return (
+    <Line {...p}>
+      <path d="M4 14.5a8 8 0 1 1 16 0" />
+      <path d="M8 14.5 4 18.5 8 22.5" />
+    </Line>
+  )
+}
+
 export function GlyphLock(p: P) {
   return (
     <Line {...p}>
