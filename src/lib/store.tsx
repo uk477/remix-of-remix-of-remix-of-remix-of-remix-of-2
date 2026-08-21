@@ -63,6 +63,7 @@ function dbToTopupStatus(s: DBTopupStatus): TopupStatus {
 }
 
 function orderStatusToDB(s: OrderStatus): DBOrderStatus {
+  if (s === 'cancelled') return 'declined'
   return s === 'waiting' ? 'pending' : s
 }
 
