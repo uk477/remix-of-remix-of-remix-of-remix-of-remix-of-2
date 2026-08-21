@@ -50,6 +50,7 @@ import {
   Toggle,
 } from './primitives'
 import { useToast } from '../toast'
+import { OrderAdminOverride } from './order-admin-override'
 import { useUserLookup, userDisplay, userSearchHaystack } from './use-user-lookup'
 import { loadTestOrders, updateTestOrder } from '@/lib/demo-orders'
 import type { Order } from '@/lib/types'
@@ -702,7 +703,7 @@ export function OrdersSection() {
                       key={edit.id}
                       orderId={edit.id}
                       status={edit.status}
-                      onStatusChange={(next) => {
+                      onStatusChange={(next: string) => {
                         setEdit((prev) =>
                           prev && prev.id === edit.id
                             ? { ...prev, status: next as OrderStatus }
