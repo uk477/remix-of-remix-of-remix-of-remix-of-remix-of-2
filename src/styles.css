@@ -1138,3 +1138,21 @@ a,
     animation-duration: 8s;
   }
 }
+
+@keyframes gold-sweep {
+  0% {
+    transform: translateX(-130%);
+  }
+  100% {
+    transform: translateX(230%);
+  }
+}
+.animate-gold-sweep {
+  animation: gold-sweep 1.8s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+  will-change: transform;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-gold-sweep {
+    animation: none;
+  }
+}
