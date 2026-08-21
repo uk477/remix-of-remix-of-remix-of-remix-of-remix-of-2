@@ -460,17 +460,19 @@ export function BoostOrderScreen({ order }: { order: Order }) {
             {order.refillable ? (
               <RefillGuaranteeCard
                 delay={0.15}
-                title={ru ? 'Гарантия рефилла' : 'Refill guarantee'}
-                countLabel={`${used} / ${REFILL_LIMIT}`}
-                description={refillDescription}
-                untilLabel={
-                  windowEnd != null
-                    ? ru
-                      ? 'Гарантия действует до'
-                      : 'Guarantee valid until'
-                    : ru
-                      ? 'Гарантия действует'
-                      : 'Guarantee window'
+                title={ru ? 'Рефилл-гарантия' : 'Refill guarantee'}
+                used={used}
+                total={REFILL_LIMIT}
+                availableLabel={
+                  ru ? `${left} доступны` : `${left} available`
+                }
+                countLabel={
+                  ru ? `Осталось ${left} из ${REFILL_LIMIT}` : `${left} of ${REFILL_LIMIT} left`
+                }
+                description={
+                  ru
+                    ? 'Бесплатно восстановим списанные показатели.'
+                    : 'We restore lost metrics free of charge.'
                 }
                 untilValue={
                   windowEnd != null
@@ -483,6 +485,7 @@ export function BoostOrderScreen({ order }: { order: Order }) {
                 buttonLabel={refillButtonLabel}
                 onRequest={() => setAskRefill(true)}
               />
+
             ) : null}
 
             <SupportAction
