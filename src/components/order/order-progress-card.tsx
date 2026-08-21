@@ -1,8 +1,12 @@
 'use client'
 
-import { AnimatedNumber, OrderCard, ProgressBar, StatusBadge, type OrderTone } from './primitives'
+import { AnimatedNumber, Eyebrow, ProgressBar, Reveal, StatusText, type OrderTone } from './primitives'
 import { OrderTimeline, type TimelineStep } from './order-timeline'
 
+/**
+ * The one raised surface on the page. Everything else is flat or hairline, so
+ * this deck carries the primary information without competing frames.
+ */
 export function OrderProgressCard({
   title,
   badgeLabel,
@@ -27,29 +31,54 @@ export function OrderProgressCard({
   steps: TimelineStep[]
   delay?: number
 }) {
-  const done = badgeTone === 'success'
+  const complete = percent >= 1
   return (
-    <OrderCard className="p-4" delay={delay}>
+    <Reveal
+      delay={delay}
+      className="relative overflow-hidden rounded-[22px] px-5 pb-5 pt-4.5"
+    >
+      {/* deck surface: cool graphite lift, top light catch, no visible border */}
+      <span
+        aria-hidden
+        className="absolute inset-0 -z-10"
+        style={{
+          background:
+            'linear-gradient(180deg, color-mix(in oklab, var(--foreground) 7.5%, var(--card)) 0%, var(--card) 62%)',
+          boxShadow:
+            'inset 0 1px 0 color-mix(in oklab, white 9%, transparent), 0 26px 50px -38px rgba(0,0,0,0.95)',
+        }}
+      />
+
       <div className="flex items-center justify-between gap-3">
-        <h2 className="text-[15px] font-semibold tracking-tight">{title}</h2>
-        <StatusBadge tone={badgeTone} label={badgeLabel} pulse={badgeTone === 'live'} />
+        <Eyebrow>{title}</Eyebrow>
+        <StatusText tone={badgeTone} label={badgeLabel} pulse={badgeTone === 'live'} />
       </div>
 
       <div className="mt-3 flex items-end justify-between gap-3">
-        <p className="font-display text-[26px] font-bold leading-none tracking-tight">
+        <p className="font-display text-[34px] font-extrabold leading-none tracking-[-0.035em]">
           <AnimatedNumber value={delivered} />
-          <span className="text-muted-foreground"> / {total.toLocaleString('en-US')}</span>
+          <span className="text-[20px] font-semibold text-muted-foreground/60">
+            {' / '}
+            {total.toLocaleString('en-US')}
+          </span>
         </p>
-        <p className="pb-0.5 text-[13px] font-medium text-muted-foreground">{percentLabel}</p>
+        <p className="pb-1 text-[12.5px] font-medium tabular-nums text-muted-foreground">
+          {percentLabel}
+        </p>
       </div>
 
-      <ProgressBar value={percent} tone={done ? 'success' : 'live'} className="mt-3" />
+      <ProgressBar value={percent} tone={complete ? 'success' : 'live'} className="mt-3.5" />
 
-      {etaLabel ? <p className="mt-2.5 text-[13px] text-muted-foreground">{etaLabel}</p> : null}
+      {etaLabel ? (
+        <p className="mt-2.5 text-[12.5px] leading-tight text-muted-foreground">{etaLabel}</p>
+      ) : null}
 
-      <div className="mt-4 border-t border-white/[0.06] pt-4">
+      <div
+        className="mt-4 pt-4"
+        style={{ borderTop: '1px solid color-mix(in oklab, var(--foreground) 7%, transparent)' }}
+      >
         <OrderTimeline steps={steps} />
       </div>
-    </OrderCard>
+    </Reveal>
   )
 }
