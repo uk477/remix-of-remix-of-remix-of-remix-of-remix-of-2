@@ -372,8 +372,10 @@ export function BoostOrderScreen({ order }: { order: Order }) {
   const isFailed = adminStatus === 'failed'
   const override = isRefill || isRefund || isFailed
   const overrideView = orderStatusView(backendStatus)
-  /* Единственный источник цвета — фактический статус с backend. */
-  const finalTone: OrderTone = overrideView.tone
+  /* Единственный источник цвета — фактический статус с backend.
+   * Для возврата используем золотой акцент, чтобы статус читался как
+   * premium-операция, а не «ошибка/инфо». */
+  const finalTone: OrderTone = isRefund ? 'live' : overrideView.tone
   const finalStatusLabel = override ? (ru ? overrideView.ru : overrideView.en) : statusLabel
   const finalBadgeLabel = override ? (ru ? overrideView.ru : overrideView.en) : progressBadgeLabel
   const finalHeadline = isRefill
