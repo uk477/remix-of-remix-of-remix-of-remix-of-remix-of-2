@@ -14,6 +14,7 @@ import {
 import { VerifiedBadge } from '../icons/verified-badge'
 import { compactNumber } from '@/lib/format'
 import { decodeTweetText, verifiedTone, type XTweet } from '@/lib/x-tweet'
+import { formatDateShort } from '@/lib/datetime'
 
 const METRIC_TINT: Record<string, string> = {
   reply: '#1d9bf0',
@@ -58,10 +59,7 @@ export function SocialPostPreview({
         .trim()
     : ''
   const postedAt = p?.posted_at
-    ? new Date(p.posted_at).toLocaleDateString(ru ? 'ru-RU' : 'en-US', {
-        month: 'short',
-        day: 'numeric',
-      })
+    ? formatDateShort(p.posted_at, ru ? 'ru' : 'en')
     : ''
 
   const body = loading ? (

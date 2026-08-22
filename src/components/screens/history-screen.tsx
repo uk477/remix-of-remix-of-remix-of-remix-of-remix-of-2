@@ -16,6 +16,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { money } from '@/lib/format'
 import { useI18n } from '@/lib/i18n'
+import { formatDateLong, formatDateNumeric, formatTime } from '@/lib/datetime'
 import { orderStatusAccent, orderStatusLabel } from '@/lib/order-status'
 import { useAuth } from '@/lib/auth'
 import { useNav } from '@/lib/nav'
@@ -53,21 +54,18 @@ type Row =
       status: TopupStatus
     }
 
-function dateKey(ts: number) {
+function dateKey(ts: number, lang: string) {
   const d = new Date(ts)
   const today = new Date()
   const yest = new Date()
   yest.setDate(today.getDate() - 1)
   if (d.toDateString() === today.toDateString()) return 'today'
   if (d.toDateString() === yest.toDateString()) return 'yesterday'
-  return d.toLocaleDateString(undefined, { day: '2-digit', month: 'long', year: 'numeric' })
+  return formatDateLong(d, lang)
 }
 
-function timeOnly(ts: number) {
-  return new Date(ts).toLocaleTimeString(undefined, {
-    hour: '2-digit',
-    minute: '2-digit',
-  })
+function timeOnly(ts: number, lang: string) {
+  return formatTime(ts, lang)
 }
 
 function statusText(
@@ -144,7 +142,7 @@ export function HistoryScreen() {
   const grouped = useMemo(() => {
     const map = new Map<string, Row[]>()
     for (const r of rows) {
-      const k = dateKey(r.date)
+      const k = dateKey(r.date, lang)
       if (!map.has(k)) map.set(k, [])
       map.get(k)!.push(r)
     }
@@ -493,11 +491,7 @@ function OrderRow({
   const live = order.status === 'in_progress' || order.status === 'refilling'
   const accent = orderStatusAccent(order.status)
 
-  const dateStr = `${new Date(order.date).toLocaleDateString(undefined, {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-  })} ${timeOnly(order.date)}`
+  const dateStr = `${formatDateNumeric(order.date, lang)} ${timeOnly(order.date, lang)}`
 
   return (
     <motion.div
@@ -692,6 +686,7 @@ function TopupContent({
   row: Extract<Row, { kind: 'topup' }>
   statusLabel: string
 }) {
+  const { lang } = useI18n()
   const positive = row.status === 'success'
   const declined = row.status === 'declined'
 
@@ -715,7 +710,7 @@ function TopupContent({
       <div className="min-w-0 flex-1">
         <h3 className="truncate text-[15px] font-semibold">{row.coin}</h3>
         <p className="mt-0.5 text-xs text-muted-foreground">
-          {timeOnly(row.date)} <span className="opacity-60">•</span>{' '}
+          {timeOnly(row.date, lang)} <span className="opacity-60">•</span>{' '}
           <span className={statusColor}>{statusLabel}</span>
         </p>
       </div>

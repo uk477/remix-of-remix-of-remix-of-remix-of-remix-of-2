@@ -25,6 +25,8 @@ import { useToast } from '@/components/toast'
 import { readMails } from '@/lib/mail-reader.functions'
 import { normalizeTotpSecret, validateTotpSecret } from '@/lib/dev-tools'
 import { fetchTotp } from '@/lib/totp-api.functions'
+import { formatDateTimeFull } from '@/lib/datetime'
+import { useI18n } from '@/lib/i18n'
 
 // ─── Menu ──────────────────────────────────────────────────────────────
 export function ToolsScreen() {
@@ -257,6 +259,7 @@ export function MailToolScreen() {
   const [error, setError] = useState<string | null>(null)
   const [openId, setOpenId] = useState<string | null>(null)
   const { show } = useToast()
+  const { lang } = useI18n()
 
   // Prefill when opened from an order ("Email access" chip)
   useEffect(() => {
@@ -409,7 +412,7 @@ export function MailToolScreen() {
                       <div className="flex items-center justify-between gap-2">
                         <span className="truncate text-[12px] font-semibold">{m.subject}</span>
                         <span className="shrink-0 text-[10px] text-muted-foreground">
-                          {new Date(m.received).toLocaleString()}
+                          {formatDateTimeFull(m.received, lang)}
                         </span>
                       </div>
                       <span className="truncate text-[11px] text-muted-foreground">{m.from}</span>
