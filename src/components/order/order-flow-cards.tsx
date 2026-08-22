@@ -273,12 +273,10 @@ function WalletGlyph({ done }: { done?: boolean }) {
 export function RefundStatusCard({
   phase,
   ru,
-  steps,
   delay,
 }: {
   phase: FlowPhase
   ru: boolean
-  steps: TimelineStep[]
   delay?: number
 }) {
   const done = phase === 'success'
