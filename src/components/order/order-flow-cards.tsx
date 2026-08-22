@@ -376,7 +376,6 @@ export function RefundStatusCard({
           </NodeCircle>
         </div>
       }
-      steps={steps}
     />
   )
 }
