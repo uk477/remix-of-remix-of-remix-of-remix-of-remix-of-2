@@ -37,7 +37,7 @@ function CardShell({
   headline: string
   subtitle: string
   visual: ReactNode
-  steps: TimelineStep[]
+  steps?: TimelineStep[]
   delay?: number
 }) {
   return (
@@ -65,12 +65,14 @@ function CardShell({
 
       <div className="mt-4">{visual}</div>
 
-      <div
-        className="mt-4 pt-4"
-        style={{ borderTop: '1px solid color-mix(in oklab, var(--foreground) 7%, transparent)' }}
-      >
-        <OrderTimeline steps={steps} />
-      </div>
+      {steps && steps.length > 0 ? (
+        <div
+          className="mt-4 pt-4"
+          style={{ borderTop: '1px solid color-mix(in oklab, var(--foreground) 7%, transparent)' }}
+        >
+          <OrderTimeline steps={steps} />
+        </div>
+      ) : null}
     </Reveal>
   )
 }
