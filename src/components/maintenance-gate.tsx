@@ -5,6 +5,7 @@ import { BellRing, Wrench, Clock, ShieldCheck, Loader2, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useServerFn } from '@tanstack/react-start'
 import { useI18n } from '@/lib/i18n'
+import { formatDateTime } from '@/lib/datetime'
 import { useMaintenance } from '@/lib/maintenance'
 import { useAuth } from '@/lib/auth'
 import {
@@ -15,13 +16,7 @@ import {
 
 function formatEta(eta: string, lang: string) {
   try {
-    const d = new Date(eta)
-    return new Intl.DateTimeFormat(lang === 'ru' ? 'ru-RU' : 'en-US', {
-      day: '2-digit',
-      month: 'short',
-      hour: '2-digit',
-      minute: '2-digit',
-    }).format(d)
+    return formatDateTime(eta, lang)
   } catch {
     return ''
   }

@@ -58,10 +58,7 @@ export function SocialPostPreview({
         .trim()
     : ''
   const postedAt = p?.posted_at
-    ? new Date(p.posted_at).toLocaleDateString(ru ? 'ru-RU' : 'en-US', {
-        month: 'short',
-        day: 'numeric',
-      })
+    ? formatDateShort(p.posted_at, ru ? 'ru' : 'en')
     : ''
 
   const body = loading ? (

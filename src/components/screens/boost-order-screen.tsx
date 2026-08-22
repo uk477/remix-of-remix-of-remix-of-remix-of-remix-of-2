@@ -41,16 +41,12 @@ import { loadXTweetFast, extractTweetId, type XTweet } from '@/lib/x-tweet'
 import { loadXProfileFast, normalizeXHandle } from '@/lib/x-profile'
 import type { XProfileRow } from '@/lib/x-profile.functions'
 import type { Order } from '@/lib/types'
+import { formatDateTime } from '@/lib/datetime'
 
 const REFILL_LIMIT = 4
 
 function fullDate(ts: number, lang: string) {
-  return new Date(ts).toLocaleString(lang === 'ru' ? 'ru-RU' : 'en-US', {
-    day: '2-digit',
-    month: 'short',
-    hour: '2-digit',
-    minute: '2-digit',
-  })
+  return formatDateTime(ts, lang)
 }
 
 function nf(n: number) {

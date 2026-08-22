@@ -409,7 +409,7 @@ export function MailToolScreen() {
                       <div className="flex items-center justify-between gap-2">
                         <span className="truncate text-[12px] font-semibold">{m.subject}</span>
                         <span className="shrink-0 text-[10px] text-muted-foreground">
-                          {new Date(m.received).toLocaleString()}
+                          {formatDateTimeFull(m.received, lang)}
                         </span>
                       </div>
                       <span className="truncate text-[11px] text-muted-foreground">{m.from}</span>

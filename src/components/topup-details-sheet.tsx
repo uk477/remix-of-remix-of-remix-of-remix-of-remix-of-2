@@ -156,11 +156,8 @@ function explorerUrl(coin: string, network: string, hash: string) {
   return fn ? fn(hash) : null
 }
 
-function fmtDate(ts: number) {
-  const d = new Date(ts)
-  return d.toLocaleString(undefined, {
-    day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit',
-  })
+function fmtDate(ts: number, lang: string) {
+  return formatDateTimeFull(ts, lang)
 }
 
 function short(s: string, head = 8, tail = 6) {
