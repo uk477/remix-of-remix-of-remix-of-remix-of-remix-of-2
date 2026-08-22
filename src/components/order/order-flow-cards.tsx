@@ -37,7 +37,7 @@ function CardShell({
   headline: string
   subtitle: string
   visual: ReactNode
-  steps: TimelineStep[]
+  steps?: TimelineStep[]
   delay?: number
 }) {
   return (
@@ -65,12 +65,14 @@ function CardShell({
 
       <div className="mt-4">{visual}</div>
 
-      <div
-        className="mt-4 pt-4"
-        style={{ borderTop: '1px solid color-mix(in oklab, var(--foreground) 7%, transparent)' }}
-      >
-        <OrderTimeline steps={steps} />
-      </div>
+      {steps && steps.length > 0 ? (
+        <div
+          className="mt-4 pt-4"
+          style={{ borderTop: '1px solid color-mix(in oklab, var(--foreground) 7%, transparent)' }}
+        >
+          <OrderTimeline steps={steps} />
+        </div>
+      ) : null}
     </Reveal>
   )
 }
@@ -271,12 +273,10 @@ function WalletGlyph({ done }: { done?: boolean }) {
 export function RefundStatusCard({
   phase,
   ru,
-  steps,
   delay,
 }: {
   phase: FlowPhase
   ru: boolean
-  steps: TimelineStep[]
   delay?: number
 }) {
   const done = phase === 'success'
@@ -374,7 +374,6 @@ export function RefundStatusCard({
           </NodeCircle>
         </div>
       }
-      steps={steps}
     />
   )
 }

@@ -372,8 +372,10 @@ export function BoostOrderScreen({ order }: { order: Order }) {
   const isFailed = adminStatus === 'failed'
   const override = isRefill || isRefund || isFailed
   const overrideView = orderStatusView(backendStatus)
-  /* Единственный источник цвета — фактический статус с backend. */
-  const finalTone: OrderTone = overrideView.tone
+  /* Единственный источник цвета — фактический статус с backend.
+   * Для возврата используем золотой акцент, чтобы статус читался как
+   * premium-операция, а не «ошибка/инфо». */
+  const finalTone: OrderTone = isRefund ? 'live' : overrideView.tone
   const finalStatusLabel = override ? (ru ? overrideView.ru : overrideView.en) : statusLabel
   const finalBadgeLabel = override ? (ru ? overrideView.ru : overrideView.en) : progressBadgeLabel
   const finalHeadline = isRefill
@@ -512,34 +514,7 @@ export function BoostOrderScreen({ order }: { order: Order }) {
             ]}
           />
         ) : flow?.kind === 'refund' ? (
-          <RefundStatusCard
-            delay={0.1}
-            phase={flow.phase}
-            ru={ru}
-            steps={[
-              {
-                label: ru ? 'Возврат оформлен' : 'Refund created',
-                meta: fullDate(order.date, lang),
-                state: 'done',
-              },
-              {
-                label: ru ? 'Перевод средств' : 'Transfer',
-                state: flow.phase === 'error' ? 'danger' : flow.phase === 'success' ? 'done' : 'live',
-              },
-              {
-                label: ru ? 'Средства зачислены' : 'Funds credited',
-                meta:
-                  flow.phase === 'success'
-                    ? ru
-                      ? 'Готово'
-                      : 'Done'
-                    : ru
-                      ? 'Ожидает'
-                      : 'Pending',
-                state: flow.phase === 'success' ? 'done' : 'idle',
-              },
-            ]}
-          />
+          <RefundStatusCard delay={0.1} phase={flow.phase} ru={ru} />
         ) : (
         <OrderProgressCard
           delay={0.1}
