@@ -686,6 +686,7 @@ function TopupContent({
   row: Extract<Row, { kind: 'topup' }>
   statusLabel: string
 }) {
+  const { lang } = useI18n()
   const positive = row.status === 'success'
   const declined = row.status === 'declined'
 

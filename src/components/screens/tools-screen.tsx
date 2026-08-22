@@ -26,6 +26,7 @@ import { readMails } from '@/lib/mail-reader.functions'
 import { normalizeTotpSecret, validateTotpSecret } from '@/lib/dev-tools'
 import { fetchTotp } from '@/lib/totp-api.functions'
 import { formatDateTimeFull } from '@/lib/datetime'
+import { useI18n } from '@/lib/i18n'
 
 // ─── Menu ──────────────────────────────────────────────────────────────
 export function ToolsScreen() {
@@ -258,6 +259,7 @@ export function MailToolScreen() {
   const [error, setError] = useState<string | null>(null)
   const [openId, setOpenId] = useState<string | null>(null)
   const { show } = useToast()
+  const { lang } = useI18n()
 
   // Prefill when opened from an order ("Email access" chip)
   useEffect(() => {
