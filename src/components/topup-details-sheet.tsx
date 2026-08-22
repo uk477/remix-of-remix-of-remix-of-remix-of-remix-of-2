@@ -20,6 +20,7 @@ import { useI18n } from '@/lib/i18n'
 import type { Lang, Topup } from '@/lib/types'
 import { CoinIcon } from './ui/coin-icon'
 import { useToast } from './toast'
+import { formatDateTimeFull } from '@/lib/datetime'
 
 
 const L: Record<string, Record<Lang, string>> = {
@@ -353,20 +354,20 @@ export function TopupDetailsSheet({
                 <Row
                   icon={<Clock className="size-4" />}
                   label={tx('created')}
-                  value={fmtDate(topup.date)}
+                  value={fmtDate(topup.date, lang)}
                 />
                 {topup.closedAt && (
                   <Row
                     icon={<Clock className="size-4" />}
                     label={tx('closed')}
-                    value={fmtDate(topup.closedAt)}
+                    value={fmtDate(topup.closedAt, lang)}
                   />
                 )}
                 {topup.status === 'pending' && (
                   <Row
                     icon={<Clock className="size-4" />}
                     label={tx('expires')}
-                    value={fmtDate(topup.date + 30 * 60 * 1000)}
+                    value={fmtDate(topup.date + 30 * 60 * 1000, lang)}
                   />
                 )}
                 {topup.status === 'pending' && topup.address && (

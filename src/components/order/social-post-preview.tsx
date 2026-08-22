@@ -14,6 +14,7 @@ import {
 import { VerifiedBadge } from '../icons/verified-badge'
 import { compactNumber } from '@/lib/format'
 import { decodeTweetText, verifiedTone, type XTweet } from '@/lib/x-tweet'
+import { formatDateShort } from '@/lib/datetime'
 
 const METRIC_TINT: Record<string, string> = {
   reply: '#1d9bf0',

@@ -25,6 +25,7 @@ import { useToast } from '@/components/toast'
 import { readMails } from '@/lib/mail-reader.functions'
 import { normalizeTotpSecret, validateTotpSecret } from '@/lib/dev-tools'
 import { fetchTotp } from '@/lib/totp-api.functions'
+import { formatDateTimeFull } from '@/lib/datetime'
 
 // ─── Menu ──────────────────────────────────────────────────────────────
 export function ToolsScreen() {
