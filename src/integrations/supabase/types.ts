@@ -1304,6 +1304,10 @@ export type Database = {
       }
       admin_whitelist_remove: { Args: { _user_id: string }; Returns: boolean }
       bootstrap_admin_if_none: { Args: never; Returns: boolean }
+      complete_refill: {
+        Args: { _order_key: string; _refill_id?: string }
+        Returns: Json
+      }
       credit_topup: { Args: { _topup_id: string }; Returns: number }
       ensure_profile: {
         Args: never

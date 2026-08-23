@@ -87,6 +87,18 @@ export function useRefill(orderId: string) {
     return () => window.clearInterval(id)
   }, [])
 
+  // Пока заказ в рефилле — опрашиваем backend: как только API подтвердит
+  // успешное восполнение, статус вернётся в «завершён» автоматически.
+  useEffect(() => {
+    if (state?.orderStatus !== 'refilling') return
+    const id = window.setInterval(() => {
+      void load()
+    }, 6000)
+    return () => window.clearInterval(id)
+  }, [state?.orderStatus, load])
+
+
+
   useEffect(() => () => {
     if (acceptedTimer.current) window.clearTimeout(acceptedTimer.current)
   }, [])

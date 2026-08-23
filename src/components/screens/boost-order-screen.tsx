@@ -34,7 +34,7 @@ import { useAuth } from '@/lib/auth'
 import { SERVICES } from '@/lib/data'
 import { useI18n } from '@/lib/i18n'
 import { projectOrderId } from '@/lib/order-id'
-import type { AdminOrderStatus } from '@/lib/admin-orders.shared'
+import { ADMIN_ORDER_STATUSES, type AdminOrderStatus } from '@/lib/admin-orders.shared'
 import { useRefill } from '@/lib/use-refill'
 import { useStore } from '@/lib/store'
 import { loadXTweetFast, extractTweetId, type XTweet } from '@/lib/x-tweet'
@@ -225,6 +225,17 @@ export function BoostOrderScreen({ order }: { order: Order }) {
   useEffect(() => {
     void refillReload()
   }, [visibleStatus, refillReload])
+  // База — источник истины: как только backend подтвердил успешный рефилл и
+  // вернул заказ в `completed`, экран сам переключается на «Заказ завершён».
+  const serverStatus = refill.state?.orderStatus
+  useEffect(() => {
+    if (!serverStatus) return
+    if (!(ADMIN_ORDER_STATUSES as readonly string[]).includes(serverStatus)) return
+    if (serverStatus === adminStatus) return
+    applyAdminStatus(serverStatus as AdminOrderStatus)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [serverStatus])
+
   const refillState = refill.phase as RefillState
   const used = refill.used
   const left = refill.remaining
