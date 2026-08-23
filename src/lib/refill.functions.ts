@@ -64,7 +64,7 @@ export const completeRefill = createServerFn({ method: 'POST' })
     if (!input?.orderId) throw new Error('orderId required')
     return {
       orderId: String(input.orderId),
-      refillId: input.refillId ? String(input.refillId) : null,
+      refillId: input.refillId ? String(input.refillId) : undefined,
     }
   })
   .handler(async ({ data, context }) => {
