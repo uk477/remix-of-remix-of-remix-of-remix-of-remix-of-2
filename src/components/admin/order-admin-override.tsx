@@ -26,6 +26,7 @@ import {
   type RefundState,
 } from '@/lib/admin-orders.functions'
 import { ADMIN_ORDER_STATUSES, type AdminOrderStatus } from '@/lib/admin-orders.shared'
+import { completeRefill } from '@/lib/refill.functions'
 import { formatCountdown } from '@/lib/use-refill'
 import { useToast } from '../toast'
 import { GhostButton, PrimaryButton } from './primitives'
