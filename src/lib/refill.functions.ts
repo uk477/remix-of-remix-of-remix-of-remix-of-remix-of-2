@@ -53,3 +53,25 @@ export const requestRefill = createServerFn({ method: 'POST' })
     if (error) throw new Error(error.message)
     return state as unknown as RefillServerState
   })
+
+/**
+ * Пометить рефилл выполненным. Триггер в базе автоматически возвращает
+ * заказ в статус «завершён» (исходный completed_at не перезаписывается).
+ */
+export const completeRefill = createServerFn({ method: 'POST' })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { orderId: string; refillId?: string }) => {
+    if (!input?.orderId) throw new Error('orderId required')
+    return {
+      orderId: String(input.orderId),
+      refillId: input.refillId ? String(input.refillId) : null,
+    }
+  })
+  .handler(async ({ data, context }) => {
+    const { data: state, error } = await context.supabase.rpc('complete_refill', {
+      _order_key: data.orderId,
+      _refill_id: data.refillId,
+    })
+    if (error) throw new Error(error.message)
+    return state as unknown as RefillServerState
+  })
