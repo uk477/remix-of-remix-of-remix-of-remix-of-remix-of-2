@@ -72,6 +72,7 @@ export function OrderAdminOverride({
   const overviewFn = useServerFn(adminOrderRefills)
   const refundFn = useServerFn(adminRefundOrder)
   const refundStateFn = useServerFn(getOrderRefundState)
+  const completeRefillFn = useServerFn(completeRefill)
 
   const [target, setTarget] = useState<AdminOrderStatus>(
     (ADMIN_ORDER_STATUSES as readonly string[]).includes(status)
@@ -80,6 +81,7 @@ export function OrderAdminOverride({
   )
   const [saving, setSaving] = useState(false)
   const [refilling, setRefilling] = useState(false)
+  const [finishing, setFinishing] = useState(false)
   const [data, setData] = useState<AdminRefillOverview | null>(null)
   const [refund, setRefund] = useState<RefundState | null>(null)
   const [refunding, setRefunding] = useState(false)
@@ -148,6 +150,24 @@ export function OrderAdminOverride({
       show('Ошибка: ' + (e instanceof Error ? e.message : 'не удалось'))
     } finally {
       setRefilling(false)
+    }
+  }
+
+  /** Успешный ответ API о восполнении: заказ автоматически → «завершён». */
+  const finishRefill = async () => {
+    if (finishing) return
+    setFinishing(true)
+    try {
+      const st = await completeRefillFn({ data: { orderId } })
+      const next = (st?.orderStatus ?? 'completed') as AdminOrderStatus
+      setTarget(next)
+      onStatusChange?.(next)
+      show('Рефилл выполнен → заказ завершён')
+      await load()
+    } catch (e) {
+      show('Ошибка: ' + (e instanceof Error ? e.message : 'не удалось'))
+    } finally {
+      setFinishing(false)
     }
   }
 
@@ -248,6 +268,14 @@ export function OrderAdminOverride({
               Force refill
             </button>
           </div>
+          <button
+            onClick={finishRefill}
+            disabled={finishing}
+            className="pressable mt-2.5 flex w-full items-center justify-center gap-1.5 rounded-xl border border-success/40 bg-success/10 px-3.5 py-2.5 text-[12px] font-bold text-success disabled:opacity-70"
+          >
+            {finishing ? <Loader2 className="size-3.5 animate-spin" /> : null}
+            Рефилл выполнен (API success) → завершить заказ
+          </button>
         </div>
 
         {/* Возврат средств */}
