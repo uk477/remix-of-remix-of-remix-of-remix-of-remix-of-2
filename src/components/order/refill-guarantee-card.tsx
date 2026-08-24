@@ -237,7 +237,9 @@ export function RefillGuaranteeCard({
 
       <SlotRail total={total} left={left} reduce={reduce} live={live} />
 
-      <div className="mt-4 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+      <p className="mt-4 text-[13px] leading-[1.55] text-muted-foreground">{description}</p>
+
+      <div className="mt-3 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
         <span className="text-[13px] tabular-nums text-muted-foreground">{countLabel}</span>
         <span
           className="text-[13px] text-muted-foreground"
@@ -247,7 +249,6 @@ export function RefillGuaranteeCard({
         </span>
       </div>
 
-      <p className="mt-2 text-[13px] leading-[1.55] text-muted-foreground">{description}</p>
 
       <motion.button
         type="button"
