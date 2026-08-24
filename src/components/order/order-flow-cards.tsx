@@ -14,6 +14,7 @@
  */
 
 import type { ReactNode } from 'react'
+import { motion } from 'framer-motion'
 import { Eyebrow, Reveal, StatusText } from './primitives'
 import { OrderTimeline, type TimelineStep } from './order-timeline'
 
