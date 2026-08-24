@@ -14,6 +14,7 @@
  */
 
 import type { ReactNode } from 'react'
+import { motion } from 'framer-motion'
 import { Eyebrow, Reveal, StatusText } from './primitives'
 import { OrderTimeline, type TimelineStep } from './order-timeline'
 
@@ -83,16 +84,17 @@ function RefillArc({ phase }: { phase: FlowPhase }) {
   const color = phase === 'error' ? 'var(--destructive)' : 'var(--success)'
   return (
     <span className="relative flex size-[42px] shrink-0 items-center justify-center">
-      <svg viewBox="0 0 44 44" className={phase === 'active' ? 'animate-flow-arc size-[42px]' : 'size-[42px]'}>
-        <circle
-          cx="22"
-          cy="22"
-          r="16"
-          fill="none"
-          stroke={color}
-          strokeOpacity={0.18}
-          strokeWidth="3"
-        />
+      <motion.svg
+        viewBox="0 0 44 44"
+        className="size-[42px]"
+        animate={phase === 'active' ? { rotate: 360 } : { rotate: 0 }}
+        transition={
+          phase === 'active'
+            ? { duration: 1.6, ease: 'linear', repeat: Infinity }
+            : { duration: 0.4 }
+        }
+      >
+        <circle cx="22" cy="22" r="16" fill="none" stroke={color} strokeOpacity={0.18} strokeWidth="3" />
         <circle
           cx="22"
           cy="22"
@@ -105,7 +107,7 @@ function RefillArc({ phase }: { phase: FlowPhase }) {
           transform="rotate(-90 22 22)"
           style={{ filter: `drop-shadow(0 0 5px color-mix(in oklab, ${color} 60%, transparent))` }}
         />
-      </svg>
+      </motion.svg>
       {phase === 'success' ? (
         <svg
           viewBox="0 0 24 24"
@@ -125,26 +127,46 @@ function RefillArc({ phase }: { phase: FlowPhase }) {
 
 function DotTrack({ phase, color }: { phase: FlowPhase; color: string }) {
   const lit = phase === 'success'
+  const active = phase === 'active'
   return (
     <div className="relative h-[14px] flex-1 overflow-hidden">
       <div className="flex h-full items-center justify-between">
         {Array.from({ length: TRACK_DOTS }).map((_, i) => (
-          <span
+          <motion.span
             key={i}
-            className={phase === 'active' ? 'animate-flow-dot size-[6px] rounded-full' : 'size-[6px] rounded-full'}
-            style={{
-              background: color,
-              opacity: lit ? 1 : 0.22,
-              boxShadow: lit ? `0 0 10px color-mix(in oklab, ${color} 70%, transparent)` : undefined,
-              animationDelay: `${i * 0.16}s`,
-              transition: 'opacity .45s ease, box-shadow .45s ease',
-            }}
+            className="size-[6px] rounded-full"
+            style={{ background: color }}
+            animate={
+              active
+                ? {
+                    opacity: [0.22, 1, 0.22],
+                    scale: [1, 1.35, 1],
+                    boxShadow: [
+                      '0 0 0px rgba(0,0,0,0)',
+                      `0 0 10px color-mix(in oklab, ${color} 75%, transparent)`,
+                      '0 0 0px rgba(0,0,0,0)',
+                    ],
+                  }
+                : {
+                    opacity: lit ? 1 : 0.22,
+                    scale: 1,
+                    boxShadow: lit
+                      ? `0 0 10px color-mix(in oklab, ${color} 70%, transparent)`
+                      : '0 0 0px rgba(0,0,0,0)',
+                  }
+            }
+            transition={
+              active
+                ? { duration: 1.8, repeat: Infinity, ease: 'easeInOut', delay: i * 0.12 }
+                : { duration: 0.45, ease: 'easeOut' }
+            }
           />
         ))}
       </div>
     </div>
   )
 }
+
 
 export function RecoveryStatusCard({
   phase,
