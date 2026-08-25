@@ -16,6 +16,7 @@ import { useToast } from '../toast'
 import { OrderHeader } from '../order/order-header'
 import { OrderSummaryCard } from '../order/order-summary-card'
 import { SocialPostPreview } from '../order/social-post-preview'
+import { SocialProfilePreview } from '../order/social-profile-preview'
 import { OrderProgressCard } from '../order/order-progress-card'
 import { dbStatusToOrderStatus, orderStatusView } from '@/lib/order-status'
 import { useServerFn } from '@tanstack/react-start'
@@ -705,88 +706,6 @@ export function BoostOrderScreen({ order }: { order: Order }) {
         ) : null}
       </AnimatePresence>
     </div>
-  )
-}
-
-/* ── Followers target: quoted-profile panel ───────────────────────────── */
-function ProfilePreview({
-  profile,
-  handle,
-  start,
-  projected,
-  done,
-  ru,
-  delay,
-}: {
-  profile: XProfileRow | null
-  handle: string
-  start: number
-  projected: number
-  done: boolean
-  ru: boolean
-  delay?: number
-}) {
-  const p = profile && !profile.not_found ? profile : null
-  const vt = (p?.verified_type ?? '').toLowerCase()
-  const tone =
-    p && (p.is_blue_verified || p.is_verified || vt)
-      ? vt === 'business' || vt === 'organization'
-        ? 'text-[#e2b719]'
-        : vt === 'government'
-          ? 'text-[#829aab]'
-          : 'text-[#1d9bf0]'
-      : null
-
-  return (
-    <Reveal delay={delay} className="px-1">
-      <div className="mb-2 px-0.5">
-        <Eyebrow>{ru ? 'Аккаунт' : 'Target account'}</Eyebrow>
-      </div>
-
-      <div
-        className="rounded-[18px] p-4"
-        style={{
-          background: 'color-mix(in oklab, var(--foreground) 3%, transparent)',
-          boxShadow: 'inset 0 0 0 1px color-mix(in oklab, var(--foreground) 7%, transparent)',
-        }}
-      >
-        <div className="flex items-center gap-3">
-          <span className="flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-full bg-foreground/[0.06]">
-            {p?.avatar_url ? (
-              <img src={p.avatar_url} alt="" className="size-full object-cover" />
-            ) : (
-              <XMark className="size-[42%] text-foreground/70" />
-            )}
-          </span>
-          <span className="min-w-0 flex-1">
-            <span className="flex min-w-0 items-center gap-1">
-              <span className="truncate text-[15px] font-semibold leading-tight">
-                {p?.name || handle || '—'}
-              </span>
-              {tone ? <VerifiedBadge className={`size-[15px] shrink-0 ${tone}`} /> : null}
-            </span>
-            <span className="mt-0.5 block truncate text-[13px] leading-tight text-muted-foreground">
-              @{handle || 'username'}
-            </span>
-          </span>
-          <XMark className="size-[15px] shrink-0 text-foreground/45" />
-        </div>
-
-        <div
-          className="mt-3.5 flex items-baseline justify-between gap-3 pt-3"
-          style={{ borderTop: '1px solid color-mix(in oklab, var(--foreground) 7%, transparent)' }}
-        >
-          <span className="text-[13px] text-muted-foreground">
-            {ru ? 'Фолловеры' : 'Followers'}
-          </span>
-          <span className="text-[13.5px] font-semibold tabular-nums">
-            {nf(start)}
-            <span className="mx-1.5 text-muted-foreground/70">→</span>
-            <span className={done ? 'text-success' : 'text-primary'}>{nf(projected)}</span>
-          </span>
-        </div>
-      </div>
-    </Reveal>
   )
 }
 
