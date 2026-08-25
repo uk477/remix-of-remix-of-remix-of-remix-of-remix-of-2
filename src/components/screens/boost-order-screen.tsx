@@ -465,16 +465,18 @@ export function BoostOrderScreen({ order }: { order: Order }) {
 
 
         {isFollowers ? (
-          <ProfilePreview
+          <SocialProfilePreview
             profile={profile}
             handle={handle}
             start={startFollowers}
-            projected={startFollowers + volume}
+            volume={volume}
             done={done}
             ru={ru}
+            lang={lang}
             delay={0.05}
           />
         ) : (
+
           <SocialPostPreview
             tweet={tweet}
             missing={tweetMissing}
