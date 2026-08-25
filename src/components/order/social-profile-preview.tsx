@@ -1,45 +1,26 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { Eyebrow, Reveal, Skeleton } from './primitives'
-import { GlyphArrowUpRight, XMark } from './icons'
+import { CalendarDays } from 'lucide-react'
+import { Eyebrow, Reveal } from './primitives'
+import { GlyphArrowUpRight } from './icons'
 import { VerifiedBadge } from '../icons/verified-badge'
+import { DigitRoll } from '../ui/digit-roll'
+import { AurxMark } from '../brand'
 import { verifiedTone } from '@/lib/x-tweet'
-import { localeFor } from '@/lib/datetime'
+import { cn } from '@/lib/utils'
 import type { XProfileRow } from '@/lib/x-profile.functions'
 
-function grouped(n: number, lang: string) {
-  try {
-    return new Intl.NumberFormat(localeFor(lang)).format(Math.max(0, Math.round(n)))
-  } catch {
-    return String(n)
-  }
-}
-
-/** «апреля 2009» / «April 2009» — как в шапке профиля X. */
-function joinedLabel(value: string, lang: string) {
-  const d = new Date(value)
-  if (!Number.isFinite(d.getTime())) return ''
-  try {
-    return new Intl.DateTimeFormat(localeFor(lang), { month: 'long', year: 'numeric' }).format(d)
-  } catch {
-    return ''
-  }
-}
-
-function CalendarGlyph({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden>
-      <rect x="3" y="5" width="18" height="16" rx="3" stroke="currentColor" strokeWidth="1.8" />
-      <path d="M3 10h18M8 3v4M16 3v4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-    </svg>
-  )
+function joinedLabel(raw: string | null | undefined): string | null {
+  if (!raw) return null
+  const d = new Date(raw)
+  if (Number.isNaN(d.getTime())) return null
+  return `Joined ${d.toLocaleString('en-US', { month: 'long' })} ${d.getFullYear()}`
 }
 
 /**
- * Целевой аккаунт для заказов на подписчиков: настоящая шапка профиля X
- * (баннер, аватар, верификация, дата регистрации, реальные счётчики) плюс
- * нижняя лента «На старте → После выполнения».
+ * Целевой аккаунт: то же нативное оформление профиля X, что и на экране
+ * покупки (menu → boost → followers), с реальными данными аккаунта.
  */
 export function SocialProfilePreview({
   profile,
@@ -48,7 +29,6 @@ export function SocialProfilePreview({
   volume,
   done,
   ru,
-  lang,
   delay,
 }: {
   profile: XProfileRow | null
@@ -57,179 +37,117 @@ export function SocialProfilePreview({
   volume: number
   done: boolean
   ru: boolean
-  lang: string
+  lang?: string
   delay?: number
 }) {
-  const p = profile && !profile.not_found ? profile : null
-  const loading = !profile
-  const tone = p ? verifiedTone(p) : null
+  const live = profile && !profile.not_found ? profile : null
+  const startCount = live?.followers ?? start
+  const total = startCount + volume
+  const digits = total.toLocaleString('en-US').split('')
+  const displayHandle = live?.user_name || handle || 'username'
+  const displayName = live?.name || handle || 'Name'
+  const tone = live ? verifiedTone(live) : null
+  const joined = joinedLabel(live?.joined_at) ?? ''
+  const following = (live?.following ?? 0).toLocaleString('en-US')
   const href = handle ? `https://x.com/${handle}` : null
-  const joined = p?.joined_at ? joinedLabel(p.joined_at, lang) : ''
-  const startCount = p?.followers ?? start
-  const projected = startCount + volume
+  const accent = done ? 'var(--success)' : 'var(--primary)'
 
   return (
     <Reveal delay={delay} className="px-1">
-      <div className="mb-2 px-0.5">
+      <div className="mb-2 flex items-center justify-between gap-3 px-0.5">
         <Eyebrow>{ru ? 'Аккаунт' : 'Target account'}</Eyebrow>
+        {href ? (
+          <a
+            href={href}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-1 text-[12px] font-medium text-muted-foreground transition-colors hover:text-foreground active:opacity-60"
+          >
+            {ru ? 'Открыть' : 'Open'}
+            <GlyphArrowUpRight className="size-[13px]" />
+          </a>
+        ) : null}
       </div>
 
       <motion.div
-        whileTap={{ scale: 0.988 }}
+        whileTap={{ scale: 0.99 }}
         transition={{ type: 'spring', stiffness: 420, damping: 32 }}
-        className="overflow-hidden rounded-[20px]"
-        style={{
-          background: 'color-mix(in oklab, var(--foreground) 3%, transparent)',
-          boxShadow: 'inset 0 0 0 1px color-mix(in oklab, var(--foreground) 7%, transparent)',
-        }}
+        className="overflow-hidden rounded-2xl border border-white/10 bg-black"
       >
         {/* Banner */}
-        <div className="relative h-[104px] w-full bg-foreground/[0.06]">
-          {loading ? (
-            <Skeleton className="size-full rounded-none" />
-          ) : p?.banner_url ? (
-            <img src={p.banner_url} alt="" className="size-full object-cover" />
-          ) : (
-            <div
-              className="size-full"
-              style={{
-                background:
-                  'linear-gradient(135deg, color-mix(in oklab, var(--primary) 22%, transparent), transparent 70%)',
-              }}
-            />
-          )}
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-x-0 bottom-0 h-14"
-            style={{
-              background: 'linear-gradient(to top, var(--background), transparent)',
-              opacity: 0.55,
-            }}
-          />
+        <div className="h-[76px] overflow-hidden bg-[#333639]">
+          {live?.banner_url ? (
+            <img src={live.banner_url} alt="" className="size-full object-cover" />
+          ) : null}
         </div>
 
         <div className="relative px-4 pb-4">
-          {/* Avatar + open link */}
-          <div className="flex items-end justify-between">
-            <span
-              className="-mt-9 flex size-[72px] shrink-0 items-center justify-center overflow-hidden rounded-full bg-background"
-              style={{ boxShadow: '0 0 0 3px var(--background)' }}
-            >
-              {loading ? (
-                <Skeleton className="size-full rounded-full" />
-              ) : p?.avatar_url ? (
-                <img src={p.avatar_url} alt="" className="size-full object-cover" />
+          <div className="flex items-start justify-between">
+            <div className="-mt-10 flex size-[72px] items-center justify-center overflow-hidden rounded-full border-[4px] border-black bg-[#1d1f23]">
+              {live?.avatar_url ? (
+                <img src={live.avatar_url} alt="" className="size-full object-cover" />
               ) : (
-                <XMark className="size-[38%] text-foreground/70" />
+                <AurxMark className="size-[70%] opacity-90" />
               )}
-            </span>
-
-            {href ? (
-              <a
-                href={href}
-                target="_blank"
-                rel="noreferrer"
-                aria-label={ru ? 'Открыть профиль' : 'Open profile'}
-                className="mb-1 inline-flex size-9 items-center justify-center rounded-full text-muted-foreground transition-colors hover:text-foreground active:opacity-60"
-                style={{
-                  boxShadow: 'inset 0 0 0 1px color-mix(in oklab, var(--foreground) 12%, transparent)',
-                }}
-              >
-                <GlyphArrowUpRight className="size-[15px]" />
-              </a>
-            ) : null}
+            </div>
           </div>
 
-          {/* Identity */}
-          <div className="mt-2.5">
-            {loading ? (
-              <div className="space-y-2">
-                <Skeleton className="h-4 w-1/3" />
-                <Skeleton className="h-3 w-1/4" />
-              </div>
-            ) : (
-              <>
-                <div className="flex min-w-0 items-center gap-1.5">
-                  <span className="truncate text-[19px] font-bold leading-tight">
-                    {p?.name || handle || '—'}
-                  </span>
-                  {tone ? <VerifiedBadge className={`size-[17px] shrink-0 ${tone}`} /> : null}
-                </div>
-                <div className="mt-0.5 truncate text-[13.5px] leading-tight text-muted-foreground">
-                  @{p?.user_name || handle || 'username'}
-                </div>
-              </>
-            )}
+          <div className="mt-2">
+            <p
+              className="flex items-center gap-1 text-[19px] font-extrabold leading-tight tracking-[-0.01em] text-white"
+              style={{ fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif' }}
+            >
+              <span className="min-w-0 truncate">{displayName}</span>
+              {tone ? <VerifiedBadge className={cn('size-[19px] shrink-0', tone)} /> : null}
+            </p>
+            <p
+              className="text-[14px] leading-tight text-[#71767b]"
+              style={{ fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif' }}
+            >
+              @{displayHandle}
+            </p>
           </div>
 
           {joined ? (
-            <div className="mt-3 flex items-center gap-1.5 text-[13px] text-muted-foreground">
-              <CalendarGlyph className="size-[14px] shrink-0" />
-              <span>
-                {ru ? `В X с ${joined}` : `Joined X in ${joined}`}
-              </span>
+            <div className="mt-3 flex items-center gap-1 text-[14px] text-[#71767b]">
+              <CalendarDays className="size-[16px]" strokeWidth={2} />
+              <span>{joined}</span>
             </div>
           ) : null}
 
-          {!loading && p ? (
-            <div className="mt-2.5 flex flex-wrap items-baseline gap-x-5 gap-y-1 text-[13px] text-muted-foreground">
-              <span>
-                <span className="font-semibold text-foreground tabular-nums">
-                  {grouped(p.following ?? 0, lang)}
-                </span>{' '}
-                {ru ? 'читаемых' : 'following'}
-              </span>
-              <span>
-                <span className="font-semibold text-foreground tabular-nums">
-                  {grouped(p.followers ?? 0, lang)}
-                </span>{' '}
-                {ru ? 'подписчиков' : 'followers'}
-              </span>
-            </div>
-          ) : null}
+          <div className="mt-3 flex items-center gap-5 text-[14px] text-[#71767b]">
+            <span>
+              <span className="font-bold text-white">{following}</span> Following
+            </span>
+            <span className="flex items-baseline gap-1">
+              <DigitRoll digits={digits} />
+              <span>Followers</span>
+            </span>
+          </div>
         </div>
 
         {/* Delivery strip */}
-        <div
-          className="grid grid-cols-[1fr_auto_1fr] items-center"
-          style={{
-            borderTop: '1px solid color-mix(in oklab, var(--foreground) 7%, transparent)',
-            background: 'color-mix(in oklab, var(--foreground) 2.5%, transparent)',
-          }}
-        >
-          <div className="px-3 py-3 text-center">
-            <div className="text-[11.5px] uppercase tracking-[0.06em] text-muted-foreground">
+        <div className="grid grid-cols-[1fr_auto_1fr] items-center border-t border-white/10">
+          <div className="px-3 py-2.5 text-center">
+            <div className="text-[10.5px] uppercase tracking-[0.06em] text-white/40">
               {ru ? 'На старте' : 'At start'}
             </div>
-            <div className="mt-1 text-[15px] font-semibold tabular-nums">
-              {grouped(startCount, lang)}
+            <div className="mt-0.5 text-[14px] font-semibold tabular-nums text-white/90">
+              {startCount.toLocaleString('en-US')}
             </div>
           </div>
-
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: (delay ?? 0) + 0.2, type: 'spring', stiffness: 320, damping: 24 }}
-            className="mx-1 rounded-full px-3 py-1 text-[13px] font-semibold tabular-nums"
-            style={{
-              color: done ? 'var(--success)' : 'var(--primary)',
-              background: done
-                ? 'color-mix(in oklab, var(--success) 14%, transparent)'
-                : 'color-mix(in oklab, var(--primary) 14%, transparent)',
-            }}
+          <div
+            className="rounded-full px-2.5 py-1 text-[12.5px] font-semibold tabular-nums"
+            style={{ color: accent, background: `color-mix(in oklab, ${accent} 14%, transparent)` }}
           >
-            +{grouped(volume, lang)}
-          </motion.div>
-
-          <div className="px-3 py-3 text-center">
-            <div className="text-[11.5px] uppercase tracking-[0.06em] text-muted-foreground">
+            +{volume.toLocaleString('en-US')}
+          </div>
+          <div className="px-3 py-2.5 text-center">
+            <div className="text-[10.5px] uppercase tracking-[0.06em] text-white/40">
               {ru ? 'После выполнения' : 'After delivery'}
             </div>
-            <div
-              className="mt-1 text-[15px] font-semibold tabular-nums"
-              style={{ color: done ? 'var(--success)' : 'var(--primary)' }}
-            >
-              {grouped(projected, lang)}
+            <div className="mt-0.5 text-[14px] font-semibold tabular-nums" style={{ color: accent }}>
+              {total.toLocaleString('en-US')}
             </div>
           </div>
         </div>
