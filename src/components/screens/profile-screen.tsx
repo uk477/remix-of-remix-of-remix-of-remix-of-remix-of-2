@@ -1019,7 +1019,7 @@ function ReferralSheet({
     const list = getReferrals()
     return list.map((r, i) => ({
       ...r,
-      avatarUrl: r.avatarUrl ?? AVATAR_POOL[i % AVATAR_POOL.length]?.url,
+      avatarUrl: r.avatarUrl ?? AVATAR_POOL[i % AVATAR_POOL.length],
     }))
   }, [])
   const series = useMemo(() => getEarningsSeries(), [])
