@@ -1,6 +1,6 @@
 "use client";
 
-import frontrunproLogo from "@/assets/frontrunpro-logo.png.asset.json";
+import frontrunproLogo from "@/assets/frontrunpro-logo.png";
 
 import { AccountDescriptionSheet } from "@/components/account-description-sheet";
 import { AnimatePresence, motion } from "framer-motion";
@@ -4346,18 +4346,18 @@ function DisclosureRow({
 
 // ─────────────────────────── Next-step sheet ───────────────────────────
 
-import laughAvatar from "@/assets/guarantors/laugh.jpg.asset.json";
-import coldAvatar from "@/assets/guarantors/cold.jpg.asset.json";
-import beamAvatar from "@/assets/guarantors/beam.jpg.asset.json";
-import fameAvatar from "@/assets/guarantors/fame.jpg.asset.json";
-import faiqAvatar from "@/assets/guarantors/faiq.jpg.asset.json";
+import laughAvatar from "@/assets/guarantors/laugh.jpg";
+import coldAvatar from "@/assets/guarantors/cold.jpg";
+import beamAvatar from "@/assets/guarantors/beam.jpg";
+import fameAvatar from "@/assets/guarantors/fame.jpg";
+import faiqAvatar from "@/assets/guarantors/faiq.jpg";
 
 const GUARANTORS: { handle: string; color: string; avatar: string }[] = [
-  { handle: "laugh", color: "from-amber-500/40 to-orange-500/20", avatar: laughAvatar.url },
-  { handle: "cold", color: "from-sky-500/40 to-blue-500/20", avatar: coldAvatar.url },
-  { handle: "beam", color: "from-fuchsia-500/40 to-purple-500/20", avatar: beamAvatar.url },
-  { handle: "fame", color: "from-emerald-500/40 to-teal-500/20", avatar: fameAvatar.url },
-  { handle: "faiq", color: "from-rose-500/40 to-pink-500/20", avatar: faiqAvatar.url },
+  { handle: "laugh", color: "from-amber-500/40 to-orange-500/20", avatar: laughAvatar },
+  { handle: "cold", color: "from-sky-500/40 to-blue-500/20", avatar: coldAvatar },
+  { handle: "beam", color: "from-fuchsia-500/40 to-purple-500/20", avatar: beamAvatar },
+  { handle: "fame", color: "from-emerald-500/40 to-teal-500/20", avatar: fameAvatar },
+  { handle: "faiq", color: "from-rose-500/40 to-pink-500/20", avatar: faiqAvatar },
 ];
 
 function NextStepSheet({
@@ -4722,7 +4722,7 @@ function SmartFollowersBlock({
         )}
         <span className="ml-auto flex shrink-0 items-center gap-1 text-[13px] leading-4 text-[#71767b]">
           Powered by <span className="font-bold text-white">@frontrunpro</span>
-          <img src={frontrunproLogo.url} alt="frontrunpro" className="size-[14px] object-contain" />
+          <img src={frontrunproLogo} alt="frontrunpro" className="size-[14px] object-contain" />
         </span>
       </div>
 

@@ -1,6 +1,6 @@
 'use client'
 
-import gramAsset from '@/assets/coins/gram.png.asset.json'
+import gramAsset from '@/assets/coins/gram.png'
 
 import { AnimatePresence, motion } from 'framer-motion'
 import {
@@ -1026,8 +1026,8 @@ const BRAND_LOGOS: Record<string, { src: string; label: string; href?: string }>
   USDT: { src: 'https://cdn.simpleicons.org/tether/26A17B', label: 'USDT' },
   BTC: { src: 'https://cdn.simpleicons.org/bitcoin/F7931A', label: 'BTC' },
   ETH: { src: 'https://cdn.simpleicons.org/ethereum/627EEA', label: 'ETH' },
-  GRAM: { src: gramAsset.url, label: 'GRAM' },
-  TON: { src: gramAsset.url, label: 'GRAM' },
+  GRAM: { src: gramAsset, label: 'GRAM' },
+  TON: { src: gramAsset, label: 'GRAM' },
   SOL: { src: 'https://cdn.simpleicons.org/solana/9945FF', label: 'SOL' },
   Telegram: { src: 'https://cdn.simpleicons.org/telegram/26A5E4', label: 'Telegram' },
   X: { src: 'https://cdn.simpleicons.org/x/ffffff', label: 'X' },

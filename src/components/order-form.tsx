@@ -43,20 +43,20 @@ import { extractTweetId, loadXTweetFast, decodeTweetText } from '@/lib/x-tweet'
 import type { XTweetRow } from '@/lib/x-tweet.functions'
 import { ServiceInfoSheet } from './service-info-sheet'
 import { DigitRoll } from './ui/digit-roll'
-import img4 from '@/assets/avatars/image-4.asset.json'
-import img5 from '@/assets/avatars/image-5.asset.json'
-import img7 from '@/assets/avatars/image-7.asset.json'
-import img9 from '@/assets/avatars/image-9.asset.json'
-import img10 from '@/assets/avatars/image-10.asset.json'
-import img11 from '@/assets/avatars/image-11.asset.json'
+import img4 from '@/assets/avatars/image-4.png'
+import img5 from '@/assets/avatars/image-5.png'
+import img7 from '@/assets/avatars/image-7.png'
+import img9 from '@/assets/avatars/image-9.png'
+import img10 from '@/assets/avatars/image-10.png'
+import img11 from '@/assets/avatars/image-11.png'
 
 const AVATAR_OPTIONS: { id: string; url: string; label: string }[] = [
-  { id: 'pepe', url: img4.url, label: 'Pepe' },
-  { id: 'rick', url: img5.url, label: 'Rick' },
-  { id: 'twitter', url: img7.url, label: 'Twitter' },
-  { id: 'alien', url: img9.url, label: 'Alien cat' },
-  { id: 'boom', url: img10.url, label: 'Boom cat' },
-  { id: 'mike', url: img11.url, label: 'Mike' },
+  { id: 'pepe', url: img4, label: 'Pepe' },
+  { id: 'rick', url: img5, label: 'Rick' },
+  { id: 'twitter', url: img7, label: 'Twitter' },
+  { id: 'alien', url: img9, label: 'Alien cat' },
+  { id: 'boom', url: img10, label: 'Boom cat' },
+  { id: 'mike', url: img11, label: 'Mike' },
 ]
 
 function restoreTargets(item?: CartItem) {

@@ -13,8 +13,8 @@ import {
 } from 'lucide-react'
 
 import { ScreenHeader } from '@/components/screen-header'
-import outlookMark from '@/assets/outlook-mark.png.asset.json'
-import authMark from '@/assets/auth-mark.png.asset.json'
+import outlookMark from '@/assets/outlook-mark.png'
+import authMark from '@/assets/auth-mark.png'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -173,7 +173,7 @@ export function TotpToolScreen() {
         <div className="rounded-2xl border border-border bg-card/80 p-4 shadow-[0_20px_60px_-30px_rgba(0,0,0,0.9)] backdrop-blur">
           <div className="mb-4 flex items-start gap-3">
             <div className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-white p-2">
-              <img src={authMark.url} alt="2FA" className="size-10 object-contain" />
+              <img src={authMark} alt="2FA" className="size-10 object-contain" />
             </div>
             <div className="min-w-0">
               <h3 className="text-[15px] font-bold leading-tight">2FA Code Generator</h3>
@@ -303,7 +303,7 @@ export function MailToolScreen() {
         <div className="rounded-2xl border border-border bg-card/80 p-4 shadow-[0_20px_60px_-30px_rgba(0,0,0,0.9)] backdrop-blur">
           <div className="mb-4 flex items-start gap-3">
             <div className="flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-white p-2">
-              <img src={outlookMark.url} alt="Mail" className="size-10 object-contain" />
+              <img src={outlookMark} alt="Mail" className="size-10 object-contain" />
             </div>
             <div className="min-w-0">
               <h3 className="text-[15px] font-bold leading-tight">Mail Reader</h3>
