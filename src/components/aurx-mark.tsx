@@ -1,4 +1,4 @@
-import markAsset from '@/assets/aurx-mark.png.asset.json'
+import markAsset from '@/assets/aurx-mark.png'
 
 /**
  * AURX brand mark — just the X monogram (transparent bg), no wordmark.
@@ -7,7 +7,7 @@ import markAsset from '@/assets/aurx-mark.png.asset.json'
 export function AurxMark({ className }: { className?: string }) {
   return (
     <img
-      src={markAsset.url}
+      src={markAsset}
       alt="AURX"
       className={className}
       draggable={false}

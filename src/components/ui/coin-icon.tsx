@@ -2,13 +2,13 @@
 
 import type { CSSProperties, ReactElement } from 'react'
 
-import usdtAsset from '@/assets/coins/usdt.png.asset.json'
-import usdcAsset from '@/assets/coins/usdc.png.asset.json'
-import dogeAsset from '@/assets/coins/doge.png.asset.json'
-import xrpAsset from '@/assets/coins/xrp.png.asset.json'
-import polAsset from '@/assets/coins/pol.png.asset.json'
-import btcAsset from '@/assets/coins/btc.png.asset.json'
-import gramAsset from '@/assets/coins/gram.png.asset.json'
+import usdtAsset from '@/assets/coins/usdt.png'
+import usdcAsset from '@/assets/coins/usdc.png'
+import dogeAsset from '@/assets/coins/doge.png'
+import xrpAsset from '@/assets/coins/xrp.png'
+import polAsset from '@/assets/coins/pol.png'
+import btcAsset from '@/assets/coins/btc.png'
+import gramAsset from '@/assets/coins/gram.png'
 
 
 
@@ -81,7 +81,7 @@ function SvgFull({ viewBox, children }: { viewBox: string; children: ReactElemen
 }
 
 function IconBTC() {
-  return <ImgCoin src={btcAsset.url} alt="BTC" />
+  return <ImgCoin src={btcAsset} alt="BTC" />
 }
 
 
@@ -103,17 +103,17 @@ function IconETH() {
 }
 
 function IconUSDT() {
-  return <ImgCoin src={usdtAsset.url} alt="USDT" />
+  return <ImgCoin src={usdtAsset} alt="USDT" />
 }
 
 
 function IconUSDC() {
-  return <ImgCoin src={usdcAsset.url} alt="USDC" />
+  return <ImgCoin src={usdcAsset} alt="USDC" />
 }
 
 
 function IconGRAM() {
-  return <ImgCoin src={gramAsset.url} alt="Gram" />
+  return <ImgCoin src={gramAsset} alt="Gram" />
 }
 
 function IconSOL() {
@@ -183,18 +183,18 @@ function IconLTC() {
 }
 
 function IconXRP() {
-  return <ImgCoin src={xrpAsset.url} alt="XRP" />
+  return <ImgCoin src={xrpAsset} alt="XRP" />
 }
 
 
 function IconDOGE() {
-  return <ImgCoin src={dogeAsset.url} alt="DOGE" />
+  return <ImgCoin src={dogeAsset} alt="DOGE" />
 }
 
 
 
 function IconPOL() {
-  return <ImgCoin src={polAsset.url} alt="POL" />
+  return <ImgCoin src={polAsset} alt="POL" />
 }
 
 function IconXMR() {
