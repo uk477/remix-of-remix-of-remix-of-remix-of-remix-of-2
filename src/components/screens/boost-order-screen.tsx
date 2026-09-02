@@ -135,7 +135,8 @@ export function BoostOrderScreen({ order }: { order: Order }) {
       const id = window.setTimeout(() => setFlow(null), 2800)
       return () => window.clearTimeout(id)
     }
-    if (prev === 'refunded' && (adminStatus === 'completed' || adminStatus === 'declined')) {
+    // Явная отмена — это обычная карточка «Отменён», а не финал возврата.
+    if (prev === 'refunded' && adminStatus === 'completed') {
       setFlow({ kind: 'refund', phase: 'success' })
       const id = window.setTimeout(() => setFlow(null), 2800)
       return () => window.clearTimeout(id)
