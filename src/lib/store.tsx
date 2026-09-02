@@ -512,6 +512,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     () => ({
       balance,
       setBalance,
+      applyServerBalance,
       cart,
       addToCart,
       removeFromCart,
@@ -522,6 +523,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       setEditingCustomKey,
       orders,
       addOrder,
+      registerServerOrder,
       syncOrderStatus,
       refillOrder,
       topups,
