@@ -2658,136 +2658,154 @@ function BlueVerifiedCard({
           onAdminMenu();
         }
       }}
-      whileTap={{ scale: soldOut ? 1 : 0.98 }}
-      initial={{ opacity: 0, y: 10 }}
+      whileTap={{ scale: soldOut ? 1 : 0.985 }}
+      initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0 }}
       transition={{
-        duration: 0.28,
+        duration: 0.3,
         ease: [0.22, 1, 0.36, 1],
-        delay: Math.min(index, 6) * 0.025,
+        delay: Math.min(index, 6) * 0.03,
       }}
       className={[
-        "group relative isolate flex w-full items-stretch overflow-hidden rounded-2xl border text-left outline-none transition-all duration-300",
+        "group relative isolate flex w-full flex-col overflow-hidden rounded-[20px] border text-left outline-none transition-all duration-300",
         soldOut
-          ? "cursor-not-allowed border-white/5 opacity-45 grayscale"
+          ? "cursor-not-allowed border-white/5 bg-indigo-950 opacity-45 grayscale"
           : featured
-            ? "border-indigo-500/40 bg-indigo-900 shadow-[0_24px_60px_-32px_rgba(79,70,229,0.35)] hover:border-indigo-500/70 hover:shadow-[0_28px_70px_-32px_rgba(79,70,229,0.45)]"
-            : "border-indigo-900/60 bg-indigo-950 hover:border-indigo-500/30 hover:bg-indigo-900/70",
+            ? "border-indigo-500/45 bg-gradient-to-br from-indigo-900 via-indigo-950 to-indigo-1000 shadow-[0_30px_70px_-40px_rgba(79,70,229,0.6)] hover:border-indigo-500/70"
+            : "border-white/[0.07] bg-indigo-950/80 hover:border-indigo-500/30 hover:bg-indigo-900/50",
       ].join(" ")}
     >
-      {/* Featured accent rail */}
+      {/* Ambient glow */}
       {!soldOut && featured && (
         <div
           aria-hidden
-          className="absolute left-0 top-0 h-full w-[3px] bg-gradient-to-b from-indigo-400 via-indigo-500 to-indigo-900"
+          className="pointer-events-none absolute -right-16 -top-20 size-56 rounded-full bg-indigo-500/20 blur-3xl"
         />
       )}
 
-      {/* Ambient glow for featured */}
-      {!soldOut && featured && (
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -right-10 -top-10 size-40 rounded-full bg-indigo-500/15 blur-3xl"
-        />
-      )}
-
-      {/* Left rail: verified mark + tier */}
-      <div className="relative flex w-[72px] shrink-0 flex-col items-center justify-center gap-2.5 border-r border-white/[0.05] px-2 py-4">
-        <VerifiedBadge className="size-9" style={{ color: BLUE }} />
-        <span
-          className={[
-            "text-[10px] font-semibold tracking-[0.12em]",
-            featured ? "text-indigo-400" : "text-white/30",
-          ].join(" ")}
-        >
-          {tierRoman}
-        </span>
-      </div>
-
-      {/* Content */}
-      <div className="relative flex flex-1 flex-col gap-3 p-4">
-        {featured && (
-          <span className="absolute right-3 top-3 rounded-full border border-indigo-500/30 bg-indigo-500/10 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-indigo-400">
-            {lang === "ru" ? "Популярный" : "Popular"}
-          </span>
-        )}
-
-        {onAdminMenu && (
-          <button
-            type="button"
-            onPointerDown={(e) => e.stopPropagation()}
-            onClick={(e) => {
-              e.stopPropagation();
-              longPressFired.current = true;
-              onAdminMenu();
-            }}
+      {/* Top row */}
+      <div className="relative flex items-start justify-between gap-3 px-5 pt-5">
+        <div className="flex items-center gap-3">
+          <div
             className={[
-              "absolute z-20 flex size-7 items-center justify-center rounded-lg border transition-colors",
-              featured ? "right-3 top-9 border-indigo-500/25 bg-indigo-500/10 text-indigo-300 hover:bg-indigo-500/20" : "right-2 top-2 border-white/10 bg-white/[0.04] text-white/60 hover:text-white",
+              "flex size-11 shrink-0 items-center justify-center rounded-xl border",
+              featured
+                ? "border-indigo-500/35 bg-indigo-500/12"
+                : "border-white/[0.08] bg-white/[0.04]",
             ].join(" ")}
-            aria-label={`Редактировать ${account.name.ru}`}
-            title="Редактировать"
           >
-            <Pencil className="size-3" strokeWidth={2.2} />
-          </button>
-        )}
-
-        <div className="flex flex-col">
-          <span className="font-space-grotesk text-[26px] font-semibold leading-none tracking-[-0.03em] tabular-nums text-white">
-            {rangeText}
-          </span>
-          <span className="mt-1 font-dm-sans text-[11px] font-medium uppercase tracking-[0.18em] text-white/40">
-            {labels.followers.toLowerCase()}
-          </span>
+            <VerifiedBadge className="size-6" style={{ color: BLUE }} />
+          </div>
+          <div className="flex flex-col">
+            <span className="font-space-grotesk text-[13px] font-semibold tracking-[-0.01em] text-white">
+              {tierName}
+            </span>
+            <span className="font-dm-sans text-[10px] font-medium uppercase tracking-[0.22em] text-white/35">
+              tier {tierRoman}
+            </span>
+          </div>
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="rounded-md border border-white/[0.08] bg-white/[0.03] px-2 py-1 font-dm-sans text-[11px] font-medium tabular-nums text-white/70">
+          {featured && !soldOut && (
+            <span className="rounded-full border border-indigo-500/35 bg-indigo-500/12 px-2.5 py-1 font-dm-sans text-[9px] font-semibold uppercase tracking-[0.14em] text-indigo-300">
+              {lang === "ru" ? "Популярный" : "Popular"}
+            </span>
+          )}
+          {onAdminMenu && (
+            <button
+              type="button"
+              onPointerDown={(e) => e.stopPropagation()}
+              onClick={(e) => {
+                e.stopPropagation();
+                longPressFired.current = true;
+                onAdminMenu();
+              }}
+              className="z-20 flex size-7 items-center justify-center rounded-lg border border-white/10 bg-white/[0.04] text-white/60 transition-colors hover:text-white"
+              aria-label={`Редактировать ${account.name.ru}`}
+              title="Редактировать"
+            >
+              <Pencil className="size-3" strokeWidth={2.2} />
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Hero metric */}
+      <div className="relative px-5 pt-4">
+        <div className="flex items-baseline gap-2">
+          <span className="font-space-grotesk text-[34px] font-semibold leading-none tracking-[-0.04em] tabular-nums text-white">
+            {rangeText}
+          </span>
+          <span className="font-dm-sans text-[11px] font-medium uppercase tracking-[0.18em] text-white/35">
+            {labels.followers.toLowerCase()}
+          </span>
+        </div>
+        <div className="mt-3 flex items-center gap-2">
+          <span className="rounded-md border border-white/[0.08] bg-white/[0.03] px-2 py-1 font-dm-sans text-[11px] font-medium tabular-nums text-white/65">
             {yearText}
           </span>
           <span
             className={[
-              "rounded-md border px-2 py-1 font-dm-sans text-[11px] font-semibold",
+              "rounded-md border px-2 py-1 font-dm-sans text-[11px] font-medium",
               featured
                 ? "border-indigo-500/30 bg-indigo-500/10 text-indigo-300"
-                : "border-white/[0.08] bg-white/[0.03] text-white/70",
+                : "border-white/[0.08] bg-white/[0.03] text-white/65",
             ].join(" ")}
           >
-            {tierName}
+            {lang === "ru" ? "Верифицирован" : "Verified"}
           </span>
         </div>
+      </div>
 
-        <div className="mt-auto flex items-end justify-between pt-1">
-          <span className="font-space-grotesk text-[22px] font-semibold leading-none tracking-[-0.02em] tabular-nums text-white">
+      {/* Divider */}
+      <div
+        aria-hidden
+        className={[
+          "mx-5 mt-4 h-px",
+          featured
+            ? "bg-gradient-to-r from-indigo-500/40 via-indigo-500/10 to-transparent"
+            : "bg-white/[0.06]",
+        ].join(" ")}
+      />
+
+      {/* Footer */}
+      <div className="relative flex items-center justify-between px-5 py-4">
+        <div className="flex flex-col">
+          <span className="font-dm-sans text-[10px] font-medium uppercase tracking-[0.2em] text-white/30">
+            {lang === "ru" ? "Цена" : "Price"}
+          </span>
+          <span className="font-space-grotesk text-[24px] font-semibold leading-none tracking-[-0.03em] tabular-nums text-white">
             {money(account.pricePerAccount)}
           </span>
-          {!soldOut && (
-            <span
-              className={[
-                "inline-flex size-8 items-center justify-center rounded-full border transition-all duration-300",
-                featured
-                  ? "border-indigo-500/35 bg-indigo-500/10 text-indigo-300 group-hover:translate-x-0.5 group-hover:bg-indigo-500/20"
-                  : "border-white/10 bg-white/[0.04] text-white/50 group-hover:translate-x-0.5 group-hover:text-white/80",
-              ].join(" ")}
-            >
-              <ArrowRight className="size-3.5" />
-            </span>
-          )}
         </div>
-
-        {soldOut && (
-          <div className="pointer-events-none absolute inset-0 z-10 overflow-hidden">
-            <div
-              className="absolute left-1/2 top-1/2 h-[1.5px] w-[160%] -translate-x-1/2 -translate-y-1/2 rotate-[12deg] bg-red-600"
-              style={{ boxShadow: "0 0 10px rgba(220,38,38,0.7)" }}
-            />
-            <span className="absolute bottom-2 right-2 text-[8px] font-black uppercase tracking-tighter text-red-500">
-              {labels.out}
-            </span>
-          </div>
+        {!soldOut && (
+          <span
+            className={[
+              "inline-flex items-center gap-1.5 rounded-full border px-3.5 py-2 font-dm-sans text-[12px] font-semibold transition-all duration-300",
+              featured
+                ? "border-indigo-500/40 bg-indigo-500/15 text-indigo-200 group-hover:bg-indigo-500/25"
+                : "border-white/10 bg-white/[0.04] text-white/70 group-hover:border-indigo-500/30 group-hover:text-white",
+            ].join(" ")}
+          >
+            {lang === "ru" ? "Купить" : "Buy"}
+            <ArrowRight className="size-3.5 transition-transform duration-300 group-hover:translate-x-0.5" />
+          </span>
         )}
       </div>
+
+      {soldOut && (
+        <div className="pointer-events-none absolute inset-0 z-10 overflow-hidden">
+          <div
+            className="absolute left-1/2 top-1/2 h-[1.5px] w-[160%] -translate-x-1/2 -translate-y-1/2 rotate-[10deg] bg-red-600"
+            style={{ boxShadow: "0 0 10px rgba(220,38,38,0.7)" }}
+          />
+          <span className="absolute bottom-2 right-3 text-[9px] font-black uppercase tracking-tighter text-red-500">
+            {labels.out}
+          </span>
+        </div>
+      )}
     </motion.div>
   );
 }
