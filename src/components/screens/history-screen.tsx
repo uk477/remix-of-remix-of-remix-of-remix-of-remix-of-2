@@ -651,7 +651,7 @@ function OrderRow({
         </div>
 
         <div className="hidden w-24 justify-center sm:flex">
-          <StatusBadge label={statusLabel} status={order.status} />
+          <StatusBadge label={statusLabel} status={userStatus} />
         </div>
 
         <div className="shrink-0 text-right sm:w-20">
