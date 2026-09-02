@@ -107,6 +107,7 @@ export function HistoryScreen() {
     () =>
       orders
         .filter((o) => o.paid)
+        .map((o) => ({ ...o, status: o.dbStatus ? dbStatusToOrderStatus(o.dbStatus) : o.status }))
         .sort((a, b) => b.date - a.date),
     [orders],
   )
@@ -487,9 +488,10 @@ function OrderRow({
     ? compactQty(boostQty, lang === 'ru' ? 'ru' : 'en')
     : titleParts.qty
 
-  const done = order.status === 'completed'
-  const live = order.status === 'in_progress' || order.status === 'refilling'
-  const accent = orderStatusAccent(order.status)
+  const userStatus = order.dbStatus ? dbStatusToOrderStatus(order.dbStatus) : order.status
+  const done = userStatus === 'completed'
+  const live = userStatus === 'in_progress' || userStatus === 'refilling'
+  const accent = orderStatusAccent(userStatus)
 
   const dateStr = `${formatDateNumeric(order.date, lang)} ${timeOnly(order.date, lang)}`
 
@@ -577,7 +579,7 @@ function OrderRow({
 
 
         <div className="mt-3 flex items-center gap-2 border-t border-white/[0.05] pt-2.5">
-          <StatusBadge label={statusLabel} status={order.status} />
+          <StatusBadge label={statusLabel} status={userStatus} />
           {cd ? (
             <span
               className={`flex items-center gap-1 font-mono text-[11px] tabular-nums ${guaranteeTone(cd.ms)}`}
