@@ -1,0 +1,1 @@
+- [ ] Consolidate user-facing order statuses while preserving backend/admin statuses
