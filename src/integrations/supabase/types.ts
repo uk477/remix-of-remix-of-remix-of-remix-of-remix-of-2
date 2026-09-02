@@ -1367,6 +1367,7 @@ export type Database = {
         Args: { _provider_order_id: string; _refill_id: string }
         Returns: Json
       }
+      refill_claim_provider: { Args: { _refill_id: string }; Returns: Json }
       refill_fail: {
         Args: { _error?: string; _refill_id: string }
         Returns: Json
