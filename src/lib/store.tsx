@@ -21,6 +21,8 @@ import { TEST_ORDERS_EVENT, loadTestOrders } from './demo-orders'
 type StoreContextType = {
   balance: number
   setBalance: (updater: number | ((prev: number) => number)) => void
+  /** Баланс уже изменён на сервере — только обновляем локальный кэш. */
+  applyServerBalance: (next: number) => void
   cart: CartItem[]
   addToCart: (item: CartItem) => void
   removeFromCart: (key: string) => void
@@ -31,6 +33,8 @@ type StoreContextType = {
   setEditingCustomKey: (key: string | null) => void
   orders: Order[]
   addOrder: (order: Order) => void
+  /** Заказ уже создан на сервере — вставляем в кэш без повторной записи. */
+  registerServerOrder: (order: Order) => void
   syncOrderStatus: (id: string, status: DbOrderStatus) => void
   refillOrder: (id: string) => void
   topups: Topup[]
@@ -322,6 +326,12 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     [],
   )
 
+  // Списание/зачисление уже выполнено серверной функцией (place_order,
+  // refund_order): пишем в profiles нельзя — там стоит защитный триггер.
+  const applyServerBalance = useCallback((next: number) => {
+    if (Number.isFinite(next)) setBalanceState(next)
+  }, [])
+
   // ─── Cart ───────────────────────────────────────────────────────────────────
   const addToCart = useCallback(
     (item: CartItem) => {
@@ -383,6 +393,10 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       .then(({ error }) => {
         if (error) console.error('[store] order insert failed', error)
       })
+  }, [])
+
+  const registerServerOrder = useCallback((order: Order) => {
+    setOrders((prev) => [order, ...prev.filter((item) => item.id !== order.id)])
   }, [])
 
   /**
@@ -498,6 +512,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     () => ({
       balance,
       setBalance,
+      applyServerBalance,
       cart,
       addToCart,
       removeFromCart,
@@ -508,6 +523,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       setEditingCustomKey,
       orders,
       addOrder,
+      registerServerOrder,
       syncOrderStatus,
       refillOrder,
       topups,
@@ -522,6 +538,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     [
       balance,
       setBalance,
+      applyServerBalance,
       cart,
       addToCart,
       removeFromCart,
@@ -532,6 +549,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       setEditingCustomKey,
       orders,
       addOrder,
+      registerServerOrder,
       syncOrderStatus,
       refillOrder,
       topups,

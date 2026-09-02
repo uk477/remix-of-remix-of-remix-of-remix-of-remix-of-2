@@ -30,6 +30,8 @@ import {
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { compactNumber, money, parseTargets } from '@/lib/format'
 import { useI18n } from '@/lib/i18n'
+import { useServerFn } from '@tanstack/react-start'
+import { createFollowHubOrder } from '@/lib/followhub.functions'
 import { useNav } from '@/lib/nav'
 import { useStore } from '@/lib/store'
 import type { BoostService, CartItem, Lang } from '@/lib/types'
@@ -75,7 +77,8 @@ function restoreAmount(item: CartItem | undefined, service: BoostService) {
 
 export function OrderForm({ service, editItem }: { service: BoostService; editItem?: CartItem }) {
   const { t, lang } = useI18n()
-  const { addToCart, balance, setBalance, addOrder } = useStore()
+  const { addToCart, balance, applyServerBalance, registerServerOrder } = useStore()
+  const createOrder = useServerFn(createFollowHubOrder)
   const { show } = useToast()
   const { go } = useNav()
 
@@ -91,6 +94,7 @@ export function OrderForm({ service, editItem }: { service: BoostService; editIt
   const [keypadOpen, setKeypadOpen] = useState(false)
   const [qtyDraft, setQtyDraft] = useState<string>('')
   const [infoOpen, setInfoOpen] = useState(false)
+  const [buying, setBuying] = useState(false)
   const isFollowers = service.categoryId === 'followers'
   const isLikes = service.categoryId === 'likes'
   const isViews = service.categoryId === 'views'
@@ -341,7 +345,8 @@ export function OrderForm({ service, editItem }: { service: BoostService; editIt
     doAddToCart()
   }
 
-  function handleBuyNow() {
+  async function handleBuyNow() {
+    if (buying) return
     setTouched(true)
     if (!canOrder) {
       triggerShake('buy')
@@ -361,26 +366,47 @@ export function OrderForm({ service, editItem }: { service: BoostService; editIt
       show(t('not_enough'))
       return
     }
-    clearDraft()
-    setBalance((b) => b - total)
-    addOrder({
-      id: `FH-${Math.floor(10000 + Math.random() * 89999)}`,
-      date: Date.now(),
-      title: service.name[lang],
-      amount: total,
-      status: 'in_progress',
-      refillable: true,
-      kind: 'boost',
-      paid: true,
-      qty: clampedQty,
-      serviceId: service.id,
-      ...(valid[0] ? { target: valid[0] } : {}),
-      ...(applied && !applied.not_found ? { startFollowers: applied.followers } : {}),
-    })
-    show(t('payment_success'))
-    setRaw('')
-    setQty(service.min)
-    setTouched(false)
+
+    setBuying(true)
+    const localOrderId = `FH-${crypto.randomUUID()}`
+    try {
+      const result = await createOrder({
+        data: {
+          localOrderId,
+          serviceId: service.id,
+          category: service.categoryId,
+          title: service.name[lang],
+          quantity: clampedQty,
+          targets: valid,
+          ...(applied && !applied.not_found ? { startFollowers: applied.followers } : {}),
+        },
+      })
+      applyServerBalance(result.balance)
+      registerServerOrder({
+        id: result.localOrderId,
+        date: result.createdAt || Date.now(),
+        title: service.name[lang],
+        amount: result.amount,
+        status: 'in_progress',
+        refillable: service.refill,
+        kind: 'boost',
+        paid: true,
+        qty: clampedQty,
+        orderRef: result.providerOrderId,
+        serviceId: service.id,
+        ...(valid[0] ? { target: valid[0] } : {}),
+        ...(applied && !applied.not_found ? { startFollowers: applied.followers } : {}),
+      })
+      clearDraft()
+      show(t('payment_success'))
+      setRaw('')
+      setQty(service.min)
+      setTouched(false)
+    } catch (error) {
+      show(error instanceof Error ? error.message : 'Не удалось оформить заказ')
+    } finally {
+      setBuying(false)
+    }
   }
 
   const bulkLabel = lang === 'ru' ? 'Списком' : 'List'
@@ -788,14 +814,16 @@ export function OrderForm({ service, editItem }: { service: BoostService; editIt
             }
             transition={{ duration: 0.35 }}
             type="button"
-            onClick={handleBuyNow}
-            aria-disabled={!canOrder}
-            className={`relative flex h-12 flex-1 items-center justify-center gap-2 overflow-hidden rounded-2xl px-4 text-[13px] font-extrabold uppercase tracking-wider transition-transform ${
+             onClick={handleBuyNow}
+             aria-disabled={!canOrder || buying}
+             disabled={buying}
+             className={`relative flex h-12 flex-1 items-center justify-center gap-2 overflow-hidden rounded-2xl px-4 text-[13px] font-extrabold uppercase tracking-wider transition-transform ${
               canOrder
                 ? 'ring-glow bg-gradient-to-r from-primary via-primary to-gold-deep text-primary-foreground active:scale-[0.98]'
                 : 'bg-secondary/40 text-muted-foreground'
             }`}
           >
+            {buying ? <Loader2 className="relative z-10 size-4 animate-spin" /> : <Zap className="relative z-10 size-4" />}
             {(noFunds || (shake === 'buy' && !canOrder)) && (
               <>
                 <motion.span
