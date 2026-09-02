@@ -1372,12 +1372,14 @@ function FilterableAccountsView({
         const diff = accountReach(b) - accountReach(a);
         if (diff !== 0) return diff;
       } else if (sort === "newest") {
-        // "Новые" = недавно добавленные карточки: новые получают меньший sortOrder.
+        // "Новые" = недавно добавленные карточки: сортируем по created_at desc,
+        // при равных метках — по ручному sort_order asc.
+        const aTime = a.createdAt ?? 0;
+        const bTime = b.createdAt ?? 0;
+        if (bTime !== aTime) return bTime - aTime;
         const so =
           (a.sortOrder ?? Number.MAX_SAFE_INTEGER) - (b.sortOrder ?? Number.MAX_SAFE_INTEGER);
         if (so !== 0) return so;
-        const diff = (parseAccountYear(b) ?? 0) - (parseAccountYear(a) ?? 0);
-        if (diff !== 0) return diff;
       } else {
         // Default: respect admin manual order (new cards get min-10, so they surface at the top).
         const so =
