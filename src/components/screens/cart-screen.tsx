@@ -299,10 +299,10 @@ export function CartScreen() {
         refId: item.refId,
         meta: item.meta,
       })
-      addTestOrder(order)
-      // Keep the instant local test flow, but also persist it for this account.
-      // This prevents orders disappearing when local preview storage is reset.
-      addOrder(order)
+       addTestOrder(order)
+       // Keep the instant local test flow, but also persist it for this account.
+       // This prevents orders disappearing when local preview storage is reset.
+       registerServerOrder(order)
       if (!firstId && item.kind === 'account') firstId = order.id
     })
     clearCart()
