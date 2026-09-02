@@ -31,7 +31,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { compactNumber, money, parseTargets } from '@/lib/format'
 import { useI18n } from '@/lib/i18n'
 import { useServerFn } from '@tanstack/react-start'
-import { createFollowHubOrder } from '@/lib/followhub.functions'
+import { useQuery } from '@tanstack/react-query'
+import { createFollowHubOrder, getFollowHubLimits } from '@/lib/followhub.functions'
 import { useNav } from '@/lib/nav'
 import { useStore } from '@/lib/store'
 import type { BoostService, CartItem, Lang } from '@/lib/types'
@@ -75,18 +76,39 @@ function restoreAmount(item: CartItem | undefined, service: BoostService) {
   return Math.min(Math.max(saved, service.min), service.max)
 }
 
-export function OrderForm({ service, editItem }: { service: BoostService; editItem?: CartItem }) {
+export function OrderForm({
+  service: baseService,
+  editItem,
+}: {
+  service: BoostService
+  editItem?: CartItem
+}) {
   const { t, lang } = useI18n()
   const { addToCart, balance, applyServerBalance, registerServerOrder } = useStore()
   const createOrder = useServerFn(createFollowHubOrder)
+  const fetchLimits = useServerFn(getFollowHubLimits)
   const { show } = useToast()
   const { go } = useNav()
+
+  // Лимиты берём у поставщика: локальные значения — только запасной вариант.
+  const limitsQ = useQuery({
+    queryKey: ['followhub-limits'],
+    queryFn: () => fetchLimits(),
+    staleTime: 5 * 60 * 1000,
+  })
+  const service = useMemo<BoostService>(() => {
+    const limit = limitsQ.data?.[baseService.id]
+    return limit ? { ...baseService, min: limit.min, max: limit.max } : baseService
+  }, [baseService, limitsQ.data])
 
   const initialRaw = restoreTargets(editItem)
   const [raw, setRaw] = useState(initialRaw)
   const [bulk, setBulk] = useState(initialRaw.includes('\n'))
   const [qty, setQty] = useState(() => restoreAmount(editItem, service))
   const [touched, setTouched] = useState(false)
+  useEffect(() => {
+    setQty((q) => Math.min(Math.max(q, service.min), service.max))
+  }, [service.min, service.max])
   const [typing, setTyping] = useState(false)
   const [isFocused, setIsFocused] = useState(false)
   const [shake, setShake] = useState<false | 'add' | 'buy'>(false)

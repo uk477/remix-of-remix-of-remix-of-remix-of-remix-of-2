@@ -210,3 +210,31 @@ export const syncFollowHubOrder = createServerFn({ method: 'POST' })
     const next = result as { status?: string } | null
     return { synced: true as const, status: next?.status ?? status, received }
   })
+
+export type FollowHubLimits = Record<string, { min: number; max: number }>
+
+/** Реальные min/max поставщика для каждой локальной услуги (кэшируется на клиенте). */
+export const getFollowHubLimits = createServerFn({ method: 'GET' }).handler(
+  async (): Promise<FollowHubLimits> => {
+    let services
+    try {
+      services = await fhGetServices()
+    } catch (error) {
+      console.error('[followhub] limits fetch failed', error)
+      return {}
+    }
+    const limits: FollowHubLimits = {}
+    for (const local of SERVICES) {
+      if (!categoryNames.has(local.categoryId)) continue
+      try {
+        const provider = chooseFollowHubService(services, local.categoryId, local.name.en)
+        if (Number.isFinite(provider.min) && Number.isFinite(provider.max) && provider.max > provider.min) {
+          limits[local.id] = { min: provider.min, max: provider.max }
+        }
+      } catch {
+        // услуга недоступна у поставщика — оставляем локальные значения
+      }
+    }
+    return limits
+  },
+)
