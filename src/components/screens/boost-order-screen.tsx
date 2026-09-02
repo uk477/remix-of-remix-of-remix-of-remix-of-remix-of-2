@@ -20,6 +20,7 @@ import { OrderProgressCard } from '../order/order-progress-card'
 import { dbStatusToOrderStatus, orderStatusView } from '@/lib/order-status'
 import { useServerFn } from '@tanstack/react-start'
 import { getOrderRefundState, type RefundState } from '@/lib/admin-orders.functions'
+import { syncFollowHubOrder } from '@/lib/followhub.functions'
 import {
   RecoveryStatusCard,
   RefundStatusCard,
