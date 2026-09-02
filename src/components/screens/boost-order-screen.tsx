@@ -216,7 +216,18 @@ export function BoostOrderScreen({ order }: { order: Order }) {
   /** Окно «Не удалось выполнить заказ» — возврат уже запущен на бэкенде. */
   const [errorNotice, setErrorNotice] = useState(false)
   const refundStateFn = useServerFn(getOrderRefundState)
+  const [refundState, setRefundState] = useState<RefundState | null>(null)
   const refill = useRefill(order.id)
+
+  // The cancellation copy must reflect the persisted refund row, not the
+  // order status alone: failed/declined orders may still be awaiting credit.
+  useEffect(() => {
+    const dbId = refill.state?.dbOrderId
+    if (!dbId) return
+    void refundStateFn({ data: { orderId: dbId } })
+      .then(setRefundState)
+      .catch(() => setRefundState(null))
+  }, [refill.state?.dbOrderId, refundStateFn])
   const refillReload = refill.reload
   // Статус заказа изменился (в т.ч. через админ-панель) — гарантия пересчитывается с сервера.
   useEffect(() => {
@@ -350,7 +361,8 @@ export function BoostOrderScreen({ order }: { order: Order }) {
   /* ── Единые цвета/тексты по фактическому статусу с backend ──────────── */
   const backendStatus = dbStatusToOrderStatus(adminStatus)
   const isRefill = adminStatus === 'refilling'
-  const isRefunded = refundState?.refunded && refundState.refundStatus === 'completed'
+  const isRefund = adminStatus === 'refunded'
+  const isRefunded = refundState?.refunded === true && refundState.refundStatus === 'completed'
   const isFailed = adminStatus === 'failed'
   const overrideView = orderStatusView(backendStatus)
   /* The backend status controls the public tone and label. Refund completion
