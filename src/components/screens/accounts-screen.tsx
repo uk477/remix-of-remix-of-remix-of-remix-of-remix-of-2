@@ -2617,6 +2617,7 @@ function BlueVerifiedCard({
   const tierName = tierRoman === "II" ? "Growth" : tierRoman === "III" ? "Pro" : "Elite";
 
   const yearText = account.yearRange || (account.year ? String(account.year) : "—");
+  const featured = index % 3 === 1;
 
   // Long-press for admin
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -2668,29 +2669,61 @@ function BlueVerifiedCard({
           onAdminMenu();
         }
       }}
-      whileTap={{ scale: soldOut ? 1 : 0.99 }}
-      initial={{ opacity: 0, y: 6 }}
+      whileTap={{ scale: soldOut ? 1 : 0.98 }}
+      initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0 }}
       transition={{
-        duration: 0.22,
+        duration: 0.28,
         ease: [0.22, 1, 0.36, 1],
-        delay: Math.min(index, 6) * 0.02,
+        delay: Math.min(index, 6) * 0.025,
       }}
-      className={`group relative isolate flex w-full items-stretch overflow-hidden rounded-2xl border text-left outline-none transition-colors ${
+      className={[
+        "group relative isolate flex w-full items-stretch overflow-hidden rounded-2xl border text-left outline-none transition-all duration-300",
         soldOut
           ? "cursor-not-allowed border-white/5 opacity-45 grayscale"
-          : "border-white/[0.07] bg-[oklch(0.15_0.005_260)] hover:border-white/[0.14]"
-      }`}
+          : featured
+            ? "border-indigo-500/40 bg-indigo-900 shadow-[0_24px_60px_-32px_rgba(79,70,229,0.35)] hover:border-indigo-500/70 hover:shadow-[0_28px_70px_-32px_rgba(79,70,229,0.45)]"
+            : "border-indigo-900/60 bg-indigo-950 hover:border-indigo-500/30 hover:bg-indigo-900/70",
+      ].join(" ")}
     >
+      {/* Featured accent rail */}
+      {!soldOut && featured && (
+        <div
+          aria-hidden
+          className="absolute left-0 top-0 h-full w-[3px] bg-gradient-to-b from-indigo-400 via-indigo-500 to-indigo-900"
+        />
+      )}
+
+      {/* Ambient glow for featured */}
+      {!soldOut && featured && (
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -right-10 -top-10 size-40 rounded-full bg-indigo-500/15 blur-3xl"
+        />
+      )}
+
       {/* Left rail: verified mark + tier */}
-      <div className="relative flex w-[68px] shrink-0 flex-col items-center justify-center gap-2 border-r border-white/[0.05]">
-        <VerifiedBadge className="size-8" style={{ color: BLUE }} />
-        <span className="text-[9px] font-medium tracking-[0.16em] text-white/30">{tierRoman}</span>
+      <div className="relative flex w-[72px] shrink-0 flex-col items-center justify-center gap-2.5 border-r border-white/[0.05] px-2 py-4">
+        <VerifiedBadge className="size-9" style={{ color: BLUE }} />
+        <span
+          className={[
+            "text-[10px] font-semibold tracking-[0.12em]",
+            featured ? "text-indigo-400" : "text-white/30",
+          ].join(" ")}
+        >
+          {tierRoman}
+        </span>
       </div>
 
       {/* Content */}
       <div className="relative flex flex-1 flex-col gap-3 p-4">
+        {featured && (
+          <span className="absolute right-3 top-3 rounded-full border border-indigo-500/30 bg-indigo-500/10 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-indigo-400">
+            {lang === "ru" ? "Популярный" : "Popular"}
+          </span>
+        )}
+
         {onAdminMenu && (
           <button
             type="button"
@@ -2700,7 +2733,10 @@ function BlueVerifiedCard({
               longPressFired.current = true;
               onAdminMenu();
             }}
-            className="absolute right-2 top-2 z-20 flex size-7 items-center justify-center rounded-lg border border-white/10 bg-white/[0.04] text-white/60 hover:text-white"
+            className={[
+              "absolute z-20 flex size-7 items-center justify-center rounded-lg border transition-colors",
+              featured ? "right-3 top-9 border-indigo-500/25 bg-indigo-500/10 text-indigo-300 hover:bg-indigo-500/20" : "right-2 top-2 border-white/10 bg-white/[0.04] text-white/60 hover:text-white",
+            ].join(" ")}
             aria-label={`Редактировать ${account.name.ru}`}
             title="Редактировать"
           >
@@ -2708,25 +2744,46 @@ function BlueVerifiedCard({
           </button>
         )}
 
-        <div className="flex items-baseline gap-2">
-          <span className="font-display text-[22px] font-semibold leading-none tracking-tight tabular-nums text-white">
+        <div className="flex flex-col">
+          <span className="font-space-grotesk text-[26px] font-semibold leading-none tracking-[-0.03em] tabular-nums text-white">
             {rangeText}
           </span>
-          <span className="text-[11px] text-white/45">{labels.followers.toLowerCase()}</span>
+          <span className="mt-1 font-dm-sans text-[11px] font-medium uppercase tracking-[0.18em] text-white/40">
+            {labels.followers.toLowerCase()}
+          </span>
         </div>
 
-        <div className="flex items-center gap-3 text-[11px] text-white/55">
-          <span className="tabular-nums">{yearText}</span>
-          <span className="h-3 w-px bg-white/10" />
-          <span>{tierName}</span>
+        <div className="flex items-center gap-2">
+          <span className="rounded-md border border-white/[0.08] bg-white/[0.03] px-2 py-1 font-dm-sans text-[11px] font-medium tabular-nums text-white/70">
+            {yearText}
+          </span>
+          <span
+            className={[
+              "rounded-md border px-2 py-1 font-dm-sans text-[11px] font-semibold",
+              featured
+                ? "border-indigo-500/30 bg-indigo-500/10 text-indigo-300"
+                : "border-white/[0.08] bg-white/[0.03] text-white/70",
+            ].join(" ")}
+          >
+            {tierName}
+          </span>
         </div>
 
-        <div className="mt-1 flex items-end justify-between">
-          <span className="font-display text-[20px] font-semibold leading-none tabular-nums text-white">
+        <div className="mt-auto flex items-end justify-between pt-1">
+          <span className="font-space-grotesk text-[22px] font-semibold leading-none tracking-[-0.02em] tabular-nums text-white">
             {money(account.pricePerAccount)}
           </span>
           {!soldOut && (
-            <ArrowRight className="size-4 text-white/40 transition-transform group-hover:translate-x-0.5 group-hover:text-white/80" />
+            <span
+              className={[
+                "inline-flex size-8 items-center justify-center rounded-full border transition-all duration-300",
+                featured
+                  ? "border-indigo-500/35 bg-indigo-500/10 text-indigo-300 group-hover:translate-x-0.5 group-hover:bg-indigo-500/20"
+                  : "border-white/10 bg-white/[0.04] text-white/50 group-hover:translate-x-0.5 group-hover:text-white/80",
+              ].join(" ")}
+            >
+              <ArrowRight className="size-3.5" />
+            </span>
           )}
         </div>
 
