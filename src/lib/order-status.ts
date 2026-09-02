@@ -23,13 +23,11 @@ export type StatusView = {
 }
 
 export const ORDER_STATUS_VIEW: Record<OrderStatus, StatusView> = {
-  waiting: { tone: 'neutral', ru: 'Заказ оформлен', en: 'Placed' },
+  waiting: { tone: 'neutral', ru: 'Ожидает', en: 'Waiting' },
   in_progress: { tone: 'warning', ru: 'В работе', en: 'In progress' },
-  refilling: { tone: 'emerald', ru: 'В процессе (refill)', en: 'In progress (refill)' },
-  refunded: { tone: 'info', ru: 'Возврат средств', en: 'Refund' },
-  failed: { tone: 'danger', ru: 'Ошибка', en: 'Error' },
   completed: { tone: 'success', ru: 'Завершён', en: 'Completed' },
   cancelled: { tone: 'coral', ru: 'Отменён', en: 'Cancelled' },
+  refilling: { tone: 'emerald', ru: 'Рефил', en: 'Refill' },
 }
 
 export function orderStatusView(status: OrderStatus): StatusView {
