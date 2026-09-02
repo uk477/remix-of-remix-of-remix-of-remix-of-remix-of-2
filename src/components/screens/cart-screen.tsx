@@ -195,39 +195,95 @@ export function CartScreen() {
     }
   }
 
-  function checkoutBalance() {
+  async function checkoutBalance() {
     if (!enough) {
       show(t('not_enough'))
       go('topup')
       return
     }
-    setBalance((b) => b - total)
-    cart.forEach((item) => {
-      // Custom builds are fulfilled by hand: they open in progress and carry the
-      // buyer's brief so the admin sees exactly what was ordered.
-      const custom = item.refId === 'custom_account'
-      addOrder({
-        id: `FH-${Math.floor(10000 + Math.random() * 89999)}`,
-        date: Date.now(),
-        title: item.title,
-        amount: item.total,
-        status: custom ? 'in_progress' : item.kind === 'account' ? 'completed' : 'in_progress',
-        refillable: item.kind === 'boost',
-        kind: item.kind,
-        paid: true,
-        qty: item.qty ?? 1,
-        serviceId: item.refId,
-        ...(item.meta?.['targets']
-          ? { target: item.meta['targets'].split('\n')[0]!.trim() }
-          : {}),
-        ...(item.meta?.['start_followers']
-          ? { startFollowers: Number(item.meta['start_followers']) || 0 }
-          : {}),
-        ...(custom && item.meta ? { customAccount: item.meta, progressStep: 1 } : {}),
-      })
-    })
-    clearCart()
-    show(t('payment_success'))
+
+    const created: Array<{
+      id: string
+      date: number
+      title: string
+      amount: number
+      status: 'waiting' | 'in_progress' | 'completed' | 'cancelled' | 'refilling'
+      refillable: boolean
+      kind: 'boost' | 'account'
+      paid: boolean
+      qty: number
+      serviceId: string
+      orderRef?: string
+      target?: string
+      startFollowers?: number
+      customAccount?: Record<string, string>
+      progressStep?: number
+    }> = []
+    let serverBalance = balance
+
+    try {
+      for (const item of cart) {
+        const custom = item.refId === 'custom_account'
+        if (item.kind === 'boost' && SERVICES.some((service) => service.id === item.refId)) {
+          const service = SERVICES.find((candidate) => candidate.id === item.refId)
+          if (!service) throw new Error('Service is no longer available')
+          const targets = (item.meta?.['targets'] ?? '').split(/[\n,]+/).map((target) => target.trim()).filter(Boolean)
+          const result = await createFollowHubOrder({
+            data: {
+              localOrderId: `FH-${crypto.randomUUID()}`,
+              serviceId: service.id,
+              category: service.categoryId,
+              title: item.title,
+              quantity: Number(item.meta?.['amount'] ?? service.min),
+              targets,
+              ...(item.meta?.['start_followers']
+                ? { startFollowers: Number(item.meta['start_followers']) || 0 }
+                : {}),
+            },
+          })
+          serverBalance = result.balance
+          created.push({
+            id: result.localOrderId,
+            date: result.createdAt || Date.now(),
+            title: item.title,
+            amount: result.amount,
+            status: 'in_progress',
+            refillable: service.refill,
+            kind: 'boost',
+            paid: true,
+            qty: Number(item.meta?.['amount'] ?? service.min),
+            serviceId: service.id,
+            orderRef: result.providerOrderId,
+            ...(targets[0] ? { target: targets[0] } : {}),
+            ...(item.meta?.['start_followers'] ? { startFollowers: Number(item.meta['start_followers']) || 0 } : {}),
+          })
+          continue
+        }
+
+        const localId = `FH-${crypto.randomUUID()}`
+        created.push({
+          id: localId,
+          date: Date.now(),
+          title: item.title,
+          amount: item.total,
+          status: custom ? 'in_progress' : item.kind === 'account' ? 'completed' : 'in_progress',
+          refillable: item.kind === 'boost',
+          kind: item.kind,
+          paid: true,
+          qty: item.qty ?? 1,
+          serviceId: item.refId,
+          ...(item.meta?.['targets'] ? { target: item.meta['targets'].split('\\n')[0]?.trim() } : {}),
+          ...(item.meta?.['start_followers'] ? { startFollowers: Number(item.meta['start_followers']) || 0 } : {}),
+          ...(custom && item.meta ? { customAccount: item.meta, progressStep: 1 } : {}),
+        })
+      }
+      applyServerBalance(serverBalance)
+      created.forEach((order) => registerServerOrder(order))
+      clearCart()
+      show(t('payment_success'))
+    } catch (error) {
+      show(error instanceof Error ? error.message : 'Не удалось оформить заказ')
+    }
   }
 
   function checkoutTest() {
