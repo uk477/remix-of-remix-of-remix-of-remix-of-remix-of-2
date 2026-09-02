@@ -1345,7 +1345,32 @@ export type Database = {
         Args: { _amount: number; _meta?: Json; _qty?: number; _title: string }
         Returns: Json
       }
+      provider_attach_order: {
+        Args: {
+          _order_id: string
+          _provider: string
+          _provider_order_id: string
+        }
+        Returns: Json
+      }
+      provider_sync_order: {
+        Args: {
+          _order_id: string
+          _received?: number
+          _start_count?: number
+          _status: string
+        }
+        Returns: Json
+      }
       redeem_promo: { Args: { _code: string }; Returns: Json }
+      refill_attach_provider: {
+        Args: { _provider_order_id: string; _refill_id: string }
+        Returns: Json
+      }
+      refill_fail: {
+        Args: { _error?: string; _refill_id: string }
+        Returns: Json
+      }
       refill_resolve_order: {
         Args: { _order_key: string; _user_id: string }
         Returns: {
