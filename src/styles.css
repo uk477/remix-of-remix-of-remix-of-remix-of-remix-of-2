@@ -13,6 +13,13 @@
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
   --font-bebas: "Bebas Neue", ui-sans-serif, system-ui, sans-serif;
   --font-barlow: "Barlow", ui-sans-serif, system-ui, sans-serif;
+  --font-space-grotesk: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-dm-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  --color-indigo-1000: #0a0a1a;
+  --color-indigo-950: #141432;
+  --color-indigo-900: #1e1e5a;
+  --color-indigo-500: #4f46e5;
+  --color-indigo-400: #818cf8;
 
   --color-gold: var(--gold);
   --color-gold-soft: var(--gold-soft);
