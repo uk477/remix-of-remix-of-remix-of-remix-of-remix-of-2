@@ -136,11 +136,11 @@ export function CartScreen() {
     cart,
     removeFromCart,
     cartTotal,
-    balance,
-    setBalance,
-    clearCart,
-    addOrder,
-    editingCustomKey,
+     balance,
+     applyServerBalance,
+     clearCart,
+     registerServerOrder,
+     editingCustomKey,
     setEditingCustomKey,
   } = useStore()
 
