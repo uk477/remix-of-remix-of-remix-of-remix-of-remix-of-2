@@ -326,6 +326,12 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     [],
   )
 
+  // Списание/зачисление уже выполнено серверной функцией (place_order,
+  // refund_order): пишем в profiles нельзя — там стоит защитный триггер.
+  const applyServerBalance = useCallback((next: number) => {
+    if (Number.isFinite(next)) setBalanceState(next)
+  }, [])
+
   // ─── Cart ───────────────────────────────────────────────────────────────────
   const addToCart = useCallback(
     (item: CartItem) => {
