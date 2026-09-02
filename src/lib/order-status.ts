@@ -77,25 +77,34 @@ export function dbStatusToOrderStatus(s: DbOrderStatus | string): OrderStatus {
   switch (s) {
     case 'completed':
       return 'completed'
-    case 'refunded':
-      return 'refunded'
-    case 'failed':
-      return 'failed'
     case 'refilling':
       return 'refilling'
-    case 'declined':
-      return 'cancelled'
     case 'in_progress':
+    case 'waiting':
       return 'in_progress'
+    case 'declined':
+    case 'refunded':
+    case 'failed':
+      return 'cancelled'
+    case 'pending':
     default:
       return 'waiting'
   }
 }
 
 export function orderStatusToDbStatus(s: OrderStatus): DbOrderStatus {
-  if (s === 'cancelled') return 'declined'
-  if (s === 'waiting') return 'pending'
-  return s
+  switch (s) {
+    case 'waiting':
+      return 'pending'
+    case 'in_progress':
+      return 'in_progress'
+    case 'completed':
+      return 'completed'
+    case 'refilling':
+      return 'refilling'
+    case 'cancelled':
+      return 'declined'
+  }
 }
 
 /** Единый акцент статуса: CSS-переменная цвета для линии, свечения, иконок. */
