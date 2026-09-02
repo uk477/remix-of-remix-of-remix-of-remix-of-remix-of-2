@@ -106,6 +106,9 @@ export function OrderForm({
   const [bulk, setBulk] = useState(initialRaw.includes('\n'))
   const [qty, setQty] = useState(() => restoreAmount(editItem, service))
   const [touched, setTouched] = useState(false)
+  useEffect(() => {
+    setQty((q) => Math.min(Math.max(q, service.min), service.max))
+  }, [service.min, service.max])
   const [typing, setTyping] = useState(false)
   const [isFocused, setIsFocused] = useState(false)
   const [shake, setShake] = useState<false | 'add' | 'buy'>(false)
