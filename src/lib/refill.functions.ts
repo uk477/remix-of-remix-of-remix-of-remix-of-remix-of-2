@@ -21,6 +21,9 @@ export type RefillServerState = {
   serverNow: string
 }
 
+const PROVIDER_REFILL_UNAVAILABLE =
+  'Автоматический рефилл временно недоступен: поставщик не предоставляет API для отправки заявки'
+
 export const getRefillState = createServerFn({ method: 'POST' })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { orderId: string }) => {
@@ -46,6 +49,29 @@ export const requestRefill = createServerFn({ method: 'POST' })
     }
   })
   .handler(async ({ data, context }) => {
+    const { data: order, error: orderError } = await context.supabase
+      .from('orders')
+      .select('id, status, meta')
+      .or(`id.eq.${data.orderId},meta->>local_id.eq.${data.orderId}`)
+      .maybeSingle()
+    if (orderError) throw new Error(orderError.message)
+    if (!order) throw new Error('Order not found')
+    if (order.status === 'refunded') throw new Error('Refunded orders cannot be refilled')
+
+    const { data: refund, error: refundError } = await context.supabase
+      .from('order_refunds')
+      .select('id')
+      .eq('order_id', order.id)
+      .maybeSingle()
+    if (refundError) throw new Error(refundError.message)
+    if (refund) throw new Error('Refunded orders cannot be refilled')
+
+    // The documented supplier API has purchase and order reads, but no refill
+    // command. Do not create a local request until external work is accepted;
+    // doing so would leave the order in `refilling` forever.
+    throw new Error(PROVIDER_REFILL_UNAVAILABLE)
+
+    /* c8 ignore next 6 -- enable atomically when the supplier adds refill API */
     const { data: state, error } = await context.supabase.rpc('request_refill', {
       _order_key: data.orderId,
       _client_token: data.idempotencyKey,
