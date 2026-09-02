@@ -34,8 +34,17 @@ function isProviderFailure(status: string) {
   )
 }
 
+type RefillRpcContext = {
+  supabase: {
+    rpc: (
+      fn: 'refill_state',
+      args: { _order_key: string },
+    ) => PromiseLike<{ data: unknown; error: { message: string } | null }>
+  }
+}
+
 async function readRefillState(
-  context: { supabase: Parameters<typeof requireSupabaseAuth>[0] extends never ? never : any },
+  context: RefillRpcContext,
   orderId: string,
 ): Promise<RefillServerState> {
   const { data: state, error } = await context.supabase.rpc('refill_state', {
