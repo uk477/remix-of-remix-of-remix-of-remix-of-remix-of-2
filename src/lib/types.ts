@@ -94,6 +94,8 @@ export type AgedAccount = {
   accountUrl?: string
   /** Whether the account is delivered automatically after purchase. */
   autoDelivery?: boolean
+  /** When the account card was created; used for "Newest" sorting. */
+  createdAt?: number
 }
 
 export type CartItem = {

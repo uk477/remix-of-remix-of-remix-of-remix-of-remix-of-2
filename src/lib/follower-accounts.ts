@@ -29,6 +29,7 @@ export type FollowerAccountRow = {
   features: { ru: string; en: string }[]
   sort_order: number
   is_active: boolean
+  created_at: string
   topic_id: string | null
   topic_ids: string[] | null
   account_url: string | null
@@ -37,7 +38,7 @@ export type FollowerAccountRow = {
 
 export type FollowerAccountInput = Omit<
   FollowerAccountRow,
-  'id' | 'slug' | 'sort_order' | 'topic_ids' | 'smart_followers' | 'category'
+  'id' | 'slug' | 'sort_order' | 'topic_ids' | 'smart_followers' | 'category' | 'created_at'
 > & {
   sort_order?: number
   topic_ids: string[]
@@ -83,6 +84,7 @@ export function rowToAccount(r: FollowerAccountRow): AgedAccount {
     features: (r.features ?? []).map((f) => fillLocalized(f.ru || f.en, f.en || f.ru)),
     sortOrder: r.sort_order,
     accountUrl: r.account_url ?? undefined,
+    createdAt: r.created_at ? new Date(r.created_at).getTime() : undefined,
   }
 }
 
