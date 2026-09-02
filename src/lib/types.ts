@@ -110,14 +110,13 @@ export type CartItem = {
   meta?: Record<string, string>
 }
 
+/** Five statuses visible to customers; DB keeps granular operational statuses separately. */
 export type OrderStatus =
   | 'waiting'
   | 'in_progress'
   | 'completed'
   | 'cancelled'
   | 'refilling'
-  | 'refunded'
-  | 'failed'
 
 export type Order = {
   id: string

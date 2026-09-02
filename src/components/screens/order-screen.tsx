@@ -59,6 +59,7 @@ import { customLang } from '@/lib/custom-account'
 import { copyText } from '@/lib/clipboard'
 import { money } from '@/lib/format'
 import { orderService } from '@/lib/order-service'
+import { dbStatusToOrderStatus, orderStatusLabel } from '@/lib/order-status'
 import { useI18n } from '@/lib/i18n'
 import {
   FIELD_ORDER,
@@ -449,12 +450,9 @@ export function OrderScreen() {
     }
   }
 
-  const statusLabel =
-    order?.status === 'completed'
-      ? T('completed')
-      : order?.status === 'in_progress'
-        ? T('in_progress')
-        : T('waiting')
+  const statusLabel = order
+    ? orderStatusLabel(order.dbStatus ? dbStatusToOrderStatus(order.dbStatus) : order.status, lang === 'ru')
+    : T('waiting')
   const displayTitle = (order?.title ?? T('order_title')).replace(
     'Old Dated Twitter Accounts',
     'Old Dated Accounts',

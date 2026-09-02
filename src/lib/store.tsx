@@ -409,15 +409,15 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const refillOrder = useCallback((id: string) => {
+    // The refill request is committed by the backend. Keep the local cache in
+    // the same five-status model until realtime confirms the exact DB status.
     setOrders((prev) =>
       prev.map((o) =>
-        o.id === id && (o.status === 'waiting' || o.status === 'completed')
-          ? { ...o, status: 'in_progress' as const }
+        o.id === id
+          ? { ...o, status: 'refilling', dbStatus: 'refilling' }
           : o,
       ),
     )
-    // Note: RLS blocks users from updating orders directly. Admin flips the status.
-    // Left as optimistic-only for now; a server function will handle refill later.
   }, [])
 
   // ─── Topups ─────────────────────────────────────────────────────────────────

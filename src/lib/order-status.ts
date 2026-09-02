@@ -23,13 +23,11 @@ export type StatusView = {
 }
 
 export const ORDER_STATUS_VIEW: Record<OrderStatus, StatusView> = {
-  waiting: { tone: 'neutral', ru: 'Заказ оформлен', en: 'Placed' },
+  waiting: { tone: 'neutral', ru: 'Ожидает', en: 'Waiting' },
   in_progress: { tone: 'warning', ru: 'В работе', en: 'In progress' },
-  refilling: { tone: 'emerald', ru: 'В процессе (refill)', en: 'In progress (refill)' },
-  refunded: { tone: 'info', ru: 'Возврат средств', en: 'Refund' },
-  failed: { tone: 'danger', ru: 'Ошибка', en: 'Error' },
   completed: { tone: 'success', ru: 'Завершён', en: 'Completed' },
   cancelled: { tone: 'coral', ru: 'Отменён', en: 'Cancelled' },
+  refilling: { tone: 'emerald', ru: 'Рефил', en: 'Refill' },
 }
 
 export function orderStatusView(status: OrderStatus): StatusView {
@@ -79,25 +77,34 @@ export function dbStatusToOrderStatus(s: DbOrderStatus | string): OrderStatus {
   switch (s) {
     case 'completed':
       return 'completed'
-    case 'refunded':
-      return 'refunded'
-    case 'failed':
-      return 'failed'
     case 'refilling':
       return 'refilling'
-    case 'declined':
-      return 'cancelled'
     case 'in_progress':
+    case 'waiting':
       return 'in_progress'
+    case 'declined':
+    case 'refunded':
+    case 'failed':
+      return 'cancelled'
+    case 'pending':
     default:
       return 'waiting'
   }
 }
 
 export function orderStatusToDbStatus(s: OrderStatus): DbOrderStatus {
-  if (s === 'cancelled') return 'declined'
-  if (s === 'waiting') return 'pending'
-  return s
+  switch (s) {
+    case 'waiting':
+      return 'pending'
+    case 'in_progress':
+      return 'in_progress'
+    case 'completed':
+      return 'completed'
+    case 'refilling':
+      return 'refilling'
+    case 'cancelled':
+      return 'declined'
+  }
 }
 
 /** Единый акцент статуса: CSS-переменная цвета для линии, свечения, иконок. */

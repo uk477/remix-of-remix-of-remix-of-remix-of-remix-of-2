@@ -19,7 +19,7 @@ import { SocialProfilePreview } from '../order/social-profile-preview'
 import { OrderProgressCard } from '../order/order-progress-card'
 import { dbStatusToOrderStatus, orderStatusView } from '@/lib/order-status'
 import { useServerFn } from '@tanstack/react-start'
-import { getOrderRefundState } from '@/lib/admin-orders.functions'
+import { getOrderRefundState, type RefundState } from '@/lib/admin-orders.functions'
 import {
   RecoveryStatusCard,
   RefundStatusCard,
@@ -101,10 +101,7 @@ export function BoostOrderScreen({ order }: { order: Order }) {
     // cannot resurrect the stale pre-mutation order object.
     syncOrderStatus(order.id, next)
     setAdminStatus(next)
-    if (next === 'completed' || next === 'refunded') setVisibleStatus('completed')
-    else if (next === 'declined' || next === 'failed') setVisibleStatus('cancelled')
-    else if (next === 'in_progress' || next === 'refilling') setVisibleStatus('in_progress')
-    else setVisibleStatus('waiting')
+    setVisibleStatus(dbStatusToOrderStatus(next))
   }
 
   /* ── Специальные потоки: восстановление (рефилл) и возврат средств ───── */
@@ -219,12 +216,29 @@ export function BoostOrderScreen({ order }: { order: Order }) {
   /** Окно «Не удалось выполнить заказ» — возврат уже запущен на бэкенде. */
   const [errorNotice, setErrorNotice] = useState(false)
   const refundStateFn = useServerFn(getOrderRefundState)
+  const [refundState, setRefundState] = useState<RefundState | null>(null)
   const refill = useRefill(order.id)
+
+  // The cancellation copy must reflect the persisted refund row, not the
+  // order status alone: failed/declined orders may still be awaiting credit.
+  useEffect(() => {
+    const dbId = refill.state?.dbOrderId
+    if (!dbId) return
+    void refundStateFn({ data: { orderId: dbId } })
+      .then(setRefundState)
+      .catch(() => setRefundState(null))
+  }, [refill.state?.dbOrderId, refundStateFn])
   const refillReload = refill.reload
   // Статус заказа изменился (в т.ч. через админ-панель) — гарантия пересчитывается с сервера.
   useEffect(() => {
     void refillReload()
   }, [visibleStatus, refillReload])
+  // A completed refund is shown as a success only after the persisted refund
+  // row confirms it; a refunded order alone does not imply credited funds.
+  useEffect(() => {
+    if (adminStatus !== 'refunded' || !refundState) return
+    setFlow({ kind: 'refund', phase: refundState.refunded && refundState.refundStatus === 'completed' ? 'success' : 'active' })
+  }, [adminStatus, refundState])
   // База — источник истины: как только backend подтвердил успешный рефилл и
   // вернул заказ в `completed`, экран сам переключается на «Заказ завершён».
   const serverStatus = refill.state?.orderStatus
@@ -303,37 +317,9 @@ export function BoostOrderScreen({ order }: { order: Order }) {
 
   /* ── Status copy ─────────────────────────────────────────────────────── */
 
-  const statusLabel = cancelled
-    ? ru
-      ? 'Отменён'
-      : 'Cancelled'
-    : done
-      ? ru
-        ? 'Завершён'
-        : 'Completed'
-      : waiting
-        ? ru
-          ? 'Заказ оформлен'
-          : 'Placed'
-        : ru
-          ? 'В процессе'
-          : 'In progress'
-
-  const progressBadgeLabel = cancelled
-    ? ru
-      ? 'Отменён'
-      : 'Cancelled'
-    : done
-      ? ru
-        ? 'Завершён'
-        : 'Completed'
-      : waiting
-        ? ru
-          ? 'Заказ оформлен'
-          : 'Placed'
-        : ru
-          ? 'В работе'
-          : 'In progress'
+  const currentStatusView = orderStatusView(visibleStatus)
+  const statusLabel = ru ? currentStatusView.ru : currentStatusView.en
+  const progressBadgeLabel = statusLabel
 
   const progressTitle = ru ? 'Статус заказа' : 'Order status'
   const progressHeadline = cancelled
@@ -376,15 +362,14 @@ export function BoostOrderScreen({ order }: { order: Order }) {
   const backendStatus = dbStatusToOrderStatus(adminStatus)
   const isRefill = adminStatus === 'refilling'
   const isRefund = adminStatus === 'refunded'
+  const isRefunded = refundState?.refunded === true && refundState.refundStatus === 'completed'
   const isFailed = adminStatus === 'failed'
-  const override = isRefill || isRefund || isFailed
   const overrideView = orderStatusView(backendStatus)
-  /* Единственный источник цвета — фактический статус с backend.
-   * Для возврата используем золотой акцент, чтобы статус читался как
-   * premium-операция, а не «ошибка/инфо». */
-  const finalTone: OrderTone = isRefund ? 'live' : overrideView.tone
-  const finalStatusLabel = override ? (ru ? overrideView.ru : overrideView.en) : statusLabel
-  const finalBadgeLabel = override ? (ru ? overrideView.ru : overrideView.en) : progressBadgeLabel
+  /* The backend status controls the public tone and label. Refund completion
+   * is a separate fact used only for the money note below. */
+  const finalTone: OrderTone = overrideView.tone
+  const finalStatusLabel = ru ? overrideView.ru : overrideView.en
+  const finalBadgeLabel = finalStatusLabel
   const finalHeadline = isRefill
     ? ru
       ? 'Восстанавливаем показатели'
@@ -411,9 +396,13 @@ export function BoostOrderScreen({ order }: { order: Order }) {
   }
   const unitWord = (UNITS[category] ?? ['ед.', 'units'])[ru ? 0 : 1]
   const caption = cancelled
-    ? ru
-      ? 'Заказ отменён, средства возвращены на баланс.'
-      : 'Order cancelled and funds returned to your balance.'
+    ? isRefunded
+      ? ru
+        ? 'Заказ отменён. Деньги возвращены на баланс.'
+        : 'Order cancelled. Funds returned to your balance.'
+      : ru
+        ? `Заказ отменён. Причина: ${cancelReason}`
+        : `Order cancelled. Reason: ${cancelReason}`
     : done
       ? ru
         ? 'Заказ полностью выполнен и закрыт.'
@@ -422,9 +411,13 @@ export function BoostOrderScreen({ order }: { order: Order }) {
         ? ru
           ? 'Заказ принят и скоро будет запущен.'
           : 'The order is accepted and starts shortly.'
-        : ru
-          ? 'Заказ запущен, показатели растут в реальном времени.'
-          : 'The order is running and the numbers are growing live.'
+        : isRefill
+          ? ru
+            ? 'Восстанавливаем результат заказа.'
+            : 'Restoring the order result.'
+          : ru
+            ? 'Заказ запущен, показатели растут в реальном времени.'
+            : 'The order is running and the numbers are growing live.'
 
   return (
     <div className="min-h-full">
@@ -563,11 +556,15 @@ export function BoostOrderScreen({ order }: { order: Order }) {
                     label: ru ? 'Заказ отменён' : 'Order cancelled',
                     state: 'danger',
                   },
-                  {
-                    label: ru ? 'Средства возвращены на баланс' : 'Funds returned to balance',
-                    state: 'idle',
-                    icon: <GlyphRefund className="size-[13px]" />,
-                  },
+                  ...(isRefunded
+                    ? [
+                        {
+                          label: ru ? 'Деньги возвращены на баланс' : 'Funds returned to balance',
+                          state: 'done' as const,
+                          icon: <GlyphRefund className="size-[13px]" />,
+                        },
+                      ]
+                    : []),
                 ]
               : [
                   {
