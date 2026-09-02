@@ -21,7 +21,7 @@ import { useNav } from '@/lib/nav'
 import { useStore } from '@/lib/store'
 import { useAuth } from '@/lib/auth'
 import { addTestOrder, makeTestOrder } from '@/lib/demo-orders'
-import type { BoostService } from '@/lib/types'
+import type { BoostService, Order } from '@/lib/types'
 import { getBoostStatuses } from '@/lib/boost-status.functions'
 import { AUDIENCES, type Audience } from '@/lib/custom-account'
 import { ScreenHeader } from '../screen-header'
@@ -136,11 +136,13 @@ export function CartScreen() {
     cart,
     removeFromCart,
     cartTotal,
-     balance,
-     applyServerBalance,
-     clearCart,
-     registerServerOrder,
-     editingCustomKey,
+    balance,
+    setBalance,
+    applyServerBalance,
+    clearCart,
+    addOrder,
+    registerServerOrder,
+    editingCustomKey,
     setEditingCustomKey,
   } = useStore()
 
@@ -202,39 +204,32 @@ export function CartScreen() {
       return
     }
 
-    const created: Array<{
-      id: string
-      date: number
-      title: string
-      amount: number
-      status: 'waiting' | 'in_progress' | 'completed' | 'cancelled' | 'refilling'
-      refillable: boolean
-      kind: 'boost' | 'account'
-      paid: boolean
-      qty: number
-      serviceId: string
-      orderRef?: string
-      target?: string
-      startFollowers?: number
-      customAccount?: Record<string, string>
-      progressStep?: number
-    }> = []
-    let serverBalance = balance
+    // Заказы продвижения оформляет backend (списание баланса + FollowHub),
+    // остальные позиции остаются на прежнем локальном пути оплаты.
+    const providerOrders: Order[] = []
+    const localOrders: Order[] = []
+    let serverBalance: number | null = null
+    let localTotal = 0
 
     try {
       for (const item of cart) {
         const custom = item.refId === 'custom_account'
-        if (item.kind === 'boost' && SERVICES.some((service) => service.id === item.refId)) {
-          const service = SERVICES.find((candidate) => candidate.id === item.refId)
-          if (!service) throw new Error('Service is no longer available')
-          const targets = (item.meta?.['targets'] ?? '').split(/[\n,]+/).map((target) => target.trim()).filter(Boolean)
+        const service =
+          item.kind === 'boost' ? SERVICES.find((candidate) => candidate.id === item.refId) : undefined
+
+        if (service) {
+          const targets = (item.meta?.['targets'] ?? '')
+            .split(/[\n,]+/)
+            .map((target) => target.trim())
+            .filter(Boolean)
+          const quantity = Number(item.meta?.['amount'] ?? service.min)
           const result = await createFollowHubOrder({
             data: {
               localOrderId: `FH-${crypto.randomUUID()}`,
               serviceId: service.id,
               category: service.categoryId,
               title: item.title,
-              quantity: Number(item.meta?.['amount'] ?? service.min),
+              quantity,
               targets,
               ...(item.meta?.['start_followers']
                 ? { startFollowers: Number(item.meta['start_followers']) || 0 }
@@ -242,7 +237,7 @@ export function CartScreen() {
             },
           })
           serverBalance = result.balance
-          created.push({
+          providerOrders.push({
             id: result.localOrderId,
             date: result.createdAt || Date.now(),
             title: item.title,
@@ -251,18 +246,20 @@ export function CartScreen() {
             refillable: service.refill,
             kind: 'boost',
             paid: true,
-            qty: Number(item.meta?.['amount'] ?? service.min),
+            qty: quantity,
             serviceId: service.id,
             orderRef: result.providerOrderId,
             ...(targets[0] ? { target: targets[0] } : {}),
-            ...(item.meta?.['start_followers'] ? { startFollowers: Number(item.meta['start_followers']) || 0 } : {}),
+            ...(item.meta?.['start_followers']
+              ? { startFollowers: Number(item.meta['start_followers']) || 0 }
+              : {}),
           })
           continue
         }
 
-        const localId = `FH-${crypto.randomUUID()}`
-        created.push({
-          id: localId,
+        localTotal += item.total
+        localOrders.push({
+          id: `FH-${Math.floor(10000 + Math.random() * 89999)}`,
           date: Date.now(),
           title: item.title,
           amount: item.total,
@@ -272,16 +269,28 @@ export function CartScreen() {
           paid: true,
           qty: item.qty ?? 1,
           serviceId: item.refId,
-          ...(item.meta?.['targets'] ? { target: item.meta['targets'].split('\\n')[0]?.trim() } : {}),
-          ...(item.meta?.['start_followers'] ? { startFollowers: Number(item.meta['start_followers']) || 0 } : {}),
+          ...(item.meta?.['targets']
+            ? { target: item.meta['targets'].split('\n')[0]!.trim() }
+            : {}),
+          ...(item.meta?.['start_followers']
+            ? { startFollowers: Number(item.meta['start_followers']) || 0 }
+            : {}),
           ...(custom && item.meta ? { customAccount: item.meta, progressStep: 1 } : {}),
         })
       }
-      applyServerBalance(serverBalance)
-      created.forEach((order) => registerServerOrder(order))
+
+      // Серверное списание уже применено к балансу; локальные позиции
+      // доплачиваем прежним путём поверх актуального значения.
+      if (serverBalance !== null) applyServerBalance(serverBalance)
+      if (localTotal > 0) setBalance((prev) => prev - localTotal)
+      providerOrders.forEach((order) => registerServerOrder(order))
+      localOrders.forEach((order) => addOrder(order))
       clearCart()
       show(t('payment_success'))
     } catch (error) {
+      // Уже принятые backend-заказы остаются в силе: показываем их и баланс.
+      if (serverBalance !== null) applyServerBalance(serverBalance)
+      providerOrders.forEach((order) => registerServerOrder(order))
       show(error instanceof Error ? error.message : 'Не удалось оформить заказ')
     }
   }
@@ -299,10 +308,10 @@ export function CartScreen() {
         refId: item.refId,
         meta: item.meta,
       })
-       addTestOrder(order)
-       // Keep the instant local test flow, but also persist it for this account.
-       // This prevents orders disappearing when local preview storage is reset.
-       registerServerOrder(order)
+      addTestOrder(order)
+      // Keep the instant local test flow, but also persist it for this account.
+      // This prevents orders disappearing when local preview storage is reset.
+      addOrder(order)
       if (!firstId && item.kind === 'account') firstId = order.id
     })
     clearCart()

@@ -251,6 +251,32 @@ export function BoostOrderScreen({ order }: { order: Order }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [serverStatus])
 
+  /* ── Синхронизация с поставщиком (FollowHub) ─────────────────────────────
+   * Пока заказ ещё не в терминальном статусе, подтягиваем прогресс у
+   * поставщика: серверная функция сама пишет результат в базу, а экран
+   * обновляется уже из серверного состояния заказа. */
+  const syncProvider = useServerFn(syncFollowHubOrder)
+  const providerOrderKey = refill.state?.dbOrderId ?? null
+  useEffect(() => {
+    if (!providerOrderKey) return
+    if (adminStatus !== 'pending' && adminStatus !== 'waiting' && adminStatus !== 'in_progress') return
+    let alive = true
+    const run = async () => {
+      try {
+        await syncProvider({ data: { orderId: providerOrderKey } })
+        if (alive) await refillReload()
+      } catch {
+        /* поставщик недоступен — оставляем текущее состояние из базы */
+      }
+    }
+    void run()
+    const id = window.setInterval(() => void run(), 45000)
+    return () => {
+      alive = false
+      window.clearInterval(id)
+    }
+  }, [providerOrderKey, adminStatus, syncProvider, refillReload])
+
   const refillState = refill.phase as RefillState
   const used = refill.used
   const left = refill.remaining

@@ -1,1 +1,3 @@
 - [x] Consolidate user-facing order statuses while preserving backend/admin statuses
+- [x] FollowHub integration: ordering, balance sync, provider status polling
+- [x] Refill via FollowHub compensation order (idempotent request, auto-complete, failure rollback)
