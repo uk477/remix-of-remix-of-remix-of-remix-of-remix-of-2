@@ -111,12 +111,11 @@ export async function fhGetOrder(orderId: string): Promise<FollowHubOrder> {
   const result = await fhCall<{ order?: FollowHubOrder } | FollowHubOrder>(
     `/Order/${encodeURIComponent(orderId)}`,
   )
-  if ('order' in result) {
-    if (!result.order) throw new FollowHubApiError(502, 'FollowHub order response is missing order data')
-    return result.order
+  const candidate = 'order' in result ? result.order : result
+  if (!candidate || typeof candidate !== 'object' || !('id' in candidate) || !('targets' in candidate)) {
+    throw new FollowHubApiError(502, 'FollowHub order response is invalid')
   }
-  if (!('id' in result)) throw new FollowHubApiError(502, 'FollowHub order response is invalid')
-  return result
+  return candidate as FollowHubOrder
 }
 
 export function followHubTypeForCategory(category: string) {
