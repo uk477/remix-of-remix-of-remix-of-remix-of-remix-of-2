@@ -21,13 +21,16 @@ export type RefillServerState = {
   serverNow: string
 }
 
+const PROVIDER_REFILL_UNAVAILABLE =
+  'Автоматический рефилл временно недоступен: поставщик не предоставляет API для отправки заявки'
+
 export const getRefillState = createServerFn({ method: 'POST' })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { orderId: string }) => {
     if (!input?.orderId) throw new Error('orderId required')
     return { orderId: String(input.orderId) }
   })
-  .handler(async ({ data, context }) => {
+  .handler(async ({ data, context }): Promise<RefillServerState> => {
     const { data: state, error } = await context.supabase.rpc('refill_state', {
       _order_key: data.orderId,
     })
@@ -45,13 +48,27 @@ export const requestRefill = createServerFn({ method: 'POST' })
       idempotencyKey: String(input.idempotencyKey).slice(0, 120),
     }
   })
-  .handler(async ({ data, context }) => {
-    const { data: state, error } = await context.supabase.rpc('request_refill', {
+  .handler(async ({ data, context }): Promise<RefillServerState> => {
+    const { data: refillState, error: stateError } = await context.supabase.rpc('refill_state', {
       _order_key: data.orderId,
-      _client_token: data.idempotencyKey,
     })
-    if (error) throw new Error(error.message)
-    return state as unknown as RefillServerState
+    if (stateError) throw new Error(stateError.message)
+    const current = refillState as unknown as RefillServerState
+    if (!current.dbOrderId) throw new Error('Order not found')
+    if (current.orderStatus === 'refunded') throw new Error('Refunded orders cannot be refilled')
+
+    const { data: refund, error: refundError } = await context.supabase
+      .from('order_refunds')
+      .select('id')
+      .eq('order_id', current.dbOrderId)
+      .maybeSingle()
+    if (refundError) throw new Error(refundError.message)
+    if (refund) throw new Error('Refunded orders cannot be refilled')
+
+    // The documented supplier API has purchase and order reads, but no refill
+    // command. Do not create a local request until external work is accepted;
+    // doing so would leave the order in `refilling` forever.
+    throw new Error(PROVIDER_REFILL_UNAVAILABLE)
   })
 
 /**
