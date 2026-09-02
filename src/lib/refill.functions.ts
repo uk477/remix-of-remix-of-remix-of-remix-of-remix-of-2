@@ -30,7 +30,7 @@ export const getRefillState = createServerFn({ method: 'POST' })
     if (!input?.orderId) throw new Error('orderId required')
     return { orderId: String(input.orderId) }
   })
-  .handler(async ({ data, context }) => {
+  .handler(async ({ data, context }): Promise<RefillServerState> => {
     const { data: state, error } = await context.supabase.rpc('refill_state', {
       _order_key: data.orderId,
     })
