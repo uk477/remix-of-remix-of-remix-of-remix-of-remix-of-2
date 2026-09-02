@@ -19,7 +19,7 @@ import { SocialProfilePreview } from '../order/social-profile-preview'
 import { OrderProgressCard } from '../order/order-progress-card'
 import { dbStatusToOrderStatus, orderStatusView } from '@/lib/order-status'
 import { useServerFn } from '@tanstack/react-start'
-import { getOrderRefundState } from '@/lib/admin-orders.functions'
+import { getOrderRefundState, type RefundState } from '@/lib/admin-orders.functions'
 import {
   RecoveryStatusCard,
   RefundStatusCard,
