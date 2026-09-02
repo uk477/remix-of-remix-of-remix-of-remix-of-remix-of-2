@@ -29,6 +29,7 @@ export type FollowerAccountRow = {
   features: { ru: string; en: string }[]
   sort_order: number
   is_active: boolean
+  created_at: string
   topic_id: string | null
   topic_ids: string[] | null
   account_url: string | null
