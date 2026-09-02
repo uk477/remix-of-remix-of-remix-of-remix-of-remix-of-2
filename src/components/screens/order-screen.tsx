@@ -451,10 +451,7 @@ export function OrderScreen() {
   }
 
   const statusLabel = order
-    ? orderStatusLabel(
-        order.dbStatus ? dbStatusToOrderStatus(order.dbStatus) : order.status,
-        lang === 'ru',
-      )
+    ? orderStatusLabel(order.dbStatus ? dbStatusToOrderStatus(order.dbStatus) : order.status, lang === 'ru')
     : T('waiting')
   const displayTitle = (order?.title ?? T('order_title')).replace(
     'Old Dated Twitter Accounts',

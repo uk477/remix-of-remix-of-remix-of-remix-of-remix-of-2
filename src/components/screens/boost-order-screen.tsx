@@ -233,6 +233,12 @@ export function BoostOrderScreen({ order }: { order: Order }) {
   useEffect(() => {
     void refillReload()
   }, [visibleStatus, refillReload])
+  // A completed refund is shown as a success only after the persisted refund
+  // row confirms it; a refunded order alone does not imply credited funds.
+  useEffect(() => {
+    if (adminStatus !== 'refunded' || !refundState) return
+    setFlow({ kind: 'refund', phase: refundState.refunded && refundState.refundStatus === 'completed' ? 'success' : 'active' })
+  }, [adminStatus, refundState])
   // База — источник истины: как только backend подтвердил успешный рефилл и
   // вернул заказ в `completed`, экран сам переключается на «Заказ завершён».
   const serverStatus = refill.state?.orderStatus
@@ -311,14 +317,8 @@ export function BoostOrderScreen({ order }: { order: Order }) {
 
   /* ── Status copy ─────────────────────────────────────────────────────── */
 
-  const statusLabel = orderStatusView(visibleStatus).ru
-    ? ru
-      ? orderStatusView(visibleStatus).ru
-      : orderStatusView(visibleStatus).en
-    : ru
-      ? 'Ожидает'
-      : 'Waiting'
-
+  const currentStatusView = orderStatusView(visibleStatus)
+  const statusLabel = ru ? currentStatusView.ru : currentStatusView.en
   const progressBadgeLabel = statusLabel
 
   const progressTitle = ru ? 'Статус заказа' : 'Order status'

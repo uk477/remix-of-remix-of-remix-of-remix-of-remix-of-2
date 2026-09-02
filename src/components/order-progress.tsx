@@ -25,6 +25,7 @@ function Counter({ value }: { value: number }) {
 import { Check, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react'
 import { customLang } from '@/lib/custom-account'
 import { updateTestOrder } from '@/lib/demo-orders'
+import { dbStatusToOrderStatus } from '@/lib/order-status'
 import { useI18n } from '@/lib/i18n'
 import type { Order } from '@/lib/types'
 
@@ -111,6 +112,7 @@ export function OrderProgress({
   const verified = order.customAccount?.['profile_verified'] === 'yes'
   const steps = stepsFor(order, cl, verified)
   const [managedStep, setManagedStep] = useState(order.progressStep)
+  const userStatus = order.dbStatus ? dbStatusToOrderStatus(order.dbStatus) : order.status
 
   useEffect(() => {
     setManagedStep(order.progressStep)
@@ -121,8 +123,8 @@ export function OrderProgress({
   const total = steps.length
   const workMax = total - 1
   let current = 1
-  if (order.status === 'in_progress') current = verified ? 3 : 2
-  let done = order.status === 'completed'
+  if (userStatus === 'in_progress' || userStatus === 'refilling') current = verified ? 3 : 2
+  let done = userStatus === 'completed'
   // An explicit stage set by an admin wins over the status-derived guess.
   if (typeof managedStep === 'number') {
     done = managedStep > workMax
