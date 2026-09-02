@@ -70,14 +70,6 @@ export const requestRefill = createServerFn({ method: 'POST' })
     // command. Do not create a local request until external work is accepted;
     // doing so would leave the order in `refilling` forever.
     throw new Error(PROVIDER_REFILL_UNAVAILABLE)
-
-    /* c8 ignore next 6 -- enable atomically when the supplier adds refill API */
-    const { data: state, error } = await context.supabase.rpc('request_refill', {
-      _order_key: data.orderId,
-      _client_token: data.idempotencyKey,
-    })
-    if (error) throw new Error(error.message)
-    return state as unknown as RefillServerState
   })
 
 /**
