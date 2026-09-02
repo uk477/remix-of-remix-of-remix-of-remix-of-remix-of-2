@@ -395,6 +395,10 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       })
   }, [])
 
+  const registerServerOrder = useCallback((order: Order) => {
+    setOrders((prev) => [order, ...prev.filter((item) => item.id !== order.id)])
+  }, [])
+
   /**
    * Apply a status that has already been committed by the backend. This keeps
    * the shared order cache authoritative when realtime delivery is delayed or
