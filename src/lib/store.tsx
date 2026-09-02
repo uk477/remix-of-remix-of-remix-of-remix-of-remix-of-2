@@ -21,6 +21,8 @@ import { TEST_ORDERS_EVENT, loadTestOrders } from './demo-orders'
 type StoreContextType = {
   balance: number
   setBalance: (updater: number | ((prev: number) => number)) => void
+  /** Баланс уже изменён на сервере — только обновляем локальный кэш. */
+  applyServerBalance: (next: number) => void
   cart: CartItem[]
   addToCart: (item: CartItem) => void
   removeFromCart: (key: string) => void
@@ -31,6 +33,8 @@ type StoreContextType = {
   setEditingCustomKey: (key: string | null) => void
   orders: Order[]
   addOrder: (order: Order) => void
+  /** Заказ уже создан на сервере — вставляем в кэш без повторной записи. */
+  registerServerOrder: (order: Order) => void
   syncOrderStatus: (id: string, status: DbOrderStatus) => void
   refillOrder: (id: string) => void
   topups: Topup[]
