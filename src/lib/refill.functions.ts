@@ -49,19 +49,18 @@ export const requestRefill = createServerFn({ method: 'POST' })
     }
   })
   .handler(async ({ data, context }): Promise<RefillServerState> => {
-    const { data: order, error: orderError } = await context.supabase
-      .from('orders')
-      .select('id, status, meta')
-      .or(`id.eq.${data.orderId},meta->>local_id.eq.${data.orderId}`)
-      .maybeSingle()
-    if (orderError) throw new Error(orderError.message)
-    if (!order) throw new Error('Order not found')
-    if (order.status === 'refunded') throw new Error('Refunded orders cannot be refilled')
+    const { data: refillState, error: stateError } = await context.supabase.rpc('refill_state', {
+      _order_key: data.orderId,
+    })
+    if (stateError) throw new Error(stateError.message)
+    const current = refillState as unknown as RefillServerState
+    if (!current.dbOrderId) throw new Error('Order not found')
+    if (current.orderStatus === 'refunded') throw new Error('Refunded orders cannot be refilled')
 
     const { data: refund, error: refundError } = await context.supabase
       .from('order_refunds')
       .select('id')
-      .eq('order_id', order.id)
+      .eq('order_id', current.dbOrderId)
       .maybeSingle()
     if (refundError) throw new Error(refundError.message)
     if (refund) throw new Error('Refunded orders cannot be refilled')
