@@ -158,3 +158,55 @@ export const followHubOrderStatus = createServerFn({ method: 'POST' })
     const order = await fhGetOrder(data.providerOrderId)
     return { order, status: followHubStatus(order.targets) }
   })
+
+/**
+ * Тянет актуальное состояние заказа у FollowHub и переносит его в базу.
+ * База остаётся единственным источником истины: RPC не трогает терминальные
+ * статусы (возврат, отмена) и активный рефилл.
+ */
+export const syncFollowHubOrder = createServerFn({ method: 'POST' })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { orderId: string }) => {
+    const orderId = String(input?.orderId ?? '').slice(0, 120)
+    if (!orderId) throw new Error('orderId required')
+    return { orderId }
+  })
+  .handler(async ({ data, context }) => {
+    const { data: row, error } = await context.supabase.rpc('refill_resolve_order', {
+      _order_key: data.orderId,
+      _user_id: context.userId,
+    })
+    if (error) throw new Error(error.message)
+    const order = (Array.isArray(row) ? row[0] : row) as
+      | { id: string; status: string; meta: Record<string, unknown> | null }
+      | null
+    if (!order?.id) throw new Error('Order not found')
+
+    const meta = (order.meta ?? {}) as Record<string, unknown>
+    if (meta['provider'] !== 'followhub') return { synced: false as const, status: order.status }
+    const providerOrderId = typeof meta['provider_order_id'] === 'string' ? meta['provider_order_id'] : ''
+    if (!providerOrderId) return { synced: false as const, status: order.status }
+
+    let provider
+    try {
+      provider = await fhGetOrder(providerOrderId)
+    } catch (fetchError) {
+      console.error('[followhub] status sync failed', fetchError)
+      return { synced: false as const, status: order.status }
+    }
+
+    const status = followHubStatus(provider.targets)
+    const received = provider.targets.reduce((sum, target) => sum + (Number(target.received) || 0), 0)
+    const startCount = Number(provider.targets[0]?.startCount)
+
+    const { data: result, error: syncError } = await context.supabase.rpc('provider_sync_order', {
+      _order_id: order.id,
+      _status: status,
+      _received: received,
+      ...(Number.isFinite(startCount) ? { _start_count: startCount } : {}),
+    })
+    if (syncError) throw new Error(syncError.message)
+
+    const next = result as { status?: string } | null
+    return { synced: true as const, status: next?.status ?? status, received }
+  })
