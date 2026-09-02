@@ -48,7 +48,7 @@ export const requestRefill = createServerFn({ method: 'POST' })
       idempotencyKey: String(input.idempotencyKey).slice(0, 120),
     }
   })
-  .handler(async ({ data, context }) => {
+  .handler(async ({ data, context }): Promise<RefillServerState> => {
     const { data: order, error: orderError } = await context.supabase
       .from('orders')
       .select('id, status, meta')
