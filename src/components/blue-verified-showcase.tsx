@@ -454,8 +454,8 @@ export function BlueVerifiedShowcase({
               transition={{ duration: 0.3, ease: EASE }}
               className="overflow-hidden"
             >
-              <div className="mt-4 overflow-hidden rounded-lg border border-border/70 bg-card/70 p-2.5">
-                <ul className="space-y-2">
+              <div className="border-t border-border/40">
+                <ul className="space-y-2 pt-3">
                   {L.aboutItems.map((item, i) => {
                     const Icon = ABOUT_ICONS[i % ABOUT_ICONS.length]
                     const style = ABOUT_STYLES[i % ABOUT_STYLES.length]
@@ -465,21 +465,21 @@ export function BlueVerifiedShowcase({
                         initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.06 + i * 0.05, duration: 0.3, ease: EASE }}
-                        className="flex min-w-0 items-center gap-2.5 rounded-xl border border-border/60 bg-background/40 p-2.5"
+                        className="flex min-w-0 items-center gap-2.5 rounded-xl border border-border/60 bg-background/40 p-3"
                       >
-                        <span className={`flex size-8 shrink-0 items-center justify-center rounded-lg ${style.icon}`}>
-                          <Icon className="size-[16px]" />
+                        <span className={`flex size-9 shrink-0 items-center justify-center rounded-lg ${style.icon}`}>
+                          <Icon className="size-[18px]" />
                         </span>
                         <span className="min-w-0 flex-1">
                           <span className={`block font-manrope text-[8px] font-bold uppercase leading-none tracking-[0.12em] ${style.tag}`}>
                             {item.tag}
                           </span>
-                          <span className="mt-0.5 block font-heading text-[12.5px] font-bold leading-[1.2] text-foreground">
+                          <span className="mt-0.5 block font-heading text-[13px] font-bold leading-[1.2] text-foreground">
                             {item.t}
                           </span>
                           <Rich
                             text={item.d}
-                            className="mt-0.5 block font-manrope text-[10.5px] leading-[1.4] text-muted-foreground"
+                            className="mt-0.5 block font-manrope text-[11px] leading-[1.4] text-muted-foreground"
                           />
                         </span>
                       </motion.li>
@@ -487,13 +487,13 @@ export function BlueVerifiedShowcase({
                   })}
                 </ul>
 
-                <div className="mt-2.5 flex items-center gap-2.5 rounded-lg border border-success/20 bg-success/[0.07] px-3 py-2.5">
-                  <span className="account-icon-hex flex size-8 shrink-0 items-center justify-center bg-success/14 text-success">
-                    <IconWarrantyClock className="size-[16px]" />
+                <div className="mt-3 flex items-center gap-2.5 rounded-xl border border-success/20 bg-success/[0.07] px-3 py-3">
+                  <span className="account-icon-hex flex size-9 shrink-0 items-center justify-center bg-success/14 text-success">
+                    <IconWarrantyClock className="size-[18px]" />
                   </span>
                   <Rich
                     text={L.aboutNote}
-                    className="font-manrope text-[11px] leading-[1.45] text-muted-foreground"
+                    className="font-manrope text-[12px] leading-[1.45] text-muted-foreground"
                   />
                 </div>
               </div>
