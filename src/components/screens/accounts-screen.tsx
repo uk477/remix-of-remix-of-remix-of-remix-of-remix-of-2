@@ -752,6 +752,7 @@ export function AccountsScreen() {
         onAdminMenu={handleAdminMenu}
         onAdd={handleAdd}
         categoryId={categoryId}
+        hideBackAndFilter={categoryId === "blue_acc"}
         xSelectMode={xSelectMode}
         selectedXIds={selectedXIds}
         xRefreshing={xRefreshing}
@@ -1284,6 +1285,7 @@ function FilterableAccountsView({
   onAdminMenu,
   onAdd,
   categoryId,
+  hideBackAndFilter = false,
   xSelectMode = false,
   selectedXIds = new Set(),
   xRefreshing = false,
@@ -1295,7 +1297,7 @@ function FilterableAccountsView({
 }: {
   list: AgedAccount[];
   title: string;
-  onBack: () => void;
+  onBack?: () => void;
   onOpen: (a: AgedAccount) => void;
   isBlue: boolean;
   Icon: LucideIcon;
@@ -1303,6 +1305,7 @@ function FilterableAccountsView({
   onAdminMenu?: (a: AgedAccount) => void;
   onAdd?: () => void;
   categoryId: MarketCategoryId;
+  hideBackAndFilter?: boolean;
   xSelectMode?: boolean;
   selectedXIds?: Set<string>;
   xRefreshing?: boolean;
@@ -1465,7 +1468,7 @@ function FilterableAccountsView({
               ? "Зажми и перетащи"
               : "Выбери 2 карточки"
         }
-        onBack={onBack}
+        onBack={hideBackAndFilter ? undefined : onBack}
         right={
           <div className="flex items-center gap-1.5">
             {isAdminMode && reorderMode === "off" && (
@@ -1500,7 +1503,7 @@ function FilterableAccountsView({
                 </button>
               </>
             )}
-            {reorderMode === "off" && (
+            {!hideBackAndFilter && reorderMode === "off" && (
               <button
                 onClick={() => setFiltersOpen(true)}
                 aria-label={L.filters}
