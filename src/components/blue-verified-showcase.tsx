@@ -39,16 +39,6 @@ const ABOUT_STYLES = [
   { icon: 'bg-coral/12 text-coral', tag: 'text-coral' },
 ] as const
 
-const ABOUT_ANIMATIONS = [
-  'animate-icon-float',
-  'animate-icon-breathe',
-  'animate-icon-glow',
-  'animate-icon-float',
-  'animate-icon-breathe',
-  'animate-icon-glow',
-] as const
-
-
 const COPY = {
   ru: {
     followersCap: 'ФОЛЛОВЕРЫ',
@@ -409,7 +399,7 @@ export function BlueVerifiedShowcase({
       <div className="mt-4 px-4">
         <SpecRow
           icon={
-            <span className="animate-icon-glow">
+            <span>
               <IconBlueCheck className="size-[18px]" style={{ color: BLUE }} />
             </span>
           }
@@ -418,7 +408,7 @@ export function BlueVerifiedShowcase({
         />
         <SpecRow
           icon={
-            <span className="animate-icon-breathe">
+            <span>
               <IconWarrantyClock className="size-[18px]" style={{ color: GREEN }} />
             </span>
           }
@@ -469,7 +459,6 @@ export function BlueVerifiedShowcase({
                   {L.aboutItems.map((item, i) => {
                     const Icon = ABOUT_ICONS[i % ABOUT_ICONS.length]
                     const style = ABOUT_STYLES[i % ABOUT_STYLES.length]
-                    const anim = ABOUT_ANIMATIONS[i % ABOUT_ANIMATIONS.length]
                     return (
                       <motion.li
                         key={item.t}
@@ -478,7 +467,7 @@ export function BlueVerifiedShowcase({
                         transition={{ delay: 0.06 + i * 0.05, duration: 0.3, ease: EASE }}
                         className="flex min-w-0 items-center gap-2.5 rounded-xl border border-border/60 bg-background/40 p-2.5"
                       >
-                        <span className={`flex size-8 shrink-0 items-center justify-center rounded-lg ${style.icon} ${anim}`}>
+                        <span className={`flex size-8 shrink-0 items-center justify-center rounded-lg ${style.icon}`}>
                           <Icon className="size-[16px]" />
                         </span>
                         <span className="min-w-0 flex-1">
@@ -499,7 +488,7 @@ export function BlueVerifiedShowcase({
                 </ul>
 
                 <div className="mt-2.5 flex items-center gap-2.5 rounded-lg border border-success/20 bg-success/[0.07] px-3 py-2.5">
-                  <span className="account-icon-hex flex size-8 shrink-0 items-center justify-center bg-success/14 text-success animate-icon-glow">
+                  <span className="account-icon-hex flex size-8 shrink-0 items-center justify-center bg-success/14 text-success">
                     <IconWarrantyClock className="size-[16px]" />
                   </span>
                   <Rich
