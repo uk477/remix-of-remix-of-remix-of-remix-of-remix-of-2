@@ -227,7 +227,7 @@ export function BlueVerifiedShowcase({
         : 'border-info/40 bg-info/12 text-info'
 
   return (
-    <div className="flex flex-col pb-20">
+    <div className="flex flex-col pb-14">
       {/* Tier selector */}
       <div className="px-4 pt-3">
         <div className="flex items-center gap-2">
