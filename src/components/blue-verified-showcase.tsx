@@ -30,6 +30,39 @@ const ABOUT_ICONS = [
   IconBulkExport,
 ] as const
 
+const ABOUT_STYLES = [
+  {
+    card: 'border-info/20 bg-info/[0.055]',
+    icon: 'rounded-full bg-info/14 text-info',
+    tag: 'text-info',
+  },
+  {
+    card: 'border-smart-violet/20 bg-smart-violet/[0.055]',
+    icon: 'rotate-3 rounded-md bg-smart-violet/14 text-smart-violet',
+    tag: 'text-smart-violet',
+  },
+  {
+    card: 'border-emerald/20 bg-emerald/[0.055]',
+    icon: 'rounded-tl-2xl rounded-br-2xl bg-emerald/14 text-emerald',
+    tag: 'text-emerald',
+  },
+  {
+    card: 'border-primary/20 bg-primary/[0.055]',
+    icon: 'w-12 rounded-sm bg-primary/14 text-primary',
+    tag: 'text-primary',
+  },
+  {
+    card: 'border-success/20 bg-success/[0.055]',
+    icon: 'account-icon-hex bg-success/14 text-success',
+    tag: 'text-success',
+  },
+  {
+    card: 'border-coral/20 bg-coral/[0.055]',
+    icon: 'account-icon-crate bg-coral/14 text-coral',
+    tag: 'text-coral',
+  },
+] as const
+
 
 const COPY = {
   ru: {
@@ -46,38 +79,36 @@ const COPY = {
     warrantyValue: '48 часов',
     about: 'Об аккаунте',
     aboutKicker: 'Что вы получаете',
-    aboutIntro:
-      'Живой аккаунт X с оплаченной синей галочкой. Готов к работе сразу после выдачи.',
     aboutItems: [
       {
         tag: 'Возраст',
         t: 'Регистрация 2009–2026',
-        d: 'Год берётся из закрытого пула и становится известен **после выдачи**.',
+        d: 'Точный год регистрации станет известен **после выдачи**.',
       },
       {
         tag: 'Выдача товара',
-        t: 'Аккаунт приходит рандомно',
-        d: 'Ник, юзернейм, аватар и описание — **случайные**. Меняются вами за пару минут.',
+        t: 'Случайный аккаунт',
+        d: 'Ник, юзернейм, аватар и описание выбираются **случайным образом**.',
       },
       {
         tag: 'Почта',
         t: 'Почта в комплекте',
-        d: 'Сервис и все данные для входа в ящик вы увидите **сразу после оплаты**.',
+        d: 'Адрес почты и данные для входа будут указаны **после оплаты**.',
       },
       {
         tag: 'Формат выдачи',
-        t: 'Логин : пароль : почта : пароль почты : 2FA',
-        d: 'Ключ 2FA приходит, **если он включён** на аккаунте — это зависит от профиля.',
+        t: 'Данные для входа',
+        d: '**Логин · пароль · почта · пароль почты · ключ 2FA.** 2FA может быть не включена.',
       },
       {
         tag: 'Галочка',
         t: 'Оплачена на 30 дней',
-        d: 'После окончания срока — **напишите нам**, оформим продление по цене сервиса.',
+        d: 'После окончания периода можно обратиться в поддержку **за продлением**.',
       },
       {
         tag: 'Опт',
-        t: 'Объём под задачу',
-        d: 'Нужна партия — **поддержка** соберёт список и даст лучший прайс и условия.',
+        t: 'Покупка объёмом',
+        d: 'Для оптового заказа и индивидуальных условий обратитесь **в поддержку**.',
       },
     ],
     aboutNote:
@@ -100,38 +131,36 @@ const COPY = {
     warrantyValue: '48 hours',
     about: 'About the account',
     aboutKicker: 'What you get',
-    aboutIntro:
-      'A live X account with a paid blue checkmark. Ready to use right after delivery.',
     aboutItems: [
       {
         tag: 'Age',
         t: 'Registered 2009–2026',
-        d: 'The year comes from a closed pool and is known **after delivery**.',
+        d: 'The exact registration year is shown **after delivery**.',
       },
       {
         tag: 'Delivery',
-        t: 'The account arrives at random',
-        d: 'Name, handle, avatar and bio are **random** — change them in a couple of minutes.',
+        t: 'Random account',
+        d: 'The name, handle, avatar and bio are selected **at random**.',
       },
       {
         tag: 'Mail',
         t: 'Mailbox included',
-        d: 'The provider and full mailbox login are shown **right after payment**.',
+        d: 'The email address and its login details are shown **after payment**.',
       },
       {
         tag: 'Format',
-        t: 'login : password : mail : mail password : 2FA',
-        d: 'The 2FA key is included **when it is enabled** on that account.',
+        t: 'Login details',
+        d: '**Login · password · email · email password · 2FA key.** 2FA may not be enabled.',
       },
       {
         tag: 'Check',
         t: 'Paid for 30 days',
-        d: 'When the term ends — **message us** and we renew it at service price.',
+        d: 'After the paid period ends, contact support **to request renewal**.',
       },
       {
         tag: 'Bulk',
-        t: 'Volume on request',
-        d: 'Need a batch — **support** builds the list and gives you the best price.',
+        t: 'Volume orders',
+        d: 'For bulk orders and individual terms, contact **support**.',
       },
     ],
     aboutNote:
@@ -442,72 +471,44 @@ export function BlueVerifiedShowcase({
               transition={{ duration: 0.3, ease: EASE }}
               className="overflow-hidden"
             >
-              <div className="mt-4 overflow-hidden rounded-[18px] border border-border/70 bg-card/70">
-                <div className="relative px-5 py-5 text-center">
-                  <span
-                    aria-hidden
-                    className="absolute inset-x-0 top-0 h-px"
-                    style={{ background: `linear-gradient(90deg, transparent, ${BLUE}88, transparent)` }}
-                  />
-                  <span
-                    aria-hidden
-                    className="pointer-events-none absolute left-1/2 -top-16 size-40 -translate-x-1/2 rounded-full blur-3xl"
-                    style={{ background: `${BLUE}26` }}
-                  />
-                  <Rich
-                    text={L.aboutIntro}
-                    className="relative mx-auto block max-w-[30ch] text-balance font-space-grotesk text-[15px] font-medium leading-[1.65] tracking-[-0.01em] text-foreground"
-                  />
-                </div>
-
-
-                <ul className="px-4 pb-1">
+              <div className="mt-4 overflow-hidden rounded-lg border border-border/70 bg-card/70 p-3">
+                <ul className="grid grid-cols-2 gap-2.5">
                   {L.aboutItems.map((item, i) => {
                     const Icon = ABOUT_ICONS[i % ABOUT_ICONS.length]
+                    const style = ABOUT_STYLES[i % ABOUT_STYLES.length]
                     return (
                       <motion.li
                         key={item.t}
                         initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.06 + i * 0.05, duration: 0.3, ease: EASE }}
-                        className="flex items-start gap-3 border-t border-border/40 py-3.5"
+                        className={`min-w-0 rounded-lg border p-3.5 ${style.card}`}
                       >
-                        <span
-                          className="mt-px flex size-8 shrink-0 items-center justify-center rounded-[10px] border"
-                          style={{
-                            background: `linear-gradient(145deg, ${BLUE}1f, transparent)`,
-                            borderColor: `${BLUE}33`,
-                          }}
-                        >
-                          <Icon className="size-[17px]" style={{ color: BLUE }} />
+                        <span className={`flex h-10 items-center justify-center ${style.icon}`}>
+                          <Icon className="size-[20px]" />
                         </span>
-                        <span className="min-w-0 flex-1">
-                          <span className="flex items-center gap-2">
-                            <span className="font-space-grotesk text-[13.5px] font-bold leading-tight tracking-[-0.015em] text-foreground">
-                              {item.t}
-                            </span>
-                            <span
-                              className="rounded-full px-1.5 py-[2px] font-dm-sans text-[9.5px] font-bold uppercase leading-none tracking-[0.1em]"
-                              style={{ background: `${BLUE}18`, color: BLUE }}
-                            >
-                              {item.tag}
-                            </span>
-                          </span>
-                          <Rich
-                            text={item.d}
-                            className="mt-1.5 block font-dm-sans text-[12.5px] leading-[1.65] text-muted-foreground"
-                          />
+                        <span className={`mt-3 block font-manrope text-[10px] font-extrabold uppercase leading-none ${style.tag}`}>
+                          {item.tag}
                         </span>
+                        <span className="mt-1.5 block font-heading text-[13px] font-bold leading-[1.25] text-foreground">
+                          {item.t}
+                        </span>
+                        <Rich
+                          text={item.d}
+                          className="mt-2 block font-manrope text-[11.5px] leading-[1.5] text-muted-foreground"
+                        />
                       </motion.li>
                     )
                   })}
                 </ul>
 
-                <div className="flex items-start gap-2.5 border-t border-border/60 bg-primary/[0.07] px-4 py-3.5">
-                  <IconWarrantyClock className="mt-px size-[18px] shrink-0 text-primary" />
+                <div className="mt-3 flex items-start gap-3 rounded-lg border border-success/20 bg-success/[0.07] px-3.5 py-3.5">
+                  <span className="account-icon-hex flex size-9 shrink-0 items-center justify-center bg-success/14 text-success">
+                    <IconWarrantyClock className="size-[19px]" />
+                  </span>
                   <Rich
                     text={L.aboutNote}
-                    className="font-dm-sans text-[12.5px] leading-[1.6] text-muted-foreground"
+                    className="font-manrope text-[12px] leading-[1.55] text-muted-foreground"
                   />
                 </div>
               </div>
