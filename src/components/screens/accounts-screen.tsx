@@ -1467,7 +1467,7 @@ function FilterableAccountsView({
               ? "Зажми и перетащи"
               : "Выбери 2 карточки"
         }
-        onBack={onBack}
+        onBack={hideBackAndFilter ? undefined : onBack}
         right={
           <div className="flex items-center gap-1.5">
             {isAdminMode && reorderMode === "off" && (
@@ -1502,7 +1502,7 @@ function FilterableAccountsView({
                 </button>
               </>
             )}
-            {reorderMode === "off" && (
+            {!hideBackAndFilter && reorderMode === "off" && (
               <button
                 onClick={() => setFiltersOpen(true)}
                 aria-label={L.filters}
