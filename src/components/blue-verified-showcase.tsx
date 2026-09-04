@@ -227,7 +227,7 @@ export function BlueVerifiedShowcase({
         : 'border-info/40 bg-info/12 text-info'
 
   return (
-    <div className="flex flex-1 flex-col pb-32">
+    <div className="flex flex-col pb-12">
       {/* Tier selector */}
       <div className="px-4 pt-3">
         <div className="flex items-center gap-2">
@@ -448,7 +448,7 @@ export function BlueVerifiedShowcase({
               className="overflow-hidden"
             >
               <div className="mt-4 overflow-hidden rounded-lg border border-border/70 bg-card/70 p-3">
-                <ul className="space-y-2.5">
+                <ul className="space-y-3">
                   {L.aboutItems.map((item, i) => {
                     const Icon = ABOUT_ICONS[i % ABOUT_ICONS.length]
                     const style = ABOUT_STYLES[i % ABOUT_STYLES.length]
@@ -458,10 +458,10 @@ export function BlueVerifiedShowcase({
                         initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.06 + i * 0.05, duration: 0.3, ease: EASE }}
-                        className="flex min-w-0 items-start gap-3 rounded-xl border border-border/60 bg-background/40 p-3.5"
+                        className="flex min-w-0 items-start gap-3 rounded-xl border border-border/60 bg-background/40 p-4"
                       >
-                        <span className={`flex size-9 shrink-0 items-center justify-center rounded-[10px] ${style.icon}`}>
-                          <Icon className="size-[19px]" />
+                        <span className={`flex size-10 shrink-0 items-center justify-center rounded-[10px] ${style.icon}`}>
+                          <Icon className="size-[20px]" />
                         </span>
                         <span className="min-w-0 flex-1 pt-0.5">
                           <span className={`block font-manrope text-[9.5px] font-extrabold uppercase leading-none ${style.tag}`}>
@@ -480,9 +480,9 @@ export function BlueVerifiedShowcase({
                   })}
                 </ul>
 
-                <div className="mt-3 flex items-start gap-3 rounded-lg border border-success/20 bg-success/[0.07] px-3.5 py-3.5">
-                  <span className="account-icon-hex flex size-9 shrink-0 items-center justify-center bg-success/14 text-success">
-                    <IconWarrantyClock className="size-[19px]" />
+                <div className="mt-3 flex items-start gap-3 rounded-lg border border-success/20 bg-success/[0.07] px-3.5 py-4">
+                  <span className="account-icon-hex flex size-10 shrink-0 items-center justify-center bg-success/14 text-success">
+                    <IconWarrantyClock className="size-[20px]" />
                   </span>
                   <Rich
                     text={L.aboutNote}
