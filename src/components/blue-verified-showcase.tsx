@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { ChevronDown, Lock, Check, ShieldCheck, BadgeCheck } from 'lucide-react'
+import { ChevronDown, Lock, Check, ShieldCheck, BadgeCheck, Sparkles } from 'lucide-react'
 import { XLogo } from '@/components/x-logo'
 import { VerifiedBadge } from '@/components/icons/verified-badge'
 import { money } from '@/lib/format'
@@ -23,6 +23,16 @@ const COPY = {
     warranty: 'Гарантия',
     warrantyValue: '48 часов',
     about: 'Об аккаунте',
+    aboutIntro:
+      'Живой аккаунт X с активной синей галочкой. Возраст регистрации 2009–2026, органичная история активности и чистая репутация — такой профиль не выглядит как только что созданный и спокойно переживает первые дни работы.',
+    aboutExtra: [
+      'Выдаётся случайный профиль из подобранного пула — ник и аватар вы меняете сами.',
+      'В комплекте почта и доступ: логин, пароль, 2FA-ключ.',
+      'Работает с нашими услугами продвижения: фолловеры, лайки, просмотры.',
+      'Массовая выдача и выгрузка в таблицу — по запросу в поддержке.',
+    ],
+    aboutNote:
+      'Проверяйте вход сразу после покупки: замена по гарантии действует 48 часов с момента выдачи.',
     buy: 'Купить',
     soldOut: 'Нет в наличии',
   },
@@ -38,6 +48,16 @@ const COPY = {
     warranty: 'Warranty',
     warrantyValue: '48 hours',
     about: 'About the account',
+    aboutIntro:
+      'A live X account with an active blue check. Registration between 2009 and 2026, organic activity history and a clean reputation — it never looks freshly made and handles the first days of work calmly.',
+    aboutExtra: [
+      'You get a random profile from a curated pool — the handle and avatar are yours to change.',
+      'Mail and access included: login, password, 2FA key.',
+      'Works with our promotion services: followers, likes, views.',
+      'Bulk delivery and spreadsheet export available on request in support.',
+    ],
+    aboutNote:
+      'Check the login right after purchase: warranty replacement is valid for 48 hours after delivery.',
     buy: 'Buy',
     soldOut: 'Sold out',
   },
@@ -215,10 +235,6 @@ export function BlueVerifiedShowcase({
                     style={{ boxShadow: `0 0 0 1px ${BLUE}22, 0 8px 24px -10px ${BLUE}` }}
                   />
                   <XLogo className="size-7 text-white" />
-                  <VerifiedBadge
-                    className="absolute -bottom-0.5 right-0 size-[18px] rounded-full bg-card"
-                    style={{ color: BLUE }}
-                  />
                 </div>
               </motion.div>
               <div className="h-10" />
@@ -230,6 +246,14 @@ export function BlueVerifiedShowcase({
                 <h2 className="font-space-grotesk text-[20px] font-bold leading-none tracking-[-0.035em] text-foreground">
                   Blue Verified
                 </h2>
+                <motion.span
+                  initial={{ scale: 0.5, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ delay: 0.14, type: 'spring', stiffness: 500, damping: 18 }}
+                  className="inline-flex"
+                >
+                  <VerifiedBadge className="size-[19px]" style={{ color: BLUE }} />
+                </motion.span>
               </div>
               <div className="mt-2 flex items-center gap-1.5">
                 <span className="font-dm-sans text-[13px] text-muted-foreground">@</span>
@@ -252,11 +276,7 @@ export function BlueVerifiedShowcase({
             <div className="flex items-start gap-6 px-4 pb-5 pt-4">
               <Stat value={rangeLabel(active, ru)} label={L.followers} delay={0.05} />
               <Stat value={ru ? '0–5 000' : '0–5,000'} label={L.tweets} delay={0.11} />
-              <Stat
-                value={active.yearRange || String(active.year ?? '—')}
-                label={L.registered}
-                delay={0.17}
-              />
+              <Stat value="2009–2026" label={L.registered} delay={0.17} />
             </div>
 
             {/* Stock chip */}
@@ -300,33 +320,70 @@ export function BlueVerifiedShowcase({
           onClick={() => setAboutOpen((v) => !v)}
           className="flex w-full items-center justify-between border-b border-border/60 py-4 text-left outline-none"
         >
-          <span className="font-dm-sans text-[14px] font-semibold text-foreground">{L.about}</span>
-          <ChevronDown
-            className={`size-4 text-muted-foreground transition-transform duration-300 ${aboutOpen ? 'rotate-180' : ''}`}
-          />
+          <span className="flex items-center gap-2 font-dm-sans text-[14px] font-semibold text-foreground">
+            <Sparkles className="size-4 text-primary" strokeWidth={2.4} />
+            {L.about}
+          </span>
+          <motion.span
+            animate={{ rotate: aboutOpen ? 180 : 0 }}
+            transition={{ type: 'spring', stiffness: 380, damping: 28 }}
+            className="flex size-7 items-center justify-center rounded-full border border-border/70 bg-card"
+          >
+            <ChevronDown className="size-4 text-muted-foreground" />
+          </motion.span>
         </motion.button>
+
         <AnimatePresence initial={false}>
           {aboutOpen && (
-            <motion.ul
+            <motion.div
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: 'auto', opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.26, ease: EASE }}
+              transition={{ duration: 0.3, ease: EASE }}
               className="overflow-hidden"
             >
-              {active.features.map((f, i) => (
-                <motion.li
-                  key={i}
-                  initial={{ opacity: 0, x: -8 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.05 + i * 0.05, duration: 0.25, ease: EASE }}
-                  className="flex items-start gap-2 py-2 font-dm-sans text-[13px] text-muted-foreground first:pt-3"
-                >
-                  <Check className="mt-0.5 size-3.5 shrink-0 text-info" strokeWidth={2.8} />
-                  {f[lang as Lang] ?? f.en}
-                </motion.li>
-              ))}
-            </motion.ul>
+              <div className="mt-4 overflow-hidden rounded-[18px] border border-border/70 bg-card/70">
+                <div className="relative border-b border-border/60 px-4 py-4">
+                  <span
+                    aria-hidden
+                    className="absolute inset-x-0 top-0 h-px"
+                    style={{ background: `linear-gradient(90deg, transparent, ${BLUE}88, transparent)` }}
+                  />
+                  <p className="font-dm-sans text-[13.5px] leading-[1.7] text-muted-foreground">
+                    {L.aboutIntro}
+                  </p>
+                </div>
+
+                <ul className="px-4 py-2">
+                  {[...active.features.map((f) => f[lang as Lang] ?? f.en), ...L.aboutExtra].map(
+                    (text, i) => (
+                      <motion.li
+                        key={i}
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.06 + i * 0.045, duration: 0.28, ease: EASE }}
+                        className="flex items-start gap-2.5 border-b border-border/40 py-3 last:border-0 font-dm-sans text-[13px] leading-[1.55] text-muted-foreground"
+                      >
+                        <span
+                          className="mt-[3px] flex size-4 shrink-0 items-center justify-center rounded-full"
+                          style={{ background: `${BLUE}22` }}
+                        >
+                          <Check className="size-2.5" style={{ color: BLUE }} strokeWidth={3.4} />
+                        </span>
+                        <span>{text}</span>
+                      </motion.li>
+                    ),
+                  )}
+                </ul>
+
+                <div className="flex items-start gap-2.5 border-t border-border/60 bg-primary/[0.06] px-4 py-3.5">
+                  <ShieldCheck className="mt-px size-4 shrink-0 text-primary" strokeWidth={2.4} />
+                  <p className="font-dm-sans text-[12.5px] leading-[1.6] text-muted-foreground">
+                    {L.aboutNote}
+                  </p>
+                </div>
+              </div>
+            </motion.div>
           )}
         </AnimatePresence>
       </div>
