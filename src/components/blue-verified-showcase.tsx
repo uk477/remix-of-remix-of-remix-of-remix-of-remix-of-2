@@ -412,6 +412,7 @@ export function BlueVerifiedShowcase({
             <span className="flex size-8 shrink-0 items-center justify-center text-foreground">
               <XLogo className="size-[19px]" />
             </span>
+            <span className="min-w-0">
 
               <span className="block font-space-grotesk text-[14.5px] font-bold leading-none tracking-[-0.02em] text-foreground">
                 {L.about}
