@@ -215,10 +215,6 @@ export function BlueVerifiedShowcase({
                     style={{ boxShadow: `0 0 0 1px ${BLUE}22, 0 8px 24px -10px ${BLUE}` }}
                   />
                   <XLogo className="size-7 text-white" />
-                  <VerifiedBadge
-                    className="absolute -bottom-0.5 right-0 size-[18px] rounded-full bg-card"
-                    style={{ color: BLUE }}
-                  />
                 </div>
               </motion.div>
               <div className="h-10" />
