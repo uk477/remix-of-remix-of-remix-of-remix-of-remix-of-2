@@ -82,23 +82,22 @@ export function IconKey2FA(props: P) {
   )
 }
 
-/** Галочка: щит — галочка прорисовывается, стрелка продления вращается */
+/** Галочка: синий бейдж верификации — галочка прорисовывается, кольцо продления идёт по кругу */
 export function IconCheckRenew(props: P) {
   return (
     <svg {...base} {...props}>
       <path
-        d="M11 2.9 18.4 5.3v5.4c0 4.1-2.9 7.4-7.4 8.8-4.4-1.4-7.4-4.7-7.4-8.8V5.3L11 2.9Z"
+        className="ic-spin-slow"
+        d="M12 2.6l2.1 1.9 2.8-.4 1.2 2.6 2.6 1.2-.4 2.8L22 12l-1.7 2.1.4 2.8-2.6 1.2-1.2 2.6-2.8-.4L12 21.4l-2.1-1.7-2.8.4-1.2-2.6-2.6-1.2.4-2.8L2 12l1.7-2.1-.4-2.8 2.6-1.2 1.2-2.6 2.8.4L12 2.6Z"
         fill="currentColor"
-        fillOpacity=".12"
+        fillOpacity=".14"
+        strokeWidth="1.3"
       />
-      <path className="ic-draw" d="m7.8 10.7 2.2 2.3 4.1-4.5" strokeWidth="1.9" />
-      <g className="ic-renew">
-        <path d="M20.9 17.4a4.2 4.2 0 1 1-1.4-3.1" strokeWidth="1.6" />
-        <path d="M19.8 11.4v2.9h-2.8" strokeWidth="1.6" />
-      </g>
+      <path className="ic-draw" d="m8.4 12.2 2.5 2.5 4.8-5" strokeWidth="1.9" />
     </svg>
   )
 }
+
 
 /** Опт: коробка — партии карточек вылетают потоком */
 export function IconBulkExport(props: P) {
