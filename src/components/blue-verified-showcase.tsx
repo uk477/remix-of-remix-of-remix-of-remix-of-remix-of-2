@@ -472,7 +472,7 @@ export function BlueVerifiedShowcase({
               className="overflow-hidden"
             >
               <div className="mt-4 overflow-hidden rounded-lg border border-border/70 bg-card/70 p-3">
-                <ul className="grid grid-cols-2 gap-2.5">
+                <ul className="space-y-2.5">
                   {L.aboutItems.map((item, i) => {
                     const Icon = ABOUT_ICONS[i % ABOUT_ICONS.length]
                     const style = ABOUT_STYLES[i % ABOUT_STYLES.length]
@@ -482,21 +482,23 @@ export function BlueVerifiedShowcase({
                         initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.06 + i * 0.05, duration: 0.3, ease: EASE }}
-                        className={`min-w-0 rounded-lg border p-3.5 ${style.card}`}
+                        className={`flex min-w-0 items-start gap-3.5 rounded-lg border p-3.5 ${style.card}`}
                       >
-                        <span className={`flex h-10 items-center justify-center ${style.icon}`}>
+                        <span className={`flex h-11 shrink-0 items-center justify-center ${style.icon}`}>
                           <Icon className="size-[20px]" />
                         </span>
-                        <span className={`mt-3 block font-manrope text-[10px] font-extrabold uppercase leading-none ${style.tag}`}>
-                          {item.tag}
+                        <span className="min-w-0 flex-1 pt-0.5">
+                          <span className={`block font-manrope text-[9.5px] font-extrabold uppercase leading-none ${style.tag}`}>
+                            {item.tag}
+                          </span>
+                          <span className="mt-1.5 block font-heading text-[13.5px] font-bold leading-[1.25] text-foreground">
+                            {item.t}
+                          </span>
+                          <Rich
+                            text={item.d}
+                            className="mt-1.5 block font-manrope text-[11.5px] leading-[1.5] text-muted-foreground"
+                          />
                         </span>
-                        <span className="mt-1.5 block font-heading text-[13px] font-bold leading-[1.25] text-foreground">
-                          {item.t}
-                        </span>
-                        <Rich
-                          text={item.d}
-                          className="mt-2 block font-manrope text-[11.5px] leading-[1.5] text-muted-foreground"
-                        />
                       </motion.li>
                     )
                   })}
