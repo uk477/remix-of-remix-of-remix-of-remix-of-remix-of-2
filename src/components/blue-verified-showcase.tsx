@@ -385,28 +385,8 @@ export function BlueVerifiedShowcase({
         </AnimatePresence>
       </div>
 
-      {/* Description */}
-      <AnimatePresence mode="wait">
-        {desc && (
-          <motion.div
-            key={`d-${active.id}`}
-            initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.25, ease: EASE }}
-            className="px-4 pt-4"
-          >
-            <div className="relative rounded-[16px] border border-border/60 bg-card/50 px-4 py-3.5 pl-5">
-              <span
-                aria-hidden
-                className="absolute left-0 top-3 bottom-3 w-[3px] rounded-full"
-                style={{ background: `linear-gradient(180deg, ${BLUE}, ${BLUE}22)` }}
-              />
-              <p className="font-dm-sans text-[13.5px] leading-[1.7] text-muted-foreground">{desc}</p>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+
+
 
       {/* Spec rows */}
       <div className="mt-4 px-4">
