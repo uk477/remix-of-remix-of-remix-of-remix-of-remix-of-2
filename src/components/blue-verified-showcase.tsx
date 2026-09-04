@@ -408,12 +408,20 @@ export function BlueVerifiedShowcase({
       {/* Spec rows */}
       <div className="mt-4 px-4">
         <SpecRow
-          icon={<IconBlueCheck className="size-[18px]" style={{ color: BLUE }} />}
+          icon={
+            <span className="animate-icon-glow">
+              <IconBlueCheck className="size-[18px]" style={{ color: BLUE }} />
+            </span>
+          }
           label={L.check}
           value={L.checkValue}
         />
         <SpecRow
-          icon={<IconWarrantyClock className="size-[18px]" style={{ color: GREEN }} />}
+          icon={
+            <span className="animate-icon-breathe">
+              <IconWarrantyClock className="size-[18px]" style={{ color: GREEN }} />
+            </span>
+          }
           label={L.warranty}
           value={L.warrantyValue}
         />
