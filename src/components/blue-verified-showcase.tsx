@@ -26,7 +26,7 @@ const ABOUT_ICONS = [
   IconPoolShuffle,
   IconMailVault,
   IconKey2FA,
-  IconBoostReady,
+  IconCheckRenew,
   IconBulkExport,
 ] as const
 
