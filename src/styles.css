@@ -1299,11 +1299,4 @@ a,
   will-change: background-position;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .animate-icon-float,
-  .animate-icon-breathe,
-  .animate-icon-glow,
-  .animate-icon-sheen {
-    animation: none;
-  }
-}
+
