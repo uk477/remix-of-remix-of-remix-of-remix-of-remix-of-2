@@ -235,50 +235,54 @@ export function BlueVerifiedShowcase({
             {L.followersCap}
           </p>
         </div>
-        <div className="mt-2.5 flex items-stretch gap-1 overflow-x-auto border-b border-border/70">
-          {tiers.map((t) => {
-            const on = t.id === active.id
-            return (
-              <motion.button
-                key={t.id}
-                type="button"
-                whileTap={{ scale: 0.94 }}
-                transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-                onClick={() => setActiveId(t.id)}
-                className="relative flex min-w-0 flex-1 shrink-0 flex-col items-center gap-0.5 px-2 pb-3 pt-1.5 outline-none"
-              >
-                <span
-                  className={`font-space-grotesk whitespace-nowrap text-[13px] font-bold leading-none tracking-[-0.02em] transition-colors duration-200 ${
-                    on ? 'text-foreground' : 'text-muted-foreground/55'
-                  }`}
-                >
-                  {rangeLabel(t, ru)}
-                </span>
-                <span
-                  className={`font-dm-sans text-[10.5px] font-bold tabular-nums leading-none transition-colors duration-200 ${
-                    on ? 'text-primary' : 'text-muted-foreground/40'
-                  }`}
-                >
-                  ${Math.round(t.pricePerAccount)}
-                </span>
-                {on && (
-                  <>
-                    <motion.span
-                      layoutId="blue-tier-underline"
-                      className="absolute -bottom-px left-2.5 right-2.5 h-[2.5px] rounded-full bg-primary"
-                      transition={{ type: 'spring', stiffness: 430, damping: 36 }}
-                    />
-                    <motion.span
-                      layoutId="blue-tier-glow"
-                      aria-hidden
-                      className="pointer-events-none absolute -bottom-2 left-1/2 h-8 w-16 -translate-x-1/2 rounded-full bg-primary/25 blur-xl"
-                      transition={{ type: 'spring', stiffness: 430, damping: 36 }}
-                    />
-                  </>
-                )}
-              </motion.button>
-            )
-          })}
+        <div className="mt-2.5 flex flex-col gap-1 border-b border-border/70 pb-2">
+          {[tiers.slice(0, 4), tiers.slice(4, 8)].map((row, rowIndex) => (
+            <div key={rowIndex} className="flex items-stretch gap-1">
+              {row.map((t) => {
+                const on = t.id === active.id
+                return (
+                  <motion.button
+                    key={t.id}
+                    type="button"
+                    whileTap={{ scale: 0.94 }}
+                    transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                    onClick={() => setActiveId(t.id)}
+                    className="relative flex min-w-0 flex-1 shrink-0 flex-col items-center gap-0.5 px-2 pb-3 pt-1.5 outline-none"
+                  >
+                    <span
+                      className={`font-space-grotesk whitespace-nowrap text-[13px] font-bold leading-none tracking-[-0.02em] transition-colors duration-200 ${
+                        on ? 'text-foreground' : 'text-muted-foreground/55'
+                      }`}
+                    >
+                      {rangeLabel(t, ru)}
+                    </span>
+                    <span
+                      className={`font-dm-sans text-[10.5px] font-bold tabular-nums leading-none transition-colors duration-200 ${
+                        on ? 'text-primary' : 'text-muted-foreground/40'
+                      }`}
+                    >
+                      ${Math.round(t.pricePerAccount)}
+                    </span>
+                    {on && (
+                      <>
+                        <motion.span
+                          layoutId="blue-tier-underline"
+                          className="absolute -bottom-px left-2.5 right-2.5 h-[2.5px] rounded-full bg-primary"
+                          transition={{ type: 'spring', stiffness: 430, damping: 36 }}
+                        />
+                        <motion.span
+                          layoutId="blue-tier-glow"
+                          aria-hidden
+                          className="pointer-events-none absolute -bottom-2 left-1/2 h-8 w-16 -translate-x-1/2 rounded-full bg-primary/25 blur-xl"
+                          transition={{ type: 'spring', stiffness: 430, damping: 36 }}
+                        />
+                      </>
+                    )}
+                  </motion.button>
+                )
+              })}
+            </div>
+          ))}
         </div>
       </div>
 
