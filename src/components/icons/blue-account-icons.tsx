@@ -6,81 +6,90 @@ const base = {
   viewBox: '0 0 24 24',
   fill: 'none',
   stroke: 'currentColor',
-  strokeWidth: 1.6,
+  strokeWidth: 1.5,
   strokeLinecap: 'round' as const,
   strokeLinejoin: 'round' as const,
 }
 
-/** Годовые кольца / история аккаунта */
+/** Возраст: календарная лента лет с отметкой */
 export function IconAgeRings(props: P) {
   return (
     <svg {...base} {...props}>
-      <circle cx="12" cy="12" r="8.5" />
-      <circle cx="12" cy="12" r="5" opacity=".7" />
-      <circle cx="12" cy="12" r="1.7" fill="currentColor" stroke="none" />
-      <path d="M12 3.5v2M12 18.5v2M3.5 12h2M18.5 12h2" opacity=".55" />
+      <path d="M3 9.2h18" opacity=".55" />
+      <rect x="3" y="4.6" width="18" height="15" rx="3.2" />
+      <path d="M7.6 2.9v3.2M16.4 2.9v3.2" />
+      <rect x="6" y="11.6" width="4.6" height="4.6" rx="1.4" fill="currentColor" fillOpacity=".22" stroke="none" />
+      <path d="M6.9 14 8 15.1l2.1-2.3" strokeWidth="1.7" />
+      <path d="M13.6 12.8h4.6M13.6 15.6h3" opacity=".5" />
     </svg>
   )
 }
 
-/** Закрытый пул — случайная выдача профиля */
+/** Пул: три карточки профиля, одна вытянута случайно */
 export function IconPoolShuffle(props: P) {
   return (
     <svg {...base} {...props}>
-      <rect x="3" y="3.5" width="8" height="8" rx="2.4" />
-      <rect x="13" y="12.5" width="8" height="8" rx="2.4" />
-      <circle cx="7" cy="7.5" r="1.15" fill="currentColor" stroke="none" />
-      <circle cx="17" cy="16.5" r="1.15" fill="currentColor" stroke="none" />
-      <path d="M13.5 7.5h4.2a2.3 2.3 0 0 1 2.3 2.3v1.4" opacity=".8" />
-      <path d="M18.4 9.6 20 11.2l1.4-1.6" opacity=".8" />
-      <path d="M10.5 16.5H6.3A2.3 2.3 0 0 1 4 14.2v-1.4" opacity=".8" />
+      <rect x="2.6" y="7.4" width="9.4" height="12" rx="2.6" opacity=".45" />
+      <rect x="5.6" y="5.6" width="9.4" height="12" rx="2.6" opacity=".7" />
+      <rect x="9.4" y="3.6" width="11.6" height="13" rx="2.8" fill="currentColor" fillOpacity=".14" />
+      <circle cx="15.2" cy="8.4" r="1.9" />
+      <path d="M12.3 14.1c.5-1.8 1.6-2.7 2.9-2.7s2.4.9 2.9 2.7" />
+      <path d="m17.9 19.4 2.6 1.1-1-2.7" opacity=".7" />
     </svg>
   )
 }
 
-/** Почта в комплекте */
+/** Почта: конверт с ключом доступа */
 export function IconMailVault(props: P) {
   return (
     <svg {...base} {...props}>
-      <rect x="2.5" y="5" width="19" height="14" rx="3" />
-      <path d="m3.6 7.4 7.1 5.1a2.2 2.2 0 0 0 2.6 0l7.1-5.1" />
-      <circle cx="18" cy="16" r="2.4" fill="currentColor" fillOpacity=".18" />
-      <path d="M18 14.9v2.2" />
+      <path d="M3 8.2A3.2 3.2 0 0 1 6.2 5h11.6A3.2 3.2 0 0 1 21 8.2v4.1" />
+      <path d="M3 8.6v7.2A3.2 3.2 0 0 0 6.2 19h6.4" />
+      <path d="m3.8 7.6 6.6 4.7a2.6 2.6 0 0 0 3.1 0l6.7-4.7" fill="currentColor" fillOpacity=".12" />
+      <circle cx="17.6" cy="16.6" r="2.1" fill="currentColor" fillOpacity=".2" />
+      <path d="M19.2 18.1 21.4 20.4" strokeWidth="1.7" />
     </svg>
   )
 }
 
-/** Логин, пароль и 2FA */
+/** Доступ: щит с ключом и 2FA-кодом */
 export function IconKey2FA(props: P) {
   return (
     <svg {...base} {...props}>
-      <path d="M4.5 12.5 10 7a4.6 4.6 0 1 1 7 7l-5.5 5.5H8.5v-2.2H6.3v-2.2H4.5v-2.6Z" />
-      <circle cx="15.2" cy="8.8" r="1.4" fill="currentColor" stroke="none" />
-      <path d="M18.6 3.4v2.2M21 5.1l-1.9 1.1M16.2 5.1l1.9 1.1" opacity=".65" />
+      <path d="M12 2.8 19.6 5.4v5.6c0 4.3-3 7.7-7.6 9.2-4.6-1.5-7.6-4.9-7.6-9.2V5.4L12 2.8Z" fill="currentColor" fillOpacity=".1" />
+      <circle cx="12" cy="10.2" r="2.2" />
+      <path d="M12 12.4v4.1M12 15.1h1.9" strokeWidth="1.7" />
+      <path d="M9.2 6.4h5.6" opacity=".5" />
     </svg>
   )
 }
 
-/** Готов к продвижению */
-export function IconBoostReady(props: P) {
+/** Галочка: бейдж с циклом продления */
+export function IconCheckRenew(props: P) {
   return (
     <svg {...base} {...props}>
-      <path d="M13.6 3.6c3.5.6 6.2 3.3 6.8 6.8l-8 8-3.3-3.3 4.5-11.5Z" opacity=".9" />
-      <path d="m9.1 15.1-3.3-3.3 7.8-8.2" opacity=".55" />
-      <circle cx="14.6" cy="9.4" r="1.5" fill="currentColor" stroke="none" />
-      <path d="M6.6 17.4c-1.3 1.3-1.6 4-1.6 4s2.7-.3 4-1.6a1.8 1.8 0 0 0-2.4-2.4Z" />
+      <path
+        d="M12 3.4a3 3 0 0 1 2.4 1.1 3 3 0 0 1 2.6.8 3 3 0 0 1 .8 2.6A3 3 0 0 1 19 10.3a3 3 0 0 1-1.2 2.4 3 3 0 0 1-.8 2.6 3 3 0 0 1-2.6.8A3 3 0 0 1 12 17.2a3 3 0 0 1-2.4-1.1 3 3 0 0 1-2.6-.8 3 3 0 0 1-.8-2.6A3 3 0 0 1 5 10.3a3 3 0 0 1 1.2-2.4 3 3 0 0 1 .8-2.6 3 3 0 0 1 2.6-.8A3 3 0 0 1 12 3.4Z"
+        fill="currentColor"
+        fillOpacity=".14"
+      />
+      <path d="m9.6 10.4 1.8 1.8 3.3-3.6" strokeWidth="1.8" />
+      <path d="M6.4 19.4a7.4 7.4 0 0 0 11.2 0" opacity=".65" />
+      <path d="m5.4 17 .8 2.5 2.4-.6" opacity=".65" />
     </svg>
   )
 }
 
-/** Опт и выгрузка списком */
+/** Опт: таблица со стрелкой выгрузки */
 export function IconBulkExport(props: P) {
   return (
     <svg {...base} {...props}>
-      <rect x="3" y="4" width="12.5" height="14" rx="2.4" />
-      <path d="M6.2 8h6.1M6.2 11h6.1M6.2 14h3.6" opacity=".75" />
-      <path d="M18.5 11v7.6" />
-      <path d="m15.9 16.2 2.6 2.6 2.6-2.6" />
+      <rect x="2.8" y="4.2" width="13.4" height="13.4" rx="2.6" />
+      <path d="M2.8 8.4h13.4" opacity=".7" />
+      <path d="M7.6 8.4v9.2" opacity=".5" />
+      <rect x="2.8" y="4.2" width="13.4" height="4.2" rx="2.2" fill="currentColor" fillOpacity=".18" stroke="none" />
+      <path d="M19 12.4v7.4" strokeWidth="1.7" />
+      <path d="m16.4 17.4 2.6 2.6 2.6-2.6" strokeWidth="1.7" />
     </svg>
   )
 }
