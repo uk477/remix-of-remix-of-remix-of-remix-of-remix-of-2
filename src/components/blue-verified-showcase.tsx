@@ -396,7 +396,7 @@ export function BlueVerifiedShowcase({
           value={L.checkValue}
         />
         <SpecRow
-          icon={<IconWarrantyClock className="size-[18px] text-primary" />}
+          icon={<IconWarrantyClock className="size-[18px]" style={{ color: GREEN }} />}
           label={L.warranty}
           value={L.warrantyValue}
         />
