@@ -491,7 +491,7 @@ export function BlueVerifiedShowcase({
                 </ul>
 
                 <div className="mt-2.5 flex items-center gap-2.5 rounded-lg border border-success/20 bg-success/[0.07] px-3 py-2.5">
-                  <span className="account-icon-hex flex size-8 shrink-0 items-center justify-center bg-success/14 text-success">
+                  <span className="account-icon-hex flex size-8 shrink-0 items-center justify-center bg-success/14 text-success animate-icon-glow">
                     <IconWarrantyClock className="size-[16px]" />
                   </span>
                   <Rich
