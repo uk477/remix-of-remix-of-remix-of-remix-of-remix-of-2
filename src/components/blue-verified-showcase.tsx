@@ -256,11 +256,7 @@ export function BlueVerifiedShowcase({
             <div className="flex items-start gap-6 px-4 pb-5 pt-4">
               <Stat value={rangeLabel(active, ru)} label={L.followers} delay={0.05} />
               <Stat value={ru ? '0–5 000' : '0–5,000'} label={L.tweets} delay={0.11} />
-              <Stat
-                value={active.yearRange || String(active.year ?? '—')}
-                label={L.registered}
-                delay={0.17}
-              />
+              <Stat value="2009–2026" label={L.registered} delay={0.17} />
             </div>
 
             {/* Stock chip */}
