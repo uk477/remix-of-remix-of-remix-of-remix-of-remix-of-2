@@ -409,27 +409,36 @@ export function BlueVerifiedShowcase({
                   </p>
                 </div>
 
-                <ul className="px-4 py-2">
-                  {[...active.features.map((f) => f[lang as Lang] ?? f.en), ...L.aboutExtra].map(
-                    (text, i) => (
+                <ul className="px-4 py-1">
+                  {L.aboutItems.map((item, i) => {
+                    const Icon = ABOUT_ICONS[i % ABOUT_ICONS.length]
+                    return (
                       <motion.li
-                        key={i}
+                        key={item.t}
                         initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.06 + i * 0.045, duration: 0.28, ease: EASE }}
-                        className="flex items-start gap-2.5 border-b border-border/40 py-3 last:border-0 font-dm-sans text-[13px] leading-[1.55] text-muted-foreground"
+                        transition={{ delay: 0.06 + i * 0.05, duration: 0.3, ease: EASE }}
+                        className="flex items-start gap-3 border-b border-border/40 py-3.5 last:border-0"
                       >
                         <span
-                          className="mt-[3px] flex size-4 shrink-0 items-center justify-center rounded-full"
-                          style={{ background: `${BLUE}22` }}
+                          className="mt-px flex size-7 shrink-0 items-center justify-center rounded-[9px] border"
+                          style={{ background: `${BLUE}14`, borderColor: `${BLUE}33` }}
                         >
-                          <Check className="size-2.5" style={{ color: BLUE }} strokeWidth={3.4} />
+                          <Icon className="size-[15px]" style={{ color: BLUE }} strokeWidth={2.2} />
                         </span>
-                        <span>{text}</span>
+                        <span className="min-w-0">
+                          <span className="block font-dm-sans text-[13.5px] font-semibold leading-tight text-foreground">
+                            {item.t}
+                          </span>
+                          <span className="mt-1 block font-dm-sans text-[12.5px] leading-[1.6] text-muted-foreground">
+                            {item.d}
+                          </span>
+                        </span>
                       </motion.li>
-                    ),
-                  )}
+                    )
+                  })}
                 </ul>
+
 
                 <div className="flex items-start gap-2.5 border-t border-border/60 bg-primary/[0.06] px-4 py-3.5">
                   <ShieldCheck className="mt-px size-4 shrink-0 text-primary" strokeWidth={2.4} />
