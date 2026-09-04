@@ -226,6 +226,14 @@ export function BlueVerifiedShowcase({
                 <h2 className="font-space-grotesk text-[20px] font-bold leading-none tracking-[-0.035em] text-foreground">
                   Blue Verified
                 </h2>
+                <motion.span
+                  initial={{ scale: 0.5, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ delay: 0.14, type: 'spring', stiffness: 500, damping: 18 }}
+                  className="inline-flex"
+                >
+                  <VerifiedBadge className="size-[19px]" style={{ color: BLUE }} />
+                </motion.span>
               </div>
               <div className="mt-2 flex items-center gap-1.5">
                 <span className="font-dm-sans text-[13px] text-muted-foreground">@</span>
