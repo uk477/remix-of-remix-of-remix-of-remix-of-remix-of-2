@@ -39,6 +39,15 @@ const ABOUT_STYLES = [
   { icon: 'bg-coral/12 text-coral', tag: 'text-coral' },
 ] as const
 
+const ABOUT_ANIMATIONS = [
+  'animate-icon-float',
+  'animate-icon-breathe',
+  'animate-icon-glow',
+  'animate-icon-float',
+  'animate-icon-breathe',
+  'animate-icon-glow',
+] as const
+
 
 const COPY = {
   ru: {
