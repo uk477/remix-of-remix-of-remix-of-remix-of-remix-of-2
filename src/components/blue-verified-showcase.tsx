@@ -441,7 +441,7 @@ export function BlueVerifiedShowcase({
               className="overflow-hidden"
             >
               <div className="mt-4 overflow-hidden rounded-[18px] border border-border/70 bg-card/70">
-                <div className="relative px-4 py-4">
+                <div className="relative px-5 py-5 text-center">
                   <span
                     aria-hidden
                     className="absolute inset-x-0 top-0 h-px"
@@ -449,14 +449,15 @@ export function BlueVerifiedShowcase({
                   />
                   <span
                     aria-hidden
-                    className="pointer-events-none absolute -left-10 -top-14 size-32 rounded-full blur-2xl"
-                    style={{ background: `${BLUE}1f` }}
+                    className="pointer-events-none absolute left-1/2 -top-16 size-40 -translate-x-1/2 rounded-full blur-3xl"
+                    style={{ background: `${BLUE}26` }}
                   />
                   <Rich
                     text={L.aboutIntro}
-                    className="relative block font-dm-sans text-[13.5px] leading-[1.75] text-muted-foreground"
+                    className="relative mx-auto block max-w-[30ch] text-balance font-space-grotesk text-[15px] font-medium leading-[1.65] tracking-[-0.01em] text-foreground"
                   />
                 </div>
+
 
                 <ul className="px-4 pb-1">
                   {L.aboutItems.map((item, i) => {
