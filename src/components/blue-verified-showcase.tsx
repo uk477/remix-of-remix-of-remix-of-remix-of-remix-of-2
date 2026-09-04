@@ -300,8 +300,8 @@ export function BlueVerifiedShowcase({
             {/* Identity */}
             <div className="px-4 pt-1">
               <div className="flex items-center gap-1.5">
-                <h2 className="font-space-grotesk text-[20px] font-bold leading-none tracking-[-0.035em] text-foreground">
-                  Blue Verified
+                <h2 className="font-space-grotesk text-[20px] font-bold leading-none tracking-[-0.035em] text-foreground blur-[5px] select-none">
+                  Classic Drift
                 </h2>
                 <motion.span
                   initial={{ scale: 0.5, opacity: 0 }}
@@ -313,27 +313,8 @@ export function BlueVerifiedShowcase({
                 </motion.span>
               </div>
               <div className="mt-2 flex items-center gap-2">
-                <span className="relative inline-flex items-center overflow-hidden rounded-md">
-                  <span
-                    aria-hidden
-                    className="select-none px-1.5 py-0.5 font-dm-sans text-[13.5px] text-muted-foreground/70 blur-[6px]"
-                  >
-                    @classicdrift_92
-                  </span>
-                  <span
-                    aria-hidden
-                    className="pointer-events-none absolute inset-0 rounded-md bg-muted-foreground/12"
-                    style={{
-                      backgroundImage:
-                        'repeating-linear-gradient(115deg, rgba(255,255,255,0.07) 0 2px, transparent 2px 6px)',
-                    }}
-                  />
-                </span>
-                <span className="flex items-center gap-1 rounded-full border border-border/70 bg-muted/25 px-2 py-[3px]">
-                  <Lock className="size-[11px] text-muted-foreground/70" strokeWidth={2.6} />
-                  <span className="font-dm-sans text-[10.5px] font-semibold uppercase tracking-[0.14em] text-muted-foreground/70">
-                    {L.hidden}
-                  </span>
+                <span className="font-dm-sans text-[13.5px] text-muted-foreground/70">
+                  @classicdrift_92
                 </span>
               </div>
 
