@@ -513,6 +513,35 @@ export const ACCOUNTS: AgedAccount[] = [
   },
   // --- Blue checkmark accounts (follower-tier catalog) ---
   {
+    id: 'acc_blue_tier1',
+    category: 'blue_acc',
+    name: { en: 'Blue Verified · Start', ru: 'Blue Verified · Start', ar: 'Blue Verified · Start', zh: 'Blue Verified · Start', es: 'Blue Verified · Start', tr: 'Blue Verified · Start', pt: 'Blue Verified · Start', fr: 'Blue Verified · Start', uk: 'Blue Verified · Start' },
+    description: {
+      en: 'Fresh blue verified account with a paid checkmark and a small audience. A clean base for any task.',
+      ru: 'Свежий аккаунт с оплаченной синей галочкой и небольшой аудиторией. Чистая база под любые задачи.',
+      ar: 'حساب موثّق أزرق جديد بعلامة مدفوعة وجمهور صغير. قاعدة نظيفة لأي مهمة.',
+      zh: '全新蓝标账号，已付费认证，粉丝较少。适合各种用途的干净基础号。',
+      es: 'Cuenta verificada azul nueva con check pagado y audiencia pequeña. Base limpia para cualquier tarea.',
+      tr: 'Ödenmiş mavi tikli, küçük kitleli yeni hesap. Her iş için temiz bir temel.',
+      pt: 'Conta verificada azul nova com selo pago e audiência pequena. Base limpa para qualquer tarefa.',
+      fr: 'Nouveau compte vérifié bleu avec badge payé et petite audience. Base propre pour toute tâche.',
+      uk: 'Свіжий акаунт з оплаченою синьою галочкою та невеликою аудиторією. Чиста база під будь-які задачі.',
+    },
+    yearRange: '2023–2025',
+    year: 2024,
+    pricePerAccount: 12.0,
+    stock: 44,
+    verification: 'blue',
+    followersRange: [0, 50],
+    topicIds: ['business'],
+    badge: { en: 'Verified', ru: 'Verified', ar: 'موثّق', zh: '已认证', es: 'Verificado', tr: 'Doğrulanmış', pt: 'Verificado', fr: 'Vérifié', uk: 'Верифікований' },
+    features: [
+      { en: 'Blue checkmark paid', ru: 'Синяя галочка оплачена', ar: 'العلامة الزرقاء مدفوعة', zh: '蓝标已付费', es: 'Check azul pagado', tr: 'Mavi tik ödendi', pt: 'Selo azul pago', fr: 'Badge bleu payé', uk: 'Синя галочка оплачена' },
+      { en: '0–50 followers', ru: '0–50 фолловеров', ar: '0–50 متابع', zh: '0–50 粉丝', es: '0–50 seguidores', tr: '0–50 takipçi', pt: '0–50 seguidores', fr: '0–50 abonnés', uk: '0–50 фолловерів' },
+    ],
+  },
+  {
+
     id: 'acc_blue_tier2',
     category: 'blue_acc',
     name: { en: 'Blue Verified · Growth', ru: 'Blue Verified · Growth', ar: 'Blue Verified · Growth', zh: 'Blue Verified · Growth', es: 'Blue Verified · Growth', tr: 'Blue Verified · Growth', pt: 'Blue Verified · Growth', fr: 'Blue Verified · Growth', uk: 'Blue Verified · Growth' },
