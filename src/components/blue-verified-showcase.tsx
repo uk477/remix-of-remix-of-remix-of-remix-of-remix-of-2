@@ -311,20 +311,25 @@ export function BlueVerifiedShowcase({
                 </motion.span>
               </div>
               <div className="mt-2 flex items-center gap-1.5">
-                <span className="font-dm-sans text-[13px] text-muted-foreground">@</span>
-                {[0, 1, 2, 3, 4].map((i) => (
-                  <motion.span
-                    key={i}
-                    className="size-2.5 rounded-[3px] bg-muted-foreground/25"
-                    animate={{ opacity: [0.35, 0.8, 0.35] }}
-                    transition={{ duration: 1.8, repeat: Infinity, delay: i * 0.12, ease: 'easeInOut' }}
-                  />
-                ))}
+                <span
+                  aria-hidden
+                  className="select-none font-dm-sans text-[13.5px] text-muted-foreground/80 blur-[5px]"
+                  style={{ textShadow: '0 0 12px rgba(255,255,255,0.18)' }}
+                >
+                  @classicdrift_92
+                </span>
+                <span className="flex items-center gap-1 rounded-full border border-border/70 bg-muted/25 px-2 py-[3px]">
+                  <Lock className="size-[11px] text-muted-foreground/70" strokeWidth={2.6} />
+                  <span className="font-dm-sans text-[10.5px] font-semibold uppercase tracking-[0.14em] text-muted-foreground/70">
+                    {L.hidden}
+                  </span>
+                </span>
               </div>
               <div className="mt-3 space-y-2">
-                <div className="h-2 w-[85%] rounded-full bg-muted-foreground/14" />
-                <div className="h-2 w-[62%] rounded-full bg-muted-foreground/14" />
+                <div className="h-2 w-[85%] rounded-full bg-muted-foreground/14 blur-[3px]" />
+                <div className="h-2 w-[62%] rounded-full bg-muted-foreground/14 blur-[3px]" />
               </div>
+
             </div>
 
             {/* Stats */}
