@@ -31,36 +31,12 @@ const ABOUT_ICONS = [
 ] as const
 
 const ABOUT_STYLES = [
-  {
-    card: 'border-info/20 bg-info/[0.055]',
-    icon: 'rounded-full bg-info/14 text-info',
-    tag: 'text-info',
-  },
-  {
-    card: 'border-smart-violet/20 bg-smart-violet/[0.055]',
-    icon: 'rotate-3 rounded-md bg-smart-violet/14 text-smart-violet',
-    tag: 'text-smart-violet',
-  },
-  {
-    card: 'border-emerald/20 bg-emerald/[0.055]',
-    icon: 'rounded-tl-2xl rounded-br-2xl bg-emerald/14 text-emerald',
-    tag: 'text-emerald',
-  },
-  {
-    card: 'border-primary/20 bg-primary/[0.055]',
-    icon: 'w-12 rounded-sm bg-primary/14 text-primary',
-    tag: 'text-primary',
-  },
-  {
-    card: 'border-success/20 bg-success/[0.055]',
-    icon: 'account-icon-hex bg-success/14 text-success',
-    tag: 'text-success',
-  },
-  {
-    card: 'border-coral/20 bg-coral/[0.055]',
-    icon: 'account-icon-crate bg-coral/14 text-coral',
-    tag: 'text-coral',
-  },
+  { icon: 'bg-info/12 text-info', tag: 'text-info' },
+  { icon: 'bg-smart-violet/12 text-smart-violet', tag: 'text-smart-violet' },
+  { icon: 'bg-emerald/12 text-emerald', tag: 'text-emerald' },
+  { icon: 'bg-primary/12 text-primary', tag: 'text-primary' },
+  { icon: 'bg-success/12 text-success', tag: 'text-success' },
+  { icon: 'bg-coral/12 text-coral', tag: 'text-coral' },
 ] as const
 
 
@@ -482,10 +458,10 @@ export function BlueVerifiedShowcase({
                         initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.06 + i * 0.05, duration: 0.3, ease: EASE }}
-                        className={`flex min-w-0 items-start gap-3.5 rounded-lg border p-3.5 ${style.card}`}
+                        className="flex min-w-0 items-start gap-3 rounded-xl border border-border/60 bg-background/40 p-3.5"
                       >
-                        <span className={`flex h-11 shrink-0 items-center justify-center ${style.icon}`}>
-                          <Icon className="size-[20px]" />
+                        <span className={`flex size-9 shrink-0 items-center justify-center rounded-[10px] ${style.icon}`}>
+                          <Icon className="size-[19px]" />
                         </span>
                         <span className="min-w-0 flex-1 pt-0.5">
                           <span className={`block font-manrope text-[9.5px] font-extrabold uppercase leading-none ${style.tag}`}>
