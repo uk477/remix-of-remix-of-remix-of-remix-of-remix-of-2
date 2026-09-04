@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { ChevronDown, Lock, Check, ShieldCheck, BadgeCheck } from 'lucide-react'
+import { ChevronDown, Lock, Check, ShieldCheck, BadgeCheck, Sparkles } from 'lucide-react'
 import { XLogo } from '@/components/x-logo'
 import { VerifiedBadge } from '@/components/icons/verified-badge'
 import { money } from '@/lib/format'
