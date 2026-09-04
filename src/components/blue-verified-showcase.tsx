@@ -210,7 +210,7 @@ export function BlueVerifiedShowcase({
   if (!active) return null
 
   const soldOut = active.stock <= 0
-  const desc = active.description?.[lang as Lang] ?? active.description?.en ?? ''
+  
   const stockTone =
     active.stock <= 0
       ? 'border-destructive/40 bg-destructive/12 text-destructive'
