@@ -1295,7 +1295,7 @@ function FilterableAccountsView({
 }: {
   list: AgedAccount[];
   title: string;
-  onBack: () => void;
+  onBack?: () => void;
   onOpen: (a: AgedAccount) => void;
   isBlue: boolean;
   Icon: LucideIcon;
@@ -1303,6 +1303,7 @@ function FilterableAccountsView({
   onAdminMenu?: (a: AgedAccount) => void;
   onAdd?: () => void;
   categoryId: MarketCategoryId;
+  hideBackAndFilter?: boolean;
   xSelectMode?: boolean;
   selectedXIds?: Set<string>;
   xRefreshing?: boolean;
