@@ -88,6 +88,8 @@ import { XLogo } from "../x-logo";
 import { SupplierItemsList } from "../supplier-items-list";
 import { spListProducts, type SpProductSummary } from "@/lib/socialplatforms.functions";
 import { VerifiedBadge } from "../icons/verified-badge";
+import { BlueVerifiedShowcase } from "../blue-verified-showcase";
+
 import { EditProfileModal } from "../order-form";
 import {
   ExternalLink,
@@ -1560,6 +1562,13 @@ function FilterableAccountsView({
         />
       ) : reorderMode === "swap" ? (
         <SwapGrid list={orderedList} renderCard={renderCardForReorder} onError={(m) => toast(m)} />
+      ) : isBlue ? (
+        <BlueVerifiedShowcase
+          list={filtered}
+          lang={lang}
+          onOpen={onOpen}
+          onAdminMenu={onAdminMenu}
+        />
       ) : (
         <>
           <PaginatedGrid
@@ -1581,6 +1590,7 @@ function FilterableAccountsView({
           />
         </>
       )}
+
 
       <FiltersSheet
         open={filtersOpen}
