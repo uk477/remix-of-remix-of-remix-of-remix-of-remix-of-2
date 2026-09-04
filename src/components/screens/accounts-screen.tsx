@@ -88,6 +88,8 @@ import { XLogo } from "../x-logo";
 import { SupplierItemsList } from "../supplier-items-list";
 import { spListProducts, type SpProductSummary } from "@/lib/socialplatforms.functions";
 import { VerifiedBadge } from "../icons/verified-badge";
+import { BlueVerifiedShowcase } from "../blue-verified-showcase";
+
 import { EditProfileModal } from "../order-form";
 import {
   ExternalLink,
