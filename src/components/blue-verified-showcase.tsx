@@ -2,27 +2,33 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import {
-  ChevronDown,
-  Lock,
-  ShieldCheck,
-  BadgeCheck,
-  Sparkles,
-  Shuffle,
-  KeyRound,
-  Mail,
-  Rocket,
-  History,
-  Clock3,
-} from 'lucide-react'
+import { ChevronDown, Lock } from 'lucide-react'
 import { XLogo } from '@/components/x-logo'
 import { VerifiedBadge } from '@/components/icons/verified-badge'
+import {
+  IconAgeRings,
+  IconPoolShuffle,
+  IconMailVault,
+  IconKey2FA,
+  IconBoostReady,
+  IconBulkExport,
+  IconBlueCheck,
+  IconWarrantyClock,
+} from '@/components/icons/blue-account-icons'
 import { money } from '@/lib/format'
 import type { AgedAccount, Lang } from '@/lib/types'
 
 const BLUE = 'oklch(0.72 0.15 235)'
 
-const ABOUT_ICONS = [History, Shuffle, Mail, KeyRound, Rocket, Clock3] as const
+const ABOUT_ICONS = [
+  IconAgeRings,
+  IconPoolShuffle,
+  IconMailVault,
+  IconKey2FA,
+  IconBoostReady,
+  IconBulkExport,
+] as const
+
 
 const COPY = {
   ru: {
@@ -38,36 +44,43 @@ const COPY = {
     warranty: 'Гарантия',
     warrantyValue: '48 часов',
     about: 'Об аккаунте',
+    aboutKicker: 'Что вы получаете',
     aboutIntro:
-      'Это не свежерег с накрученной галочкой. Профиль прожил в X годы: постил, читал, попадал в ленты — поэтому алгоритмы видят обычного человека, а не бота первого дня. Галочка уже оплачена и активна, ничего доплачивать и подтверждать не нужно.',
+      'Это **не свежерег с накрученной галочкой**. Профиль прожил в X годы: постил, читал, попадал в ленты — алгоритмы видят обычного человека, а не бота первого дня. Галочка **уже оплачена и активна**: ничего доплачивать и подтверждать не нужно.',
     aboutItems: [
       {
+        tag: 'Возраст',
         t: 'История, а не витрина',
-        d: 'Регистрация 2009–2026, органичная активность и чистая репутация: без блокировок, жалоб и следов перепродажи.',
+        d: 'Регистрация **2009–2026**, живая лента и чистая репутация: без блокировок, жалоб и следов перепродажи.',
       },
       {
-        t: 'Профиль из закрытого пула',
-        d: 'Конкретный аккаунт выдаётся случайно — ник, аватар и описание вы переписываете под себя за пару минут.',
+        tag: 'Пул',
+        t: 'Профиль выдаётся случайно',
+        d: 'Аккаунт берётся из закрытого пула. Ник, аватар и описание **переписываете под себя** за пару минут.',
       },
       {
-        t: 'Почта идёт в комплекте',
-        d: 'Полный доступ к привязанному ящику: восстановление и подтверждения остаются на вашей стороне.',
+        tag: 'Почта',
+        t: 'Ящик идёт в комплекте',
+        d: 'Полный доступ к привязанной почте: восстановление и коды подтверждения **остаются на вашей стороне**.',
       },
       {
+        tag: 'Доступ',
         t: 'Логин, пароль и 2FA-ключ',
-        d: 'Забираете данные сразу после оплаты и первым делом меняете пароль — аккаунт становится только вашим.',
+        d: 'Данные приходят сразу после оплаты. Меняете пароль первым делом — и аккаунт **только ваш**.',
       },
       {
+        tag: 'Буст',
         t: 'Готов к продвижению',
-        d: 'На него сразу можно запускать наши фолловеры, лайки и просмотры — прогрев не требуется.',
+        d: 'Сразу запускайте наши **фолловеров, лайки и просмотры** — прогрев и отлёжка не нужны.',
       },
       {
-        t: 'Опт и выгрузка',
-        d: 'Нужен объём? Соберём партию и отдадим списком в таблице — напишите в поддержку.',
+        tag: 'Опт',
+        t: 'Партии и выгрузка списком',
+        d: 'Нужен объём? Соберём партию под задачу и отдадим **таблицей** — напишите в поддержку.',
       },
     ],
     aboutNote:
-      'Зайдите в аккаунт сразу после покупки. Гарантия и бесплатная замена действуют 48 часов с момента выдачи.',
+      'Зайдите в аккаунт сразу после покупки: гарантия и бесплатная замена действуют **48 часов** с момента выдачи.',
     buy: 'Купить',
     soldOut: 'Нет в наличии',
   },
@@ -84,40 +97,66 @@ const COPY = {
     warranty: 'Warranty',
     warrantyValue: '48 hours',
     about: 'About the account',
+    aboutKicker: 'What you get',
     aboutIntro:
-      'This is not a fresh signup with a bought badge. The profile has lived on X for years — posting, reading, showing up in feeds — so algorithms read it as a person, not a day-one bot. The blue check is already paid and active.',
+      'This is **not a fresh signup with a bought badge**. The profile has lived on X for years — posting, reading, showing up in feeds — so algorithms read it as a person, not a day-one bot. The blue check is **already paid and active**.',
     aboutItems: [
       {
+        tag: 'Age',
         t: 'History, not a shell',
-        d: 'Registered between 2009 and 2026, organic activity and a clean record: no strikes, no complaints, no resale traces.',
+        d: 'Registered between **2009 and 2026**, organic activity and a clean record: no strikes, no complaints, no resale traces.',
       },
       {
-        t: 'Profile from a closed pool',
-        d: 'The exact account is assigned at random — handle, avatar and bio are yours to rewrite in a couple of minutes.',
+        tag: 'Pool',
+        t: 'Profile assigned at random',
+        d: 'The account comes from a closed pool. Handle, avatar and bio are **yours to rewrite** in a couple of minutes.',
       },
       {
+        tag: 'Mail',
         t: 'Mailbox included',
-        d: 'Full access to the linked email, so recovery and confirmations stay on your side.',
+        d: 'Full access to the linked email, so recovery and confirmation codes **stay on your side**.',
       },
       {
+        tag: 'Access',
         t: 'Login, password and 2FA key',
-        d: 'You get the credentials right after payment — change the password first and the account is only yours.',
+        d: 'Credentials arrive right after payment. Change the password first and the account is **only yours**.',
       },
       {
+        tag: 'Boost',
         t: 'Promotion-ready',
-        d: 'Run our followers, likes and views on it immediately, no warm-up needed.',
+        d: 'Run our **followers, likes and views** on it immediately — no warm-up, no cool-down.',
       },
       {
-        t: 'Bulk and export',
-        d: 'Need volume? We assemble a batch and hand it over as a spreadsheet — just ask support.',
+        tag: 'Bulk',
+        t: 'Batches and export',
+        d: 'Need volume? We assemble a batch and hand it over as a **spreadsheet** — just ask support.',
       },
     ],
     aboutNote:
-      'Log in right after purchase. Warranty and free replacement are valid for 48 hours after delivery.',
+      'Log in right after purchase: warranty and free replacement are valid for **48 hours** after delivery.',
     buy: 'Buy',
     soldOut: 'Sold out',
   },
 }
+
+/** Подсветка **ключевых** фрагментов внутри строки. */
+function Rich({ text, className }: { text: string; className?: string }) {
+  const parts = text.split(/\*\*(.+?)\*\*/g)
+  return (
+    <span className={className}>
+      {parts.map((p, i) =>
+        i % 2 === 1 ? (
+          <strong key={i} className="font-semibold text-foreground/90">
+            {p}
+          </strong>
+        ) : (
+          <span key={i}>{p}</span>
+        ),
+      )}
+    </span>
+  )
+}
+
 
 
 const EASE = [0.22, 1, 0.36, 1] as const
@@ -349,23 +388,38 @@ export function BlueVerifiedShowcase({
       {/* Description */}
       <AnimatePresence mode="wait">
         {desc && (
-          <motion.p
+          <motion.div
             key={`d-${active.id}`}
             initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.25, ease: EASE }}
-            className="px-4 pt-4 font-dm-sans text-[14px] leading-[1.65] text-muted-foreground"
+            className="px-4 pt-4"
           >
-            {desc}
-          </motion.p>
+            <div className="relative rounded-[16px] border border-border/60 bg-card/50 px-4 py-3.5 pl-5">
+              <span
+                aria-hidden
+                className="absolute left-0 top-3 bottom-3 w-[3px] rounded-full"
+                style={{ background: `linear-gradient(180deg, ${BLUE}, ${BLUE}22)` }}
+              />
+              <p className="font-dm-sans text-[13.5px] leading-[1.7] text-muted-foreground">{desc}</p>
+            </div>
+          </motion.div>
         )}
       </AnimatePresence>
 
       {/* Spec rows */}
       <div className="mt-4 px-4">
-        <SpecRow icon={<BadgeCheck className="size-4" style={{ color: BLUE }} strokeWidth={2.4} />} label={L.check} value={L.checkValue} />
-        <SpecRow icon={<ShieldCheck className="size-4 text-primary" strokeWidth={2.4} />} label={L.warranty} value={L.warrantyValue} />
+        <SpecRow
+          icon={<IconBlueCheck className="size-[18px]" style={{ color: BLUE }} />}
+          label={L.check}
+          value={L.checkValue}
+        />
+        <SpecRow
+          icon={<IconWarrantyClock className="size-[18px] text-primary" />}
+          label={L.warranty}
+          value={L.warrantyValue}
+        />
 
         <motion.button
           type="button"
@@ -373,14 +427,26 @@ export function BlueVerifiedShowcase({
           onClick={() => setAboutOpen((v) => !v)}
           className="flex w-full items-center justify-between border-b border-border/60 py-4 text-left outline-none"
         >
-          <span className="flex items-center gap-2 font-dm-sans text-[14px] font-semibold text-foreground">
-            <Sparkles className="size-4 text-primary" strokeWidth={2.4} />
-            {L.about}
+          <span className="flex min-w-0 items-center gap-2.5">
+            <span
+              className="flex size-8 shrink-0 items-center justify-center rounded-[10px] border"
+              style={{ background: `${BLUE}12`, borderColor: `${BLUE}2e`, color: BLUE }}
+            >
+              <XLogo className="size-[13px]" />
+            </span>
+            <span className="min-w-0">
+              <span className="block font-space-grotesk text-[14.5px] font-bold leading-none tracking-[-0.02em] text-foreground">
+                {L.about}
+              </span>
+              <span className="mt-1 block font-dm-sans text-[11px] uppercase leading-none tracking-[0.14em] text-muted-foreground/70">
+                {L.aboutKicker}
+              </span>
+            </span>
           </span>
           <motion.span
             animate={{ rotate: aboutOpen ? 180 : 0 }}
             transition={{ type: 'spring', stiffness: 380, damping: 28 }}
-            className="flex size-7 items-center justify-center rounded-full border border-border/70 bg-card"
+            className="flex size-7 shrink-0 items-center justify-center rounded-full border border-border/70 bg-card"
           >
             <ChevronDown className="size-4 text-muted-foreground" />
           </motion.span>
@@ -396,18 +462,24 @@ export function BlueVerifiedShowcase({
               className="overflow-hidden"
             >
               <div className="mt-4 overflow-hidden rounded-[18px] border border-border/70 bg-card/70">
-                <div className="relative border-b border-border/60 px-4 py-4">
+                <div className="relative px-4 py-4">
                   <span
                     aria-hidden
                     className="absolute inset-x-0 top-0 h-px"
                     style={{ background: `linear-gradient(90deg, transparent, ${BLUE}88, transparent)` }}
                   />
-                  <p className="font-dm-sans text-[13.5px] leading-[1.7] text-muted-foreground">
-                    {L.aboutIntro}
-                  </p>
+                  <span
+                    aria-hidden
+                    className="pointer-events-none absolute -left-10 -top-14 size-32 rounded-full blur-2xl"
+                    style={{ background: `${BLUE}1f` }}
+                  />
+                  <Rich
+                    text={L.aboutIntro}
+                    className="relative block font-dm-sans text-[13.5px] leading-[1.75] text-muted-foreground"
+                  />
                 </div>
 
-                <ul className="px-4 py-1">
+                <ul className="px-4 pb-1">
                   {L.aboutItems.map((item, i) => {
                     const Icon = ABOUT_ICONS[i % ABOUT_ICONS.length]
                     return (
@@ -416,39 +488,52 @@ export function BlueVerifiedShowcase({
                         initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.06 + i * 0.05, duration: 0.3, ease: EASE }}
-                        className="flex items-start gap-3 border-b border-border/40 py-3.5 last:border-0"
+                        className="flex items-start gap-3 border-t border-border/40 py-3.5"
                       >
                         <span
-                          className="mt-px flex size-7 shrink-0 items-center justify-center rounded-[9px] border"
-                          style={{ background: `${BLUE}14`, borderColor: `${BLUE}33` }}
+                          className="mt-px flex size-8 shrink-0 items-center justify-center rounded-[10px] border"
+                          style={{
+                            background: `linear-gradient(145deg, ${BLUE}1f, transparent)`,
+                            borderColor: `${BLUE}33`,
+                          }}
                         >
-                          <Icon className="size-[15px]" style={{ color: BLUE }} strokeWidth={2.2} />
+                          <Icon className="size-[17px]" style={{ color: BLUE }} />
                         </span>
-                        <span className="min-w-0">
-                          <span className="block font-dm-sans text-[13.5px] font-semibold leading-tight text-foreground">
-                            {item.t}
+                        <span className="min-w-0 flex-1">
+                          <span className="flex items-center gap-2">
+                            <span className="font-space-grotesk text-[13.5px] font-bold leading-tight tracking-[-0.015em] text-foreground">
+                              {item.t}
+                            </span>
+                            <span
+                              className="rounded-full px-1.5 py-[2px] font-dm-sans text-[9.5px] font-bold uppercase leading-none tracking-[0.1em]"
+                              style={{ background: `${BLUE}18`, color: BLUE }}
+                            >
+                              {item.tag}
+                            </span>
                           </span>
-                          <span className="mt-1 block font-dm-sans text-[12.5px] leading-[1.6] text-muted-foreground">
-                            {item.d}
-                          </span>
+                          <Rich
+                            text={item.d}
+                            className="mt-1.5 block font-dm-sans text-[12.5px] leading-[1.65] text-muted-foreground"
+                          />
                         </span>
                       </motion.li>
                     )
                   })}
                 </ul>
 
-
-                <div className="flex items-start gap-2.5 border-t border-border/60 bg-primary/[0.06] px-4 py-3.5">
-                  <ShieldCheck className="mt-px size-4 shrink-0 text-primary" strokeWidth={2.4} />
-                  <p className="font-dm-sans text-[12.5px] leading-[1.6] text-muted-foreground">
-                    {L.aboutNote}
-                  </p>
+                <div className="flex items-start gap-2.5 border-t border-border/60 bg-primary/[0.07] px-4 py-3.5">
+                  <IconWarrantyClock className="mt-px size-[18px] shrink-0 text-primary" />
+                  <Rich
+                    text={L.aboutNote}
+                    className="font-dm-sans text-[12.5px] leading-[1.6] text-muted-foreground"
+                  />
                 </div>
               </div>
             </motion.div>
           )}
         </AnimatePresence>
       </div>
+
 
       {/* Sticky buy bar */}
       <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border/60 bg-background/92 px-4 pb-[calc(env(safe-area-inset-bottom)+14px)] pt-3 backdrop-blur-xl">
