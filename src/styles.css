@@ -1300,3 +1300,68 @@ a,
 }
 
 
+
+/* ── Blue Verified icons: покомпонентная микро-анимация ─────────────────── */
+@keyframes ic-ring {
+  0% { opacity: .15; transform: scale(.62); }
+  35% { opacity: .95; }
+  100% { opacity: 0; transform: scale(1.18); }
+}
+.ic-ring { transform-box: fill-box; transform-origin: center; animation: ic-ring 3s ease-out infinite; }
+.ic-ring-2 { animation-delay: .35s; }
+.ic-ring-3 { animation-delay: .7s; }
+
+@keyframes ic-shuffle {
+  0%, 48% { transform: translate(0, 0) rotate(0deg); }
+  60% { transform: translate(1.6px, -2.2px) rotate(10deg); }
+  74% { transform: translate(-1.2px, .8px) rotate(-6deg); }
+  88%, 100% { transform: translate(0, 0) rotate(0deg); }
+}
+.ic-shuffle { transform-box: fill-box; transform-origin: center; animation: ic-shuffle 3.4s cubic-bezier(.4, 0, .2, 1) infinite; }
+
+@keyframes ic-letter {
+  0%, 52% { transform: translateY(1.6px); }
+  66%, 84% { transform: translateY(-1.4px); }
+  100% { transform: translateY(1.6px); }
+}
+.ic-letter { animation: ic-letter 3.2s cubic-bezier(.34, 1.4, .5, 1) infinite; }
+
+@keyframes ic-ping {
+  0%, 50% { opacity: 0; transform: scale(.3); }
+  62% { opacity: 1; transform: scale(1); }
+  82% { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(1.7); }
+}
+.ic-ping { transform-box: fill-box; transform-origin: center; animation: ic-ping 3.2s ease-out infinite; }
+
+@keyframes ic-key {
+  0%, 100% { transform: translateY(0); opacity: .45; }
+  10% { transform: translateY(1px); opacity: 1; }
+  24% { transform: translateY(0); opacity: .45; }
+}
+.ic-key { animation: ic-key 2s ease-in-out infinite; }
+.ic-key-2 { animation-delay: .2s; }
+.ic-key-3 { animation-delay: .4s; }
+.ic-key-4 { animation-delay: .6s; }
+
+@keyframes ic-draw {
+  0% { stroke-dashoffset: 16; }
+  28%, 78% { stroke-dashoffset: 0; }
+  100% { stroke-dashoffset: 16; }
+}
+.ic-draw { stroke-dasharray: 16; animation: ic-draw 3.2s ease-in-out infinite; }
+
+@keyframes ic-spin { to { transform: rotate(360deg); } }
+.ic-spin-slow { transform-box: view-box; transform-origin: 12px 12px; animation: ic-spin 14s linear infinite; }
+.ic-renew { transform-box: fill-box; transform-origin: center; animation: ic-spin 5s linear infinite; }
+.ic-hand-min { transform-box: view-box; transform-origin: 12px 11.6px; animation: ic-spin 2.6s linear infinite; }
+.ic-hand-hour { transform-box: view-box; transform-origin: 12px 11.6px; animation: ic-spin 15.6s linear infinite; }
+
+@keyframes ic-fly {
+  0% { opacity: 0; transform: translate(-3px, 3px) scale(.7); }
+  22% { opacity: 1; }
+  68% { opacity: 1; transform: translate(0, 0) scale(1); }
+  100% { opacity: 0; transform: translate(2.4px, -2.6px) scale(1.05); }
+}
+.ic-fly { animation: ic-fly 2.8s ease-out infinite; }
+.ic-fly-2 { animation-delay: 1.4s; }
