@@ -285,7 +285,7 @@ export function BlueVerifiedShowcase({
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ delay: 0.06, type: 'spring', stiffness: 380, damping: 24 }}
               >
-                <div className="relative flex size-16 items-center justify-center rounded-full border-[3px] border-card bg-black">
+                <div className="relative flex size-16 select-none items-center justify-center rounded-full border-[3px] border-card bg-black blur-[5px]">
                   <span
                     aria-hidden
                     className="absolute inset-0 rounded-full"
@@ -313,7 +313,7 @@ export function BlueVerifiedShowcase({
                 </motion.span>
               </div>
               <div className="mt-2 flex items-center gap-2">
-                <span className="font-dm-sans text-[13.5px] text-muted-foreground/70">
+                <span className="select-none font-dm-sans text-[13.5px] text-muted-foreground/70 blur-[4px]">
                   @classicdrift_92
                 </span>
               </div>
