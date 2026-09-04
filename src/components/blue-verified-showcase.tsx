@@ -2,13 +2,27 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { ChevronDown, Lock, Check, ShieldCheck, BadgeCheck, Sparkles } from 'lucide-react'
+import {
+  ChevronDown,
+  Lock,
+  ShieldCheck,
+  BadgeCheck,
+  Sparkles,
+  Shuffle,
+  KeyRound,
+  Mail,
+  Rocket,
+  History,
+  Clock3,
+} from 'lucide-react'
 import { XLogo } from '@/components/x-logo'
 import { VerifiedBadge } from '@/components/icons/verified-badge'
 import { money } from '@/lib/format'
 import type { AgedAccount, Lang } from '@/lib/types'
 
 const BLUE = 'oklch(0.72 0.15 235)'
+
+const ABOUT_ICONS = [History, Shuffle, Mail, KeyRound, Rocket, Clock3] as const
 
 const COPY = {
   ru: {
@@ -17,6 +31,7 @@ const COPY = {
     tweets: 'твитов',
     registered: 'регистрация',
     random: 'Выдаётся случайный',
+    hidden: 'Скрыт',
     pcs: 'шт.',
     check: 'Галочка',
     checkValue: 'Оплачена на 30 дней',
@@ -24,15 +39,35 @@ const COPY = {
     warrantyValue: '48 часов',
     about: 'Об аккаунте',
     aboutIntro:
-      'Живой аккаунт X с активной синей галочкой. Возраст регистрации 2009–2026, органичная история активности и чистая репутация — такой профиль не выглядит как только что созданный и спокойно переживает первые дни работы.',
-    aboutExtra: [
-      'Выдаётся случайный профиль из подобранного пула — ник и аватар вы меняете сами.',
-      'В комплекте почта и доступ: логин, пароль, 2FA-ключ.',
-      'Работает с нашими услугами продвижения: фолловеры, лайки, просмотры.',
-      'Массовая выдача и выгрузка в таблицу — по запросу в поддержке.',
+      'Это не свежерег с накрученной галочкой. Профиль прожил в X годы: постил, читал, попадал в ленты — поэтому алгоритмы видят обычного человека, а не бота первого дня. Галочка уже оплачена и активна, ничего доплачивать и подтверждать не нужно.',
+    aboutItems: [
+      {
+        t: 'История, а не витрина',
+        d: 'Регистрация 2009–2026, органичная активность и чистая репутация: без блокировок, жалоб и следов перепродажи.',
+      },
+      {
+        t: 'Профиль из закрытого пула',
+        d: 'Конкретный аккаунт выдаётся случайно — ник, аватар и описание вы переписываете под себя за пару минут.',
+      },
+      {
+        t: 'Почта идёт в комплекте',
+        d: 'Полный доступ к привязанному ящику: восстановление и подтверждения остаются на вашей стороне.',
+      },
+      {
+        t: 'Логин, пароль и 2FA-ключ',
+        d: 'Забираете данные сразу после оплаты и первым делом меняете пароль — аккаунт становится только вашим.',
+      },
+      {
+        t: 'Готов к продвижению',
+        d: 'На него сразу можно запускать наши фолловеры, лайки и просмотры — прогрев не требуется.',
+      },
+      {
+        t: 'Опт и выгрузка',
+        d: 'Нужен объём? Соберём партию и отдадим списком в таблице — напишите в поддержку.',
+      },
     ],
     aboutNote:
-      'Проверяйте вход сразу после покупки: замена по гарантии действует 48 часов с момента выдачи.',
+      'Зайдите в аккаунт сразу после покупки. Гарантия и бесплатная замена действуют 48 часов с момента выдачи.',
     buy: 'Купить',
     soldOut: 'Нет в наличии',
   },
@@ -42,6 +77,7 @@ const COPY = {
     tweets: 'tweets',
     registered: 'registered',
     random: 'Random account',
+    hidden: 'Hidden',
     pcs: 'pcs',
     check: 'Checkmark',
     checkValue: 'Paid for 30 days',
@@ -49,19 +85,40 @@ const COPY = {
     warrantyValue: '48 hours',
     about: 'About the account',
     aboutIntro:
-      'A live X account with an active blue check. Registration between 2009 and 2026, organic activity history and a clean reputation — it never looks freshly made and handles the first days of work calmly.',
-    aboutExtra: [
-      'You get a random profile from a curated pool — the handle and avatar are yours to change.',
-      'Mail and access included: login, password, 2FA key.',
-      'Works with our promotion services: followers, likes, views.',
-      'Bulk delivery and spreadsheet export available on request in support.',
+      'This is not a fresh signup with a bought badge. The profile has lived on X for years — posting, reading, showing up in feeds — so algorithms read it as a person, not a day-one bot. The blue check is already paid and active.',
+    aboutItems: [
+      {
+        t: 'History, not a shell',
+        d: 'Registered between 2009 and 2026, organic activity and a clean record: no strikes, no complaints, no resale traces.',
+      },
+      {
+        t: 'Profile from a closed pool',
+        d: 'The exact account is assigned at random — handle, avatar and bio are yours to rewrite in a couple of minutes.',
+      },
+      {
+        t: 'Mailbox included',
+        d: 'Full access to the linked email, so recovery and confirmations stay on your side.',
+      },
+      {
+        t: 'Login, password and 2FA key',
+        d: 'You get the credentials right after payment — change the password first and the account is only yours.',
+      },
+      {
+        t: 'Promotion-ready',
+        d: 'Run our followers, likes and views on it immediately, no warm-up needed.',
+      },
+      {
+        t: 'Bulk and export',
+        d: 'Need volume? We assemble a batch and hand it over as a spreadsheet — just ask support.',
+      },
     ],
     aboutNote:
-      'Check the login right after purchase: warranty replacement is valid for 48 hours after delivery.',
+      'Log in right after purchase. Warranty and free replacement are valid for 48 hours after delivery.',
     buy: 'Buy',
     soldOut: 'Sold out',
   },
 }
+
 
 const EASE = [0.22, 1, 0.36, 1] as const
 
@@ -256,20 +313,25 @@ export function BlueVerifiedShowcase({
                 </motion.span>
               </div>
               <div className="mt-2 flex items-center gap-1.5">
-                <span className="font-dm-sans text-[13px] text-muted-foreground">@</span>
-                {[0, 1, 2, 3, 4].map((i) => (
-                  <motion.span
-                    key={i}
-                    className="size-2.5 rounded-[3px] bg-muted-foreground/25"
-                    animate={{ opacity: [0.35, 0.8, 0.35] }}
-                    transition={{ duration: 1.8, repeat: Infinity, delay: i * 0.12, ease: 'easeInOut' }}
-                  />
-                ))}
+                <span
+                  aria-hidden
+                  className="select-none font-dm-sans text-[13.5px] text-muted-foreground/80 blur-[5px]"
+                  style={{ textShadow: '0 0 12px rgba(255,255,255,0.18)' }}
+                >
+                  @classicdrift_92
+                </span>
+                <span className="flex items-center gap-1 rounded-full border border-border/70 bg-muted/25 px-2 py-[3px]">
+                  <Lock className="size-[11px] text-muted-foreground/70" strokeWidth={2.6} />
+                  <span className="font-dm-sans text-[10.5px] font-semibold uppercase tracking-[0.14em] text-muted-foreground/70">
+                    {L.hidden}
+                  </span>
+                </span>
               </div>
               <div className="mt-3 space-y-2">
-                <div className="h-2 w-[85%] rounded-full bg-muted-foreground/14" />
-                <div className="h-2 w-[62%] rounded-full bg-muted-foreground/14" />
+                <div className="h-2 w-[85%] rounded-full bg-muted-foreground/14 blur-[3px]" />
+                <div className="h-2 w-[62%] rounded-full bg-muted-foreground/14 blur-[3px]" />
               </div>
+
             </div>
 
             {/* Stats */}
@@ -354,27 +416,36 @@ export function BlueVerifiedShowcase({
                   </p>
                 </div>
 
-                <ul className="px-4 py-2">
-                  {[...active.features.map((f) => f[lang as Lang] ?? f.en), ...L.aboutExtra].map(
-                    (text, i) => (
+                <ul className="px-4 py-1">
+                  {L.aboutItems.map((item, i) => {
+                    const Icon = ABOUT_ICONS[i % ABOUT_ICONS.length]
+                    return (
                       <motion.li
-                        key={i}
+                        key={item.t}
                         initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.06 + i * 0.045, duration: 0.28, ease: EASE }}
-                        className="flex items-start gap-2.5 border-b border-border/40 py-3 last:border-0 font-dm-sans text-[13px] leading-[1.55] text-muted-foreground"
+                        transition={{ delay: 0.06 + i * 0.05, duration: 0.3, ease: EASE }}
+                        className="flex items-start gap-3 border-b border-border/40 py-3.5 last:border-0"
                       >
                         <span
-                          className="mt-[3px] flex size-4 shrink-0 items-center justify-center rounded-full"
-                          style={{ background: `${BLUE}22` }}
+                          className="mt-px flex size-7 shrink-0 items-center justify-center rounded-[9px] border"
+                          style={{ background: `${BLUE}14`, borderColor: `${BLUE}33` }}
                         >
-                          <Check className="size-2.5" style={{ color: BLUE }} strokeWidth={3.4} />
+                          <Icon className="size-[15px]" style={{ color: BLUE }} strokeWidth={2.2} />
                         </span>
-                        <span>{text}</span>
+                        <span className="min-w-0">
+                          <span className="block font-dm-sans text-[13.5px] font-semibold leading-tight text-foreground">
+                            {item.t}
+                          </span>
+                          <span className="mt-1 block font-dm-sans text-[12.5px] leading-[1.6] text-muted-foreground">
+                            {item.d}
+                          </span>
+                        </span>
                       </motion.li>
-                    ),
-                  )}
+                    )
+                  })}
                 </ul>
+
 
                 <div className="flex items-start gap-2.5 border-t border-border/60 bg-primary/[0.06] px-4 py-3.5">
                   <ShieldCheck className="mt-px size-4 shrink-0 text-primary" strokeWidth={2.4} />
