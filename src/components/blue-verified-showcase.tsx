@@ -312,13 +312,22 @@ export function BlueVerifiedShowcase({
                   <VerifiedBadge className="size-[19px]" style={{ color: BLUE }} />
                 </motion.span>
               </div>
-              <div className="mt-2 flex items-center gap-1.5">
-                <span
-                  aria-hidden
-                  className="select-none font-dm-sans text-[13.5px] text-muted-foreground/80 blur-[5px]"
-                  style={{ textShadow: '0 0 12px rgba(255,255,255,0.18)' }}
-                >
-                  @classicdrift_92
+              <div className="mt-2 flex items-center gap-2">
+                <span className="relative inline-flex items-center overflow-hidden rounded-md">
+                  <span
+                    aria-hidden
+                    className="select-none px-1.5 py-0.5 font-dm-sans text-[13.5px] text-muted-foreground/70 blur-[6px]"
+                  >
+                    @classicdrift_92
+                  </span>
+                  <span
+                    aria-hidden
+                    className="pointer-events-none absolute inset-0 rounded-md bg-muted-foreground/12"
+                    style={{
+                      backgroundImage:
+                        'repeating-linear-gradient(115deg, rgba(255,255,255,0.07) 0 2px, transparent 2px 6px)',
+                    }}
+                  />
                 </span>
                 <span className="flex items-center gap-1 rounded-full border border-border/70 bg-muted/25 px-2 py-[3px]">
                   <Lock className="size-[11px] text-muted-foreground/70" strokeWidth={2.6} />
@@ -327,6 +336,7 @@ export function BlueVerifiedShowcase({
                   </span>
                 </span>
               </div>
+
               <div className="mt-3 space-y-2">
                 <div className="h-2 w-[85%] rounded-full bg-muted-foreground/14 blur-[3px]" />
                 <div className="h-2 w-[62%] rounded-full bg-muted-foreground/14 blur-[3px]" />
