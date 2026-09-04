@@ -81,6 +81,15 @@
   }
 }
 
+@utility account-icon-hex {
+  clip-path: polygon(25% 7%, 75% 7%, 100% 50%, 75% 93%, 25% 93%, 0 50%);
+}
+
+@utility account-icon-crate {
+  border-radius: 0.25rem 0.75rem 0.25rem 0.75rem;
+  transform: rotate(-3deg);
+}
+
 :root {
   color-scheme: dark;
   --background: oklch(0.14 0.004 60);
