@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { ChevronDown, Lock, Check } from 'lucide-react'
+import { ChevronDown, Lock, Check, ShieldCheck, BadgeCheck } from 'lucide-react'
 import { XLogo } from '@/components/x-logo'
 import { VerifiedBadge } from '@/components/icons/verified-badge'
 import { money } from '@/lib/format'
@@ -42,6 +42,8 @@ const COPY = {
     soldOut: 'Sold out',
   },
 }
+
+const EASE = [0.22, 1, 0.36, 1] as const
 
 function fmtShort(n: number, ru: boolean) {
   if (n >= 1000) {
@@ -95,50 +97,63 @@ export function BlueVerifiedShowcase({
   const desc = active.description?.[lang as Lang] ?? active.description?.en ?? ''
   const stockTone =
     active.stock <= 0
-      ? 'border-destructive/40 bg-destructive/10 text-destructive'
+      ? 'border-destructive/40 bg-destructive/12 text-destructive'
       : active.stock <= 10
-        ? 'border-primary/40 bg-primary/10 text-primary'
-        : 'border-info/40 bg-info/10 text-info'
+        ? 'border-primary/45 bg-primary/12 text-primary'
+        : 'border-info/40 bg-info/12 text-info'
 
   return (
-    <div className="flex flex-1 flex-col pb-28">
+    <div className="flex flex-1 flex-col pb-32">
       {/* Tier selector */}
       <div className="px-4 pt-3">
-        <p className="font-dm-sans text-[10px] font-semibold uppercase tracking-[0.24em] text-muted-foreground/70">
-          {L.followersCap}
-        </p>
-        <div className="mt-2 flex items-stretch gap-1 overflow-x-auto border-b border-border/70">
+        <div className="flex items-center gap-2">
+          <span className="h-px flex-none w-4 bg-gradient-to-r from-transparent to-primary/60" />
+          <p className="font-dm-sans text-[10px] font-bold uppercase tracking-[0.3em] text-muted-foreground/75">
+            {L.followersCap}
+          </p>
+        </div>
+        <div className="mt-2.5 flex items-stretch gap-1 overflow-x-auto border-b border-border/70">
           {tiers.map((t) => {
             const on = t.id === active.id
             return (
-              <button
+              <motion.button
                 key={t.id}
                 type="button"
+                whileTap={{ scale: 0.94 }}
+                transition={{ type: 'spring', stiffness: 500, damping: 30 }}
                 onClick={() => setActiveId(t.id)}
-                className="relative flex min-w-0 flex-1 shrink-0 flex-col items-center gap-0.5 px-2 pb-2.5 pt-1 outline-none"
+                className="relative flex min-w-0 flex-1 shrink-0 flex-col items-center gap-0.5 px-2 pb-3 pt-1.5 outline-none"
               >
                 <span
-                  className={`font-space-grotesk whitespace-nowrap text-[15px] font-bold tracking-[-0.02em] transition-colors ${
-                    on ? 'text-foreground' : 'text-muted-foreground/60'
+                  className={`font-space-grotesk whitespace-nowrap text-[16px] font-bold leading-none tracking-[-0.03em] transition-colors duration-200 ${
+                    on ? 'text-foreground' : 'text-muted-foreground/55'
                   }`}
                 >
                   {rangeLabel(t, ru)}
                 </span>
                 <span
-                  className={`font-dm-sans text-[12px] font-semibold tabular-nums transition-colors ${
-                    on ? 'text-primary' : 'text-muted-foreground/45'
+                  className={`font-dm-sans text-[12px] font-bold tabular-nums leading-none transition-colors duration-200 ${
+                    on ? 'text-primary' : 'text-muted-foreground/40'
                   }`}
                 >
                   ${Math.round(t.pricePerAccount)}
                 </span>
                 {on && (
-                  <motion.span
-                    layoutId="blue-tier-underline"
-                    className="absolute -bottom-px left-3 right-3 h-[2px] rounded-full bg-primary"
-                    transition={{ type: 'spring', stiffness: 420, damping: 34 }}
-                  />
+                  <>
+                    <motion.span
+                      layoutId="blue-tier-underline"
+                      className="absolute -bottom-px left-2.5 right-2.5 h-[2.5px] rounded-full bg-primary"
+                      transition={{ type: 'spring', stiffness: 430, damping: 36 }}
+                    />
+                    <motion.span
+                      layoutId="blue-tier-glow"
+                      aria-hidden
+                      className="pointer-events-none absolute -bottom-2 left-1/2 h-8 w-16 -translate-x-1/2 rounded-full bg-primary/25 blur-xl"
+                      transition={{ type: 'spring', stiffness: 430, damping: 36 }}
+                    />
+                  </>
                 )}
-              </button>
+              </motion.button>
             )
           })}
         </div>
@@ -149,98 +164,139 @@ export function BlueVerifiedShowcase({
         <AnimatePresence mode="wait">
           <motion.div
             key={active.id}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -6 }}
-            transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+            initial={{ opacity: 0, y: 14, scale: 0.985 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -8, scale: 0.99 }}
+            transition={{ duration: 0.3, ease: EASE }}
             onContextMenu={(e) => {
               if (onAdminMenu) {
                 e.preventDefault()
                 onAdminMenu(active)
               }
             }}
-            className="relative overflow-hidden rounded-2xl border border-border/70 bg-card"
+            className="relative overflow-hidden rounded-[20px] border border-border/70 bg-card shadow-[0_18px_50px_-30px_rgba(0,0,0,0.9)]"
           >
             {/* Hero band */}
-            <div className="relative h-24 overflow-hidden bg-gradient-to-br from-[#101a24] to-[#0c1016]">
+            <div className="relative h-24 overflow-hidden bg-gradient-to-br from-[#0f1a26] via-[#0d1219] to-[#0a0d12]">
               <div
                 aria-hidden
-                className="absolute inset-0 opacity-[0.14]"
+                className="absolute inset-0 opacity-[0.13]"
                 style={{
                   backgroundImage:
-                    'repeating-linear-gradient(115deg, rgba(255,255,255,0.6) 0 1px, transparent 1px 9px)',
+                    'repeating-linear-gradient(115deg, rgba(255,255,255,0.65) 0 1px, transparent 1px 9px)',
                 }}
               />
-              <div className="absolute right-3 top-3 flex items-center gap-1.5 rounded-lg border border-white/10 bg-black/55 px-2.5 py-1.5 backdrop-blur">
-                <Lock className="size-3 text-white/60" strokeWidth={2.4} />
-                <span className="font-dm-sans text-[11px] font-medium text-white/80">{L.random}</span>
+              <motion.div
+                aria-hidden
+                className="absolute inset-y-0 -left-1/3 w-1/3 skew-x-[-18deg] bg-gradient-to-r from-transparent via-white/12 to-transparent"
+                animate={{ x: ['0%', '460%'] }}
+                transition={{ duration: 3.4, repeat: Infinity, ease: 'easeInOut', repeatDelay: 1.6 }}
+              />
+              <div className="absolute right-3 top-3 flex items-center gap-1.5 rounded-full border border-white/12 bg-black/60 px-2.5 py-1.5 backdrop-blur">
+                <Lock className="size-3 text-white/60" strokeWidth={2.6} />
+                <span className="font-dm-sans text-[11px] font-semibold tracking-[0.01em] text-white/85">
+                  {L.random}
+                </span>
               </div>
             </div>
 
             {/* Avatar */}
             <div className="relative px-4">
-              <div className="absolute -top-8 left-4">
+              <motion.div
+                className="absolute -top-8 left-4"
+                initial={{ scale: 0.86, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ delay: 0.06, type: 'spring', stiffness: 380, damping: 24 }}
+              >
                 <div className="relative flex size-16 items-center justify-center rounded-full border-[3px] border-card bg-black">
+                  <span
+                    aria-hidden
+                    className="absolute inset-0 rounded-full"
+                    style={{ boxShadow: `0 0 0 1px ${BLUE}22, 0 8px 24px -10px ${BLUE}` }}
+                  />
                   <XLogo className="size-7 text-white" />
                   <VerifiedBadge
                     className="absolute -bottom-0.5 right-0 size-[18px] rounded-full bg-card"
                     style={{ color: BLUE }}
                   />
                 </div>
-              </div>
+              </motion.div>
               <div className="h-10" />
             </div>
 
             {/* Identity */}
             <div className="px-4 pt-1">
               <div className="flex items-center gap-1.5">
-                <h2 className="font-space-grotesk text-[19px] font-bold tracking-[-0.02em] text-foreground">
+                <h2 className="font-space-grotesk text-[20px] font-bold leading-none tracking-[-0.035em] text-foreground">
                   Blue Verified
                 </h2>
               </div>
-              <div className="mt-1.5 flex items-center gap-1.5">
+              <div className="mt-2 flex items-center gap-1.5">
                 <span className="font-dm-sans text-[13px] text-muted-foreground">@</span>
                 {[0, 1, 2, 3, 4].map((i) => (
-                  <span key={i} className="size-2.5 rounded-[3px] bg-muted-foreground/25" />
+                  <motion.span
+                    key={i}
+                    className="size-2.5 rounded-[3px] bg-muted-foreground/25"
+                    animate={{ opacity: [0.35, 0.8, 0.35] }}
+                    transition={{ duration: 1.8, repeat: Infinity, delay: i * 0.12, ease: 'easeInOut' }}
+                  />
                 ))}
               </div>
               <div className="mt-3 space-y-2">
-                <div className="h-2 w-[85%] rounded-full bg-muted-foreground/15" />
-                <div className="h-2 w-[62%] rounded-full bg-muted-foreground/15" />
+                <div className="h-2 w-[85%] rounded-full bg-muted-foreground/14" />
+                <div className="h-2 w-[62%] rounded-full bg-muted-foreground/14" />
               </div>
             </div>
 
             {/* Stats */}
             <div className="flex items-start gap-6 px-4 pb-5 pt-4">
-              <Stat value={rangeLabel(active, ru)} label={L.followers} />
-              <Stat value={ru ? '0–5 000' : '0–5,000'} label={L.tweets} />
-              <Stat value={active.yearRange || String(active.year ?? '—')} label={L.registered} />
+              <Stat value={rangeLabel(active, ru)} label={L.followers} delay={0.05} />
+              <Stat value={ru ? '0–5 000' : '0–5,000'} label={L.tweets} delay={0.11} />
+              <Stat
+                value={active.yearRange || String(active.year ?? '—')}
+                label={L.registered}
+                delay={0.17}
+              />
             </div>
 
             {/* Stock chip */}
-            <div
-              className={`absolute right-3 top-[86px] rounded-lg border px-2.5 py-1 font-dm-sans text-[12px] font-bold tabular-nums ${stockTone}`}
+            <motion.div
+              key={`stock-${active.id}`}
+              initial={{ opacity: 0, y: -6 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1, duration: 0.25, ease: EASE }}
+              className={`absolute right-3 top-[86px] rounded-full border px-2.5 py-1 font-dm-sans text-[12px] font-bold tabular-nums backdrop-blur ${stockTone}`}
             >
               {active.stock} {L.pcs}
-            </div>
+            </motion.div>
           </motion.div>
-      </AnimatePresence>
+        </AnimatePresence>
       </div>
 
       {/* Description */}
-      {desc && (
-        <p className="px-4 pt-4 font-dm-sans text-[14px] leading-relaxed text-muted-foreground">
-          {desc}
-        </p>
-      )}
+      <AnimatePresence mode="wait">
+        {desc && (
+          <motion.p
+            key={`d-${active.id}`}
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.25, ease: EASE }}
+            className="px-4 pt-4 font-dm-sans text-[14px] leading-[1.65] text-muted-foreground"
+          >
+            {desc}
+          </motion.p>
+        )}
+      </AnimatePresence>
 
       {/* Spec rows */}
       <div className="mt-4 px-4">
-        <SpecRow label={L.check} value={L.checkValue} />
-        <SpecRow label={L.warranty} value={L.warrantyValue} />
+        <SpecRow icon={<BadgeCheck className="size-4" style={{ color: BLUE }} strokeWidth={2.4} />} label={L.check} value={L.checkValue} />
+        <SpecRow icon={<ShieldCheck className="size-4 text-primary" strokeWidth={2.4} />} label={L.warranty} value={L.warrantyValue} />
 
-        <button
+        <motion.button
           type="button"
+          whileTap={{ scale: 0.99 }}
           onClick={() => setAboutOpen((v) => !v)}
           className="flex w-full items-center justify-between border-b border-border/60 py-4 text-left outline-none"
         >
@@ -248,24 +304,27 @@ export function BlueVerifiedShowcase({
           <ChevronDown
             className={`size-4 text-muted-foreground transition-transform duration-300 ${aboutOpen ? 'rotate-180' : ''}`}
           />
-        </button>
+        </motion.button>
         <AnimatePresence initial={false}>
           {aboutOpen && (
             <motion.ul
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: 'auto', opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ duration: 0.26, ease: EASE }}
               className="overflow-hidden"
             >
               {active.features.map((f, i) => (
-                <li
+                <motion.li
                   key={i}
+                  initial={{ opacity: 0, x: -8 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.05 + i * 0.05, duration: 0.25, ease: EASE }}
                   className="flex items-start gap-2 py-2 font-dm-sans text-[13px] text-muted-foreground first:pt-3"
                 >
-                  <Check className="mt-0.5 size-3.5 shrink-0 text-info" strokeWidth={2.6} />
+                  <Check className="mt-0.5 size-3.5 shrink-0 text-info" strokeWidth={2.8} />
                   {f[lang as Lang] ?? f.en}
-                </li>
+                </motion.li>
               ))}
             </motion.ul>
           )}
@@ -273,18 +332,27 @@ export function BlueVerifiedShowcase({
       </div>
 
       {/* Sticky buy bar */}
-      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border/60 bg-background/95 px-4 pb-[calc(env(safe-area-inset-bottom)+14px)] pt-3 backdrop-blur">
+      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border/60 bg-background/92 px-4 pb-[calc(env(safe-area-inset-bottom)+14px)] pt-3 backdrop-blur-xl">
         <motion.button
           type="button"
-          whileTap={{ scale: soldOut ? 1 : 0.985 }}
+          whileTap={{ scale: soldOut ? 1 : 0.975 }}
+          transition={{ type: 'spring', stiffness: 520, damping: 30 }}
           disabled={soldOut}
           onClick={() => onOpen(active)}
-          className="flex h-14 w-full items-center overflow-hidden rounded-xl bg-primary text-primary-foreground disabled:opacity-40"
+          className="relative flex h-14 w-full items-center overflow-hidden rounded-2xl bg-primary text-primary-foreground shadow-[0_14px_38px_-16px_var(--color-primary)] disabled:opacity-40 disabled:shadow-none"
         >
-          <span className="flex-1 px-5 text-left font-dm-sans text-[15px] font-semibold">
+          {!soldOut && (
+            <motion.span
+              aria-hidden
+              className="pointer-events-none absolute inset-y-0 -left-1/4 w-1/4 skew-x-[-20deg] bg-white/25 blur-[2px]"
+              animate={{ x: ['0%', '560%'] }}
+              transition={{ duration: 2.6, repeat: Infinity, ease: 'easeInOut', repeatDelay: 1.8 }}
+            />
+          )}
+          <span className="relative flex-1 px-5 text-left font-dm-sans text-[15px] font-bold tracking-[0.01em]">
             {soldOut ? L.soldOut : L.buy}
           </span>
-          <span className="flex h-full items-center border-l border-black/15 px-5 font-space-grotesk text-[19px] font-bold tabular-nums">
+          <span className="relative flex h-full items-center border-l border-black/15 px-5 font-space-grotesk text-[20px] font-bold tabular-nums tracking-[-0.02em]">
             {money(active.pricePerAccount)}
           </span>
         </motion.button>
@@ -293,21 +361,29 @@ export function BlueVerifiedShowcase({
   )
 }
 
-function Stat({ value, label }: { value: string; label: string }) {
+function Stat({ value, label, delay = 0 }: { value: string; label: string; delay?: number }) {
   return (
-    <div className="flex flex-col">
-      <span className="font-space-grotesk text-[16px] font-bold tracking-[-0.02em] tabular-nums text-foreground">
+    <motion.div
+      className="flex flex-col"
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay, duration: 0.3, ease: EASE }}
+    >
+      <span className="font-space-grotesk text-[17px] font-bold leading-none tracking-[-0.03em] tabular-nums text-foreground">
         {value}
       </span>
-      <span className="font-dm-sans text-[12px] text-muted-foreground">{label}</span>
-    </div>
+      <span className="mt-1.5 font-dm-sans text-[12px] text-muted-foreground">{label}</span>
+    </motion.div>
   )
 }
 
-function SpecRow({ label, value }: { label: string; value: string }) {
+function SpecRow({ icon, label, value }: { icon?: React.ReactNode; label: string; value: string }) {
   return (
     <div className="flex items-center justify-between border-b border-border/60 py-4">
-      <span className="font-dm-sans text-[14px] text-muted-foreground">{label}</span>
+      <span className="flex items-center gap-2 font-dm-sans text-[14px] text-muted-foreground">
+        {icon}
+        {label}
+      </span>
       <span className="font-dm-sans text-[14px] font-semibold text-foreground">{value}</span>
     </div>
   )
