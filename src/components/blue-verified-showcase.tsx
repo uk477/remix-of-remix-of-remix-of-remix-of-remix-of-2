@@ -19,6 +19,7 @@ import { money } from '@/lib/format'
 import type { AgedAccount, Lang } from '@/lib/types'
 
 const BLUE = 'oklch(0.72 0.15 235)'
+const GREEN = 'oklch(0.78 0.16 155)'
 
 const ABOUT_ICONS = [
   IconAgeRings,
