@@ -46,7 +46,7 @@ const COPY = {
     about: 'Об аккаунте',
     aboutKicker: 'Что вы получаете',
     aboutIntro:
-      'Это **не свежерег с накрученной галочкой**. Профиль прожил в X годы: постил, читал, попадал в ленты — алгоритмы видят обычного человека, а не бота первого дня. Галочка **уже оплачена и активна**: ничего доплачивать и подтверждать не нужно.',
+      'Свежий аккаунт с оплаченной синей галочкой и небольшой аудиторией. Чистая база под любые задачи.',
     aboutItems: [
       {
         tag: 'Возраст',
@@ -99,7 +99,7 @@ const COPY = {
     about: 'About the account',
     aboutKicker: 'What you get',
     aboutIntro:
-      'This is **not a fresh signup with a bought badge**. The profile has lived on X for years — posting, reading, showing up in feeds — so algorithms read it as a person, not a day-one bot. The blue check is **already paid and active**.',
+      'Fresh account with a paid blue checkmark and a small audience. Clean base for any task.',
     aboutItems: [
       {
         tag: 'Age',
@@ -428,10 +428,7 @@ export function BlueVerifiedShowcase({
           className="flex w-full items-center justify-between border-b border-border/60 py-4 text-left outline-none"
         >
           <span className="flex min-w-0 items-center gap-2.5">
-            <span
-              className="flex size-8 shrink-0 items-center justify-center rounded-[10px] border"
-              style={{ background: `${BLUE}12`, borderColor: `${BLUE}2e`, color: BLUE }}
-            >
+            <span className="flex size-8 shrink-0 items-center justify-center rounded-[10px] border border-border/60 bg-card text-foreground">
               <XLogo className="size-[13px]" />
             </span>
             <span className="min-w-0">
