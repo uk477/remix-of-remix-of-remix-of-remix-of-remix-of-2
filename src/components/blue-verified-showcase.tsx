@@ -430,9 +430,9 @@ export function BlueVerifiedShowcase({
           <span className="flex min-w-0 items-center gap-2.5">
             <span
               className="flex size-8 shrink-0 items-center justify-center rounded-[10px] border"
-              style={{ background: `${BLUE}12`, borderColor: `${BLUE}2e` }}
+              style={{ background: `${BLUE}12`, borderColor: `${BLUE}2e`, color: BLUE }}
             >
-              <XLogo className="size-[13px]" style={{ color: BLUE }} />
+              <XLogo className="size-[13px]" />
             </span>
             <span className="min-w-0">
               <span className="block font-space-grotesk text-[14.5px] font-bold leading-none tracking-[-0.02em] text-foreground">
