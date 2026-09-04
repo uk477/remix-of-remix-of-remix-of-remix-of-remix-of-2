@@ -2,27 +2,33 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import {
-  ChevronDown,
-  Lock,
-  ShieldCheck,
-  BadgeCheck,
-  Sparkles,
-  Shuffle,
-  KeyRound,
-  Mail,
-  Rocket,
-  History,
-  Clock3,
-} from 'lucide-react'
+import { ChevronDown, Lock } from 'lucide-react'
 import { XLogo } from '@/components/x-logo'
 import { VerifiedBadge } from '@/components/icons/verified-badge'
+import {
+  IconAgeRings,
+  IconPoolShuffle,
+  IconMailVault,
+  IconKey2FA,
+  IconBoostReady,
+  IconBulkExport,
+  IconBlueCheck,
+  IconWarrantyClock,
+} from '@/components/icons/blue-account-icons'
 import { money } from '@/lib/format'
 import type { AgedAccount, Lang } from '@/lib/types'
 
 const BLUE = 'oklch(0.72 0.15 235)'
 
-const ABOUT_ICONS = [History, Shuffle, Mail, KeyRound, Rocket, Clock3] as const
+const ABOUT_ICONS = [
+  IconAgeRings,
+  IconPoolShuffle,
+  IconMailVault,
+  IconKey2FA,
+  IconBoostReady,
+  IconBulkExport,
+] as const
+
 
 const COPY = {
   ru: {
