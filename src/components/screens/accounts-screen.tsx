@@ -1284,6 +1284,7 @@ function FilterableAccountsView({
   onAdminMenu,
   onAdd,
   categoryId,
+  hideBackAndFilter = false,
   xSelectMode = false,
   selectedXIds = new Set(),
   xRefreshing = false,
