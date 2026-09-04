@@ -461,6 +461,7 @@ export function BlueVerifiedShowcase({
                   {L.aboutItems.map((item, i) => {
                     const Icon = ABOUT_ICONS[i % ABOUT_ICONS.length]
                     const style = ABOUT_STYLES[i % ABOUT_STYLES.length]
+                    const anim = ABOUT_ANIMATIONS[i % ABOUT_ANIMATIONS.length]
                     return (
                       <motion.li
                         key={item.t}
@@ -469,7 +470,7 @@ export function BlueVerifiedShowcase({
                         transition={{ delay: 0.06 + i * 0.05, duration: 0.3, ease: EASE }}
                         className="flex min-w-0 items-center gap-2.5 rounded-xl border border-border/60 bg-background/40 p-2.5"
                       >
-                        <span className={`flex size-8 shrink-0 items-center justify-center rounded-lg ${style.icon}`}>
+                        <span className={`flex size-8 shrink-0 items-center justify-center rounded-lg ${style.icon} ${anim}`}>
                           <Icon className="size-[16px]" />
                         </span>
                         <span className="min-w-0 flex-1">
