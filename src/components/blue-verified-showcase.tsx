@@ -19,6 +19,7 @@ import { money } from '@/lib/format'
 import type { AgedAccount, Lang } from '@/lib/types'
 
 const BLUE = 'oklch(0.72 0.15 235)'
+const GREEN = 'oklch(0.78 0.16 155)'
 
 const ABOUT_ICONS = [
   IconAgeRings,
@@ -210,7 +211,7 @@ export function BlueVerifiedShowcase({
   if (!active) return null
 
   const soldOut = active.stock <= 0
-  const desc = active.description?.[lang as Lang] ?? active.description?.en ?? ''
+  
   const stockTone =
     active.stock <= 0
       ? 'border-destructive/40 bg-destructive/12 text-destructive'
@@ -385,28 +386,8 @@ export function BlueVerifiedShowcase({
         </AnimatePresence>
       </div>
 
-      {/* Description */}
-      <AnimatePresence mode="wait">
-        {desc && (
-          <motion.div
-            key={`d-${active.id}`}
-            initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.25, ease: EASE }}
-            className="px-4 pt-4"
-          >
-            <div className="relative rounded-[16px] border border-border/60 bg-card/50 px-4 py-3.5 pl-5">
-              <span
-                aria-hidden
-                className="absolute left-0 top-3 bottom-3 w-[3px] rounded-full"
-                style={{ background: `linear-gradient(180deg, ${BLUE}, ${BLUE}22)` }}
-              />
-              <p className="font-dm-sans text-[13.5px] leading-[1.7] text-muted-foreground">{desc}</p>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+
+
 
       {/* Spec rows */}
       <div className="mt-4 px-4">
@@ -416,7 +397,7 @@ export function BlueVerifiedShowcase({
           value={L.checkValue}
         />
         <SpecRow
-          icon={<IconWarrantyClock className="size-[18px] text-primary" />}
+          icon={<IconWarrantyClock className="size-[18px]" style={{ color: GREEN }} />}
           label={L.warranty}
           value={L.warrantyValue}
         />
@@ -428,10 +409,11 @@ export function BlueVerifiedShowcase({
           className="flex w-full items-center justify-between border-b border-border/60 py-4 text-left outline-none"
         >
           <span className="flex min-w-0 items-center gap-2.5">
-            <span className="flex size-8 shrink-0 items-center justify-center rounded-[10px] border border-border/60 bg-card text-foreground">
-              <XLogo className="size-[13px]" />
+            <span className="flex size-8 shrink-0 items-center justify-center text-foreground">
+              <XLogo className="size-[19px]" />
             </span>
             <span className="min-w-0">
+
               <span className="block font-space-grotesk text-[14.5px] font-bold leading-none tracking-[-0.02em] text-foreground">
                 {L.about}
               </span>
@@ -459,7 +441,7 @@ export function BlueVerifiedShowcase({
               className="overflow-hidden"
             >
               <div className="mt-4 overflow-hidden rounded-[18px] border border-border/70 bg-card/70">
-                <div className="relative px-4 py-4">
+                <div className="relative px-5 py-5 text-center">
                   <span
                     aria-hidden
                     className="absolute inset-x-0 top-0 h-px"
@@ -467,14 +449,15 @@ export function BlueVerifiedShowcase({
                   />
                   <span
                     aria-hidden
-                    className="pointer-events-none absolute -left-10 -top-14 size-32 rounded-full blur-2xl"
-                    style={{ background: `${BLUE}1f` }}
+                    className="pointer-events-none absolute left-1/2 -top-16 size-40 -translate-x-1/2 rounded-full blur-3xl"
+                    style={{ background: `${BLUE}26` }}
                   />
                   <Rich
                     text={L.aboutIntro}
-                    className="relative block font-dm-sans text-[13.5px] leading-[1.75] text-muted-foreground"
+                    className="relative mx-auto block max-w-[30ch] text-balance font-space-grotesk text-[15px] font-medium leading-[1.65] tracking-[-0.01em] text-foreground"
                   />
                 </div>
+
 
                 <ul className="px-4 pb-1">
                   {L.aboutItems.map((item, i) => {
