@@ -10,7 +10,7 @@ import {
   IconPoolShuffle,
   IconMailVault,
   IconKey2FA,
-  IconBoostReady,
+  IconCheckRenew,
   IconBulkExport,
   IconBlueCheck,
   IconWarrantyClock,
