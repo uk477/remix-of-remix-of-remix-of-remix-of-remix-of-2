@@ -44,36 +44,43 @@ const COPY = {
     warranty: 'Гарантия',
     warrantyValue: '48 часов',
     about: 'Об аккаунте',
+    aboutKicker: 'Что вы получаете',
     aboutIntro:
-      'Это не свежерег с накрученной галочкой. Профиль прожил в X годы: постил, читал, попадал в ленты — поэтому алгоритмы видят обычного человека, а не бота первого дня. Галочка уже оплачена и активна, ничего доплачивать и подтверждать не нужно.',
+      'Это **не свежерег с накрученной галочкой**. Профиль прожил в X годы: постил, читал, попадал в ленты — алгоритмы видят обычного человека, а не бота первого дня. Галочка **уже оплачена и активна**: ничего доплачивать и подтверждать не нужно.',
     aboutItems: [
       {
+        tag: 'Возраст',
         t: 'История, а не витрина',
-        d: 'Регистрация 2009–2026, органичная активность и чистая репутация: без блокировок, жалоб и следов перепродажи.',
+        d: 'Регистрация **2009–2026**, живая лента и чистая репутация: без блокировок, жалоб и следов перепродажи.',
       },
       {
-        t: 'Профиль из закрытого пула',
-        d: 'Конкретный аккаунт выдаётся случайно — ник, аватар и описание вы переписываете под себя за пару минут.',
+        tag: 'Пул',
+        t: 'Профиль выдаётся случайно',
+        d: 'Аккаунт берётся из закрытого пула. Ник, аватар и описание **переписываете под себя** за пару минут.',
       },
       {
-        t: 'Почта идёт в комплекте',
-        d: 'Полный доступ к привязанному ящику: восстановление и подтверждения остаются на вашей стороне.',
+        tag: 'Почта',
+        t: 'Ящик идёт в комплекте',
+        d: 'Полный доступ к привязанной почте: восстановление и коды подтверждения **остаются на вашей стороне**.',
       },
       {
+        tag: 'Доступ',
         t: 'Логин, пароль и 2FA-ключ',
-        d: 'Забираете данные сразу после оплаты и первым делом меняете пароль — аккаунт становится только вашим.',
+        d: 'Данные приходят сразу после оплаты. Меняете пароль первым делом — и аккаунт **только ваш**.',
       },
       {
+        tag: 'Буст',
         t: 'Готов к продвижению',
-        d: 'На него сразу можно запускать наши фолловеры, лайки и просмотры — прогрев не требуется.',
+        d: 'Сразу запускайте наши **фолловеров, лайки и просмотры** — прогрев и отлёжка не нужны.',
       },
       {
-        t: 'Опт и выгрузка',
-        d: 'Нужен объём? Соберём партию и отдадим списком в таблице — напишите в поддержку.',
+        tag: 'Опт',
+        t: 'Партии и выгрузка списком',
+        d: 'Нужен объём? Соберём партию под задачу и отдадим **таблицей** — напишите в поддержку.',
       },
     ],
     aboutNote:
-      'Зайдите в аккаунт сразу после покупки. Гарантия и бесплатная замена действуют 48 часов с момента выдачи.',
+      'Зайдите в аккаунт сразу после покупки: гарантия и бесплатная замена действуют **48 часов** с момента выдачи.',
     buy: 'Купить',
     soldOut: 'Нет в наличии',
   },
@@ -90,40 +97,66 @@ const COPY = {
     warranty: 'Warranty',
     warrantyValue: '48 hours',
     about: 'About the account',
+    aboutKicker: 'What you get',
     aboutIntro:
-      'This is not a fresh signup with a bought badge. The profile has lived on X for years — posting, reading, showing up in feeds — so algorithms read it as a person, not a day-one bot. The blue check is already paid and active.',
+      'This is **not a fresh signup with a bought badge**. The profile has lived on X for years — posting, reading, showing up in feeds — so algorithms read it as a person, not a day-one bot. The blue check is **already paid and active**.',
     aboutItems: [
       {
+        tag: 'Age',
         t: 'History, not a shell',
-        d: 'Registered between 2009 and 2026, organic activity and a clean record: no strikes, no complaints, no resale traces.',
+        d: 'Registered between **2009 and 2026**, organic activity and a clean record: no strikes, no complaints, no resale traces.',
       },
       {
-        t: 'Profile from a closed pool',
-        d: 'The exact account is assigned at random — handle, avatar and bio are yours to rewrite in a couple of minutes.',
+        tag: 'Pool',
+        t: 'Profile assigned at random',
+        d: 'The account comes from a closed pool. Handle, avatar and bio are **yours to rewrite** in a couple of minutes.',
       },
       {
+        tag: 'Mail',
         t: 'Mailbox included',
-        d: 'Full access to the linked email, so recovery and confirmations stay on your side.',
+        d: 'Full access to the linked email, so recovery and confirmation codes **stay on your side**.',
       },
       {
+        tag: 'Access',
         t: 'Login, password and 2FA key',
-        d: 'You get the credentials right after payment — change the password first and the account is only yours.',
+        d: 'Credentials arrive right after payment. Change the password first and the account is **only yours**.',
       },
       {
+        tag: 'Boost',
         t: 'Promotion-ready',
-        d: 'Run our followers, likes and views on it immediately, no warm-up needed.',
+        d: 'Run our **followers, likes and views** on it immediately — no warm-up, no cool-down.',
       },
       {
-        t: 'Bulk and export',
-        d: 'Need volume? We assemble a batch and hand it over as a spreadsheet — just ask support.',
+        tag: 'Bulk',
+        t: 'Batches and export',
+        d: 'Need volume? We assemble a batch and hand it over as a **spreadsheet** — just ask support.',
       },
     ],
     aboutNote:
-      'Log in right after purchase. Warranty and free replacement are valid for 48 hours after delivery.',
+      'Log in right after purchase: warranty and free replacement are valid for **48 hours** after delivery.',
     buy: 'Buy',
     soldOut: 'Sold out',
   },
 }
+
+/** Подсветка **ключевых** фрагментов внутри строки. */
+function Rich({ text, className }: { text: string; className?: string }) {
+  const parts = text.split(/\*\*(.+?)\*\*/g)
+  return (
+    <span className={className}>
+      {parts.map((p, i) =>
+        i % 2 === 1 ? (
+          <strong key={i} className="font-semibold text-foreground/90">
+            {p}
+          </strong>
+        ) : (
+          <span key={i}>{p}</span>
+        ),
+      )}
+    </span>
+  )
+}
+
 
 
 const EASE = [0.22, 1, 0.36, 1] as const
