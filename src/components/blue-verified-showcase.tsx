@@ -99,7 +99,7 @@ const COPY = {
     about: 'About the account',
     aboutKicker: 'What you get',
     aboutIntro:
-      'This is **not a fresh signup with a bought badge**. The profile has lived on X for years — posting, reading, showing up in feeds — so algorithms read it as a person, not a day-one bot. The blue check is **already paid and active**.',
+      'Fresh account with a paid blue checkmark and a small audience. Clean base for any task.',
     aboutItems: [
       {
         tag: 'Age',
