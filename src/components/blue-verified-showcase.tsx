@@ -2,13 +2,27 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { ChevronDown, Lock, Check, ShieldCheck, BadgeCheck, Sparkles } from 'lucide-react'
+import {
+  ChevronDown,
+  Lock,
+  ShieldCheck,
+  BadgeCheck,
+  Sparkles,
+  Shuffle,
+  KeyRound,
+  Mail,
+  Rocket,
+  History,
+  Clock3,
+} from 'lucide-react'
 import { XLogo } from '@/components/x-logo'
 import { VerifiedBadge } from '@/components/icons/verified-badge'
 import { money } from '@/lib/format'
 import type { AgedAccount, Lang } from '@/lib/types'
 
 const BLUE = 'oklch(0.72 0.15 235)'
+
+const ABOUT_ICONS = [History, Shuffle, Mail, KeyRound, Rocket, Clock3] as const
 
 const COPY = {
   ru: {
@@ -24,15 +38,35 @@ const COPY = {
     warrantyValue: '48 часов',
     about: 'Об аккаунте',
     aboutIntro:
-      'Живой аккаунт X с активной синей галочкой. Возраст регистрации 2009–2026, органичная история активности и чистая репутация — такой профиль не выглядит как только что созданный и спокойно переживает первые дни работы.',
-    aboutExtra: [
-      'Выдаётся случайный профиль из подобранного пула — ник и аватар вы меняете сами.',
-      'В комплекте почта и доступ: логин, пароль, 2FA-ключ.',
-      'Работает с нашими услугами продвижения: фолловеры, лайки, просмотры.',
-      'Массовая выдача и выгрузка в таблицу — по запросу в поддержке.',
+      'Это не свежерег с накрученной галочкой. Профиль прожил в X годы: постил, читал, попадал в ленты — поэтому алгоритмы видят обычного человека, а не бота первого дня. Галочка уже оплачена и активна, ничего доплачивать и подтверждать не нужно.',
+    aboutItems: [
+      {
+        t: 'История, а не витрина',
+        d: 'Регистрация 2009–2026, органичная активность и чистая репутация: без блокировок, жалоб и следов перепродажи.',
+      },
+      {
+        t: 'Профиль из закрытого пула',
+        d: 'Конкретный аккаунт выдаётся случайно — ник, аватар и описание вы переписываете под себя за пару минут.',
+      },
+      {
+        t: 'Почта идёт в комплекте',
+        d: 'Полный доступ к привязанному ящику: восстановление и подтверждения остаются на вашей стороне.',
+      },
+      {
+        t: 'Логин, пароль и 2FA-ключ',
+        d: 'Забираете данные сразу после оплаты и первым делом меняете пароль — аккаунт становится только вашим.',
+      },
+      {
+        t: 'Готов к продвижению',
+        d: 'На него сразу можно запускать наши фолловеры, лайки и просмотры — прогрев не требуется.',
+      },
+      {
+        t: 'Опт и выгрузка',
+        d: 'Нужен объём? Соберём партию и отдадим списком в таблице — напишите в поддержку.',
+      },
     ],
     aboutNote:
-      'Проверяйте вход сразу после покупки: замена по гарантии действует 48 часов с момента выдачи.',
+      'Зайдите в аккаунт сразу после покупки. Гарантия и бесплатная замена действуют 48 часов с момента выдачи.',
     buy: 'Купить',
     soldOut: 'Нет в наличии',
   },
@@ -49,19 +83,40 @@ const COPY = {
     warrantyValue: '48 hours',
     about: 'About the account',
     aboutIntro:
-      'A live X account with an active blue check. Registration between 2009 and 2026, organic activity history and a clean reputation — it never looks freshly made and handles the first days of work calmly.',
-    aboutExtra: [
-      'You get a random profile from a curated pool — the handle and avatar are yours to change.',
-      'Mail and access included: login, password, 2FA key.',
-      'Works with our promotion services: followers, likes, views.',
-      'Bulk delivery and spreadsheet export available on request in support.',
+      'This is not a fresh signup with a bought badge. The profile has lived on X for years — posting, reading, showing up in feeds — so algorithms read it as a person, not a day-one bot. The blue check is already paid and active.',
+    aboutItems: [
+      {
+        t: 'History, not a shell',
+        d: 'Registered between 2009 and 2026, organic activity and a clean record: no strikes, no complaints, no resale traces.',
+      },
+      {
+        t: 'Profile from a closed pool',
+        d: 'The exact account is assigned at random — handle, avatar and bio are yours to rewrite in a couple of minutes.',
+      },
+      {
+        t: 'Mailbox included',
+        d: 'Full access to the linked email, so recovery and confirmations stay on your side.',
+      },
+      {
+        t: 'Login, password and 2FA key',
+        d: 'You get the credentials right after payment — change the password first and the account is only yours.',
+      },
+      {
+        t: 'Promotion-ready',
+        d: 'Run our followers, likes and views on it immediately, no warm-up needed.',
+      },
+      {
+        t: 'Bulk and export',
+        d: 'Need volume? We assemble a batch and hand it over as a spreadsheet — just ask support.',
+      },
     ],
     aboutNote:
-      'Check the login right after purchase: warranty replacement is valid for 48 hours after delivery.',
+      'Log in right after purchase. Warranty and free replacement are valid for 48 hours after delivery.',
     buy: 'Buy',
     soldOut: 'Sold out',
   },
 }
+
 
 const EASE = [0.22, 1, 0.36, 1] as const
 
