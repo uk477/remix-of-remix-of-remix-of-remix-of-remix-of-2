@@ -458,10 +458,10 @@ export function BlueVerifiedShowcase({
                         initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.06 + i * 0.05, duration: 0.3, ease: EASE }}
-                        className={`flex min-w-0 items-start gap-3.5 rounded-lg border p-3.5 ${style.card}`}
+                        className="flex min-w-0 items-start gap-3 rounded-xl border border-border/60 bg-background/40 p-3.5"
                       >
-                        <span className={`flex h-11 shrink-0 items-center justify-center ${style.icon}`}>
-                          <Icon className="size-[20px]" />
+                        <span className={`flex size-9 shrink-0 items-center justify-center rounded-[10px] ${style.icon}`}>
+                          <Icon className="size-[19px]" />
                         </span>
                         <span className="min-w-0 flex-1 pt-0.5">
                           <span className={`block font-manrope text-[9.5px] font-extrabold uppercase leading-none ${style.tag}`}>
