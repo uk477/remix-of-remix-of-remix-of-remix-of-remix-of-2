@@ -388,23 +388,38 @@ export function BlueVerifiedShowcase({
       {/* Description */}
       <AnimatePresence mode="wait">
         {desc && (
-          <motion.p
+          <motion.div
             key={`d-${active.id}`}
             initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.25, ease: EASE }}
-            className="px-4 pt-4 font-dm-sans text-[14px] leading-[1.65] text-muted-foreground"
+            className="px-4 pt-4"
           >
-            {desc}
-          </motion.p>
+            <div className="relative rounded-[16px] border border-border/60 bg-card/50 px-4 py-3.5 pl-5">
+              <span
+                aria-hidden
+                className="absolute left-0 top-3 bottom-3 w-[3px] rounded-full"
+                style={{ background: `linear-gradient(180deg, ${BLUE}, ${BLUE}22)` }}
+              />
+              <p className="font-dm-sans text-[13.5px] leading-[1.7] text-muted-foreground">{desc}</p>
+            </div>
+          </motion.div>
         )}
       </AnimatePresence>
 
       {/* Spec rows */}
       <div className="mt-4 px-4">
-        <SpecRow icon={<BadgeCheck className="size-4" style={{ color: BLUE }} strokeWidth={2.4} />} label={L.check} value={L.checkValue} />
-        <SpecRow icon={<ShieldCheck className="size-4 text-primary" strokeWidth={2.4} />} label={L.warranty} value={L.warrantyValue} />
+        <SpecRow
+          icon={<IconBlueCheck className="size-[18px]" style={{ color: BLUE }} />}
+          label={L.check}
+          value={L.checkValue}
+        />
+        <SpecRow
+          icon={<IconWarrantyClock className="size-[18px] text-primary" />}
+          label={L.warranty}
+          value={L.warrantyValue}
+        />
 
         <motion.button
           type="button"
@@ -412,14 +427,26 @@ export function BlueVerifiedShowcase({
           onClick={() => setAboutOpen((v) => !v)}
           className="flex w-full items-center justify-between border-b border-border/60 py-4 text-left outline-none"
         >
-          <span className="flex items-center gap-2 font-dm-sans text-[14px] font-semibold text-foreground">
-            <Sparkles className="size-4 text-primary" strokeWidth={2.4} />
-            {L.about}
+          <span className="flex min-w-0 items-center gap-2.5">
+            <span
+              className="flex size-8 shrink-0 items-center justify-center rounded-[10px] border"
+              style={{ background: `${BLUE}12`, borderColor: `${BLUE}2e` }}
+            >
+              <XLogo className="size-[13px]" style={{ color: BLUE }} />
+            </span>
+            <span className="min-w-0">
+              <span className="block font-space-grotesk text-[14.5px] font-bold leading-none tracking-[-0.02em] text-foreground">
+                {L.about}
+              </span>
+              <span className="mt-1 block font-dm-sans text-[11px] uppercase leading-none tracking-[0.14em] text-muted-foreground/70">
+                {L.aboutKicker}
+              </span>
+            </span>
           </span>
           <motion.span
             animate={{ rotate: aboutOpen ? 180 : 0 }}
             transition={{ type: 'spring', stiffness: 380, damping: 28 }}
-            className="flex size-7 items-center justify-center rounded-full border border-border/70 bg-card"
+            className="flex size-7 shrink-0 items-center justify-center rounded-full border border-border/70 bg-card"
           >
             <ChevronDown className="size-4 text-muted-foreground" />
           </motion.span>
@@ -435,18 +462,24 @@ export function BlueVerifiedShowcase({
               className="overflow-hidden"
             >
               <div className="mt-4 overflow-hidden rounded-[18px] border border-border/70 bg-card/70">
-                <div className="relative border-b border-border/60 px-4 py-4">
+                <div className="relative px-4 py-4">
                   <span
                     aria-hidden
                     className="absolute inset-x-0 top-0 h-px"
                     style={{ background: `linear-gradient(90deg, transparent, ${BLUE}88, transparent)` }}
                   />
-                  <p className="font-dm-sans text-[13.5px] leading-[1.7] text-muted-foreground">
-                    {L.aboutIntro}
-                  </p>
+                  <span
+                    aria-hidden
+                    className="pointer-events-none absolute -left-10 -top-14 size-32 rounded-full blur-2xl"
+                    style={{ background: `${BLUE}1f` }}
+                  />
+                  <Rich
+                    text={L.aboutIntro}
+                    className="relative block font-dm-sans text-[13.5px] leading-[1.75] text-muted-foreground"
+                  />
                 </div>
 
-                <ul className="px-4 py-1">
+                <ul className="px-4 pb-1">
                   {L.aboutItems.map((item, i) => {
                     const Icon = ABOUT_ICONS[i % ABOUT_ICONS.length]
                     return (
@@ -455,39 +488,52 @@ export function BlueVerifiedShowcase({
                         initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.06 + i * 0.05, duration: 0.3, ease: EASE }}
-                        className="flex items-start gap-3 border-b border-border/40 py-3.5 last:border-0"
+                        className="flex items-start gap-3 border-t border-border/40 py-3.5"
                       >
                         <span
-                          className="mt-px flex size-7 shrink-0 items-center justify-center rounded-[9px] border"
-                          style={{ background: `${BLUE}14`, borderColor: `${BLUE}33` }}
+                          className="mt-px flex size-8 shrink-0 items-center justify-center rounded-[10px] border"
+                          style={{
+                            background: `linear-gradient(145deg, ${BLUE}1f, transparent)`,
+                            borderColor: `${BLUE}33`,
+                          }}
                         >
-                          <Icon className="size-[15px]" style={{ color: BLUE }} strokeWidth={2.2} />
+                          <Icon className="size-[17px]" style={{ color: BLUE }} />
                         </span>
-                        <span className="min-w-0">
-                          <span className="block font-dm-sans text-[13.5px] font-semibold leading-tight text-foreground">
-                            {item.t}
+                        <span className="min-w-0 flex-1">
+                          <span className="flex items-center gap-2">
+                            <span className="font-space-grotesk text-[13.5px] font-bold leading-tight tracking-[-0.015em] text-foreground">
+                              {item.t}
+                            </span>
+                            <span
+                              className="rounded-full px-1.5 py-[2px] font-dm-sans text-[9.5px] font-bold uppercase leading-none tracking-[0.1em]"
+                              style={{ background: `${BLUE}18`, color: BLUE }}
+                            >
+                              {item.tag}
+                            </span>
                           </span>
-                          <span className="mt-1 block font-dm-sans text-[12.5px] leading-[1.6] text-muted-foreground">
-                            {item.d}
-                          </span>
+                          <Rich
+                            text={item.d}
+                            className="mt-1.5 block font-dm-sans text-[12.5px] leading-[1.65] text-muted-foreground"
+                          />
                         </span>
                       </motion.li>
                     )
                   })}
                 </ul>
 
-
-                <div className="flex items-start gap-2.5 border-t border-border/60 bg-primary/[0.06] px-4 py-3.5">
-                  <ShieldCheck className="mt-px size-4 shrink-0 text-primary" strokeWidth={2.4} />
-                  <p className="font-dm-sans text-[12.5px] leading-[1.6] text-muted-foreground">
-                    {L.aboutNote}
-                  </p>
+                <div className="flex items-start gap-2.5 border-t border-border/60 bg-primary/[0.07] px-4 py-3.5">
+                  <IconWarrantyClock className="mt-px size-[18px] shrink-0 text-primary" />
+                  <Rich
+                    text={L.aboutNote}
+                    className="font-dm-sans text-[12.5px] leading-[1.6] text-muted-foreground"
+                  />
                 </div>
               </div>
             </motion.div>
           )}
         </AnimatePresence>
       </div>
+
 
       {/* Sticky buy bar */}
       <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border/60 bg-background/92 px-4 pb-[calc(env(safe-area-inset-bottom)+14px)] pt-3 backdrop-blur-xl">
