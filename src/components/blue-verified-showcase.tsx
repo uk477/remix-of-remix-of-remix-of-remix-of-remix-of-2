@@ -409,10 +409,10 @@ export function BlueVerifiedShowcase({
           className="flex w-full items-center justify-between border-b border-border/60 py-4 text-left outline-none"
         >
           <span className="flex min-w-0 items-center gap-2.5">
-            <span className="flex size-8 shrink-0 items-center justify-center rounded-[10px] border border-border/60 bg-card text-foreground">
-              <XLogo className="size-[13px]" />
+            <span className="flex size-8 shrink-0 items-center justify-center text-foreground">
+              <XLogo className="size-[19px]" />
             </span>
-            <span className="min-w-0">
+
               <span className="block font-space-grotesk text-[14.5px] font-bold leading-none tracking-[-0.02em] text-foreground">
                 {L.about}
               </span>
