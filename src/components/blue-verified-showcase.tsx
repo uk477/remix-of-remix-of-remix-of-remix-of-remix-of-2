@@ -48,6 +48,16 @@ const COPY = {
     warranty: 'Warranty',
     warrantyValue: '48 hours',
     about: 'About the account',
+    aboutIntro:
+      'A live X account with an active blue check. Registration between 2009 and 2026, organic activity history and a clean reputation — it never looks freshly made and handles the first days of work calmly.',
+    aboutExtra: [
+      'You get a random profile from a curated pool — the handle and avatar are yours to change.',
+      'Mail and access included: login, password, 2FA key.',
+      'Works with our promotion services: followers, likes, views.',
+      'Bulk delivery and spreadsheet export available on request in support.',
+    ],
+    aboutNote:
+      'Check the login right after purchase: warranty replacement is valid for 48 hours after delivery.',
     buy: 'Buy',
     soldOut: 'Sold out',
   },
