@@ -752,6 +752,7 @@ export function AccountsScreen() {
         onAdminMenu={handleAdminMenu}
         onAdd={handleAdd}
         categoryId={categoryId}
+        hideBackAndFilter={categoryId === "blue_acc"}
         xSelectMode={xSelectMode}
         selectedXIds={selectedXIds}
         xRefreshing={xRefreshing}
