@@ -1560,6 +1560,13 @@ function FilterableAccountsView({
         />
       ) : reorderMode === "swap" ? (
         <SwapGrid list={orderedList} renderCard={renderCardForReorder} onError={(m) => toast(m)} />
+      ) : isBlue ? (
+        <BlueVerifiedShowcase
+          list={filtered}
+          lang={lang}
+          onOpen={onOpen}
+          onAdminMenu={onAdminMenu}
+        />
       ) : (
         <>
           <PaginatedGrid
@@ -1581,6 +1588,7 @@ function FilterableAccountsView({
           />
         </>
       )}
+
 
       <FiltersSheet
         open={filtersOpen}
